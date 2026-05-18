@@ -1,0 +1,163 @@
+﻿namespace RRStoSQL
+{
+	partial class MainForm
+	{
+		/// <summary>
+		/// Required designer variable.
+		/// </summary>
+		private System.ComponentModel.IContainer components = null;
+
+		/// <summary>
+		/// Clean up any resources being used.
+		/// </summary>
+		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing && (components != null))
+			{
+				components.Dispose();
+			}
+			base.Dispose(disposing);
+		}
+
+		#region Windows Form Designer generated code
+
+		/// <summary>
+		/// Required method for Designer support - do not modify
+		/// the contents of this method with the code editor.
+		/// </summary>
+		private void InitializeComponent()
+		{
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.listBoxConfigs = new System.Windows.Forms.ListBox();
+			this.panelButtons = new System.Windows.Forms.Panel();
+			this.button1 = new System.Windows.Forms.Button();
+			this.btnAddConfig = new System.Windows.Forms.Button();
+			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.listViewSteps = new System.Windows.Forms.ListView();
+			this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.groupBox1.SuspendLayout();
+			this.panelButtons.SuspendLayout();
+			this.groupBox2.SuspendLayout();
+			this.SuspendLayout();
+			// 
+			// groupBox1
+			// 
+			this.groupBox1.Controls.Add(this.listBoxConfigs);
+			this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
+			this.groupBox1.Location = new System.Drawing.Point(0, 0);
+			this.groupBox1.Name = "groupBox1";
+			this.groupBox1.Size = new System.Drawing.Size(324, 121);
+			this.groupBox1.TabIndex = 0;
+			this.groupBox1.TabStop = false;
+			this.groupBox1.Text = "Конфиги:";
+			this.groupBox1.Enter += new System.EventHandler(this.groupBox1_Enter);
+			// 
+			// listBoxConfigs
+			// 
+			this.listBoxConfigs.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.listBoxConfigs.FormattingEnabled = true;
+			this.listBoxConfigs.HorizontalScrollbar = true;
+			this.listBoxConfigs.Location = new System.Drawing.Point(3, 16);
+			this.listBoxConfigs.Name = "listBoxConfigs";
+			this.listBoxConfigs.Size = new System.Drawing.Size(318, 102);
+			this.listBoxConfigs.TabIndex = 0;
+			this.listBoxConfigs.SelectedIndexChanged += new System.EventHandler(this.listBoxConfigs_SelectedIndexChanged);
+			// 
+			// panelButtons
+			// 
+			this.panelButtons.Controls.Add(this.btnAddConfig);
+			this.panelButtons.Controls.Add(this.button1);
+			this.panelButtons.Location = new System.Drawing.Point(3, 128);
+			this.panelButtons.Name = "panelButtons";
+			this.panelButtons.Size = new System.Drawing.Size(318, 52);
+			this.panelButtons.TabIndex = 1;
+			this.panelButtons.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint_1);
+			// 
+			// button1
+			// 
+			this.button1.Location = new System.Drawing.Point(111, 3);
+			this.button1.Name = "button1";
+			this.button1.Size = new System.Drawing.Size(204, 46);
+			this.button1.TabIndex = 0;
+			this.button1.Text = "Конвертировать";
+			this.button1.UseVisualStyleBackColor = true;
+			// 
+			// btnAddConfig
+			// 
+			this.btnAddConfig.Location = new System.Drawing.Point(3, 3);
+			this.btnAddConfig.Name = "btnAddConfig";
+			this.btnAddConfig.Size = new System.Drawing.Size(102, 46);
+			this.btnAddConfig.TabIndex = 1;
+			this.btnAddConfig.Text = "Добавить конфиг";
+			this.btnAddConfig.UseVisualStyleBackColor = true;
+			// 
+			// groupBox2
+			// 
+			this.groupBox2.Controls.Add(this.listViewSteps);
+			this.groupBox2.Location = new System.Drawing.Point(6, 187);
+			this.groupBox2.Name = "groupBox2";
+			this.groupBox2.Size = new System.Drawing.Size(312, 226);
+			this.groupBox2.TabIndex = 2;
+			this.groupBox2.TabStop = false;
+			// 
+			// listViewSteps
+			// 
+			this.listViewSteps.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1,
+            this.columnHeader2});
+			this.listViewSteps.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.listViewSteps.FullRowSelect = true;
+			this.listViewSteps.GridLines = true;
+			this.listViewSteps.HideSelection = false;
+			this.listViewSteps.Location = new System.Drawing.Point(3, 16);
+			this.listViewSteps.Name = "listViewSteps";
+			this.listViewSteps.Size = new System.Drawing.Size(306, 207);
+			this.listViewSteps.TabIndex = 0;
+			this.listViewSteps.UseCompatibleStateImageBehavior = false;
+			this.listViewSteps.View = System.Windows.Forms.View.Details;
+			this.listViewSteps.SelectedIndexChanged += new System.EventHandler(this.listViewSteps_SelectedIndexChanged);
+			// 
+			// columnHeader1
+			// 
+			this.columnHeader1.Text = "Статус";
+			// 
+			// columnHeader2
+			// 
+			this.columnHeader2.Text = "Этап";
+			this.columnHeader2.Width = 200;
+			// 
+			// MainForm
+			// 
+			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.ClientSize = new System.Drawing.Size(324, 425);
+			this.Controls.Add(this.groupBox2);
+			this.Controls.Add(this.panelButtons);
+			this.Controls.Add(this.groupBox1);
+			this.Name = "MainForm";
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+			this.Text = "RRStoSQL";
+			this.Load += new System.EventHandler(this.MainForm_Load);
+			this.groupBox1.ResumeLayout(false);
+			this.panelButtons.ResumeLayout(false);
+			this.groupBox2.ResumeLayout(false);
+			this.ResumeLayout(false);
+
+		}
+
+		#endregion
+
+		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.ListBox listBoxConfigs;
+		private System.Windows.Forms.Panel panelButtons;
+		private System.Windows.Forms.Button btnAddConfig;
+		private System.Windows.Forms.Button button1;
+		private System.Windows.Forms.GroupBox groupBox2;
+		private System.Windows.Forms.ListView listViewSteps;
+		private System.Windows.Forms.ColumnHeader columnHeader1;
+		private System.Windows.Forms.ColumnHeader columnHeader2;
+	}
+}
+
