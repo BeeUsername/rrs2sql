@@ -7,15 +7,34 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using MigrateFromAccess.Models;
+using MigrateFromAccess.Services;
 
 namespace RRStoSQL
 {
 	public partial class MainForm : Form
 	{
+
+		private readonly ConfigFinderService _finderService =
+		new ConfigFinderService();
+
 		public MainForm()
 		{
 			InitializeComponent();
 			InitializeSteps();
+			LoadConfigs();
+		}
+
+		private void LoadConfigs()
+		{
+			listBoxConfigs.Items.Clear();
+
+			var configs = _finderService.FindConfigs();
+
+			foreach (var config in configs)
+			{
+				listBoxConfigs.Items.Add(config);
+			}
 		}
 
 		private void InitializeSteps()
