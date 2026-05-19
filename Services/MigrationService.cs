@@ -2,15 +2,26 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.IO;
+//using RRStoSQL.Models;
 
 namespace RRStoSQL.Services
 {
 	public class MigrationService
 	{
+
+		private readonly ConfigService
+	_configService =
+		new ConfigService();
+
+		//public async Task RunAsync(
+		//			Action<string, StepStatus> updateStep)
 		public async Task RunAsync(
-			Action<string, StepStatus> updateStep)
+	string configPath,
+	Action<string, StepStatus> updateStep)
 		{
 			var steps = GetSteps();
+			AppConfig appConfig = null;
 
 			foreach (var step in steps)
 			{
@@ -20,7 +31,24 @@ namespace RRStoSQL.Services
 
 				try
 				{
-					await ExecuteStep(step);
+					//	await ExecuteStep(step);
+					if (step.Name == "Читаем конфиг")
+					{
+						appConfig =
+							_configService.Read(
+								configPath);
+
+						if (!File.Exists(
+							appConfig.MdbPath))
+						{
+							throw new Exception(
+								"MDB не найден");
+						}
+					}
+					else
+					{
+						await ExecuteStep(step);
+					}
 
 					updateStep(
 						step.Name,

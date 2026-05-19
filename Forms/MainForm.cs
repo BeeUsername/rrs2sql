@@ -175,8 +175,15 @@ namespace RRStoSQL
 
 			try
 			{
-				await _migrationService.RunAsync(
-					(step, status) =>
+				//await _migrationService.RunAsync(
+
+					var selectedConfig =
+					(ConfigItem)
+					listBoxConfigs.SelectedItem;
+
+					await _migrationService.RunAsync(
+					selectedConfig.ConfigPath,
+									(step, status) =>
 					{
 						_stepManager.SetStatus(
 							step,
