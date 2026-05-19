@@ -31,8 +31,8 @@
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.listBoxConfigs = new System.Windows.Forms.ListBox();
 			this.panelButtons = new System.Windows.Forms.Panel();
-			this.button1 = new System.Windows.Forms.Button();
 			this.btnAddConfig = new System.Windows.Forms.Button();
+			this.btnConvert = new System.Windows.Forms.Button();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.listViewSteps = new System.Windows.Forms.ListView();
 			this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -48,7 +48,7 @@
 			this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
 			this.groupBox1.Location = new System.Drawing.Point(0, 0);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(324, 121);
+			this.groupBox1.Size = new System.Drawing.Size(327, 106);
 			this.groupBox1.TabIndex = 0;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Конфиги:";
@@ -61,28 +61,19 @@
 			this.listBoxConfigs.HorizontalScrollbar = true;
 			this.listBoxConfigs.Location = new System.Drawing.Point(3, 16);
 			this.listBoxConfigs.Name = "listBoxConfigs";
-			this.listBoxConfigs.Size = new System.Drawing.Size(318, 102);
+			this.listBoxConfigs.Size = new System.Drawing.Size(321, 87);
 			this.listBoxConfigs.TabIndex = 0;
 			this.listBoxConfigs.SelectedIndexChanged += new System.EventHandler(this.listBoxConfigs_SelectedIndexChanged);
 			// 
 			// panelButtons
 			// 
 			this.panelButtons.Controls.Add(this.btnAddConfig);
-			this.panelButtons.Controls.Add(this.button1);
+			this.panelButtons.Controls.Add(this.btnConvert);
 			this.panelButtons.Location = new System.Drawing.Point(3, 128);
 			this.panelButtons.Name = "panelButtons";
 			this.panelButtons.Size = new System.Drawing.Size(318, 52);
 			this.panelButtons.TabIndex = 1;
 			this.panelButtons.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint_1);
-			// 
-			// button1
-			// 
-			this.button1.Location = new System.Drawing.Point(111, 3);
-			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(204, 46);
-			this.button1.TabIndex = 0;
-			this.button1.Text = "Конвертировать";
-			this.button1.UseVisualStyleBackColor = true;
 			// 
 			// btnAddConfig
 			// 
@@ -92,15 +83,27 @@
 			this.btnAddConfig.TabIndex = 1;
 			this.btnAddConfig.Text = "Добавить конфиг";
 			this.btnAddConfig.UseVisualStyleBackColor = true;
+			this.btnAddConfig.Click += new System.EventHandler(this.btnAddConfig_Click);
+			// 
+			// btnConvert
+			// 
+			this.btnConvert.Location = new System.Drawing.Point(111, 3);
+			this.btnConvert.Name = "btnConvert";
+			this.btnConvert.Size = new System.Drawing.Size(204, 46);
+			this.btnConvert.TabIndex = 0;
+			this.btnConvert.Text = "Конвертировать";
+			this.btnConvert.UseVisualStyleBackColor = true;
+			this.btnConvert.Click += new System.EventHandler(this.btnConvert_Click);
 			// 
 			// groupBox2
 			// 
 			this.groupBox2.Controls.Add(this.listViewSteps);
 			this.groupBox2.Location = new System.Drawing.Point(6, 187);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(312, 226);
+			this.groupBox2.Size = new System.Drawing.Size(312, 270);
 			this.groupBox2.TabIndex = 2;
 			this.groupBox2.TabStop = false;
+			this.groupBox2.Enter += new System.EventHandler(this.groupBox2_Enter);
 			// 
 			// listViewSteps
 			// 
@@ -113,7 +116,7 @@
 			this.listViewSteps.HideSelection = false;
 			this.listViewSteps.Location = new System.Drawing.Point(3, 16);
 			this.listViewSteps.Name = "listViewSteps";
-			this.listViewSteps.Size = new System.Drawing.Size(306, 207);
+			this.listViewSteps.Size = new System.Drawing.Size(306, 251);
 			this.listViewSteps.TabIndex = 0;
 			this.listViewSteps.UseCompatibleStateImageBehavior = false;
 			this.listViewSteps.View = System.Windows.Forms.View.Details;
@@ -132,7 +135,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(324, 425);
+			this.ClientSize = new System.Drawing.Size(327, 461);
 			this.Controls.Add(this.groupBox2);
 			this.Controls.Add(this.panelButtons);
 			this.Controls.Add(this.groupBox1);
@@ -153,7 +156,7 @@
 		private System.Windows.Forms.ListBox listBoxConfigs;
 		private System.Windows.Forms.Panel panelButtons;
 		private System.Windows.Forms.Button btnAddConfig;
-		private System.Windows.Forms.Button button1;
+		private System.Windows.Forms.Button btnConvert;
 		private System.Windows.Forms.GroupBox groupBox2;
 		private System.Windows.Forms.ListView listViewSteps;
 		private System.Windows.Forms.ColumnHeader columnHeader1;
