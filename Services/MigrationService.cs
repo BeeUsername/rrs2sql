@@ -1,8 +1,9 @@
-﻿using RRStoSQL.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.IO;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using RRStoSQL.Models;
 //using RRStoSQL.Models;
 
 namespace RRStoSQL.Services
@@ -37,6 +38,17 @@ namespace RRStoSQL.Services
 						appConfig =
 							_configService.Read(
 								configPath);
+
+						appConfig.SqlInstance =
+							@".\SQLEXPRESS";
+
+						appConfig.SqlDatabaseName =
+							$"RRS_{DateTime.Now:yyyyMMdd_HHmmss}";
+
+						MessageBox.Show(
+$"MDB:\n{appConfig.MdbPath}\n\n" +
+$"EXE:\n{appConfig.ExePath}\n\n" +
+$"DB:\n{appConfig.SqlDatabaseName}");
 
 						if (!File.Exists(
 							appConfig.MdbPath))
