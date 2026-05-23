@@ -5,6 +5,9 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+//using System.Diagnostics;
+//using System.Threading;
+
 namespace RRStoSQL.Services
 {
 	/// <summary>
@@ -92,22 +95,15 @@ namespace RRStoSQL.Services
 					}
 
 					// ============================================
-					// Проверка SQL
+					// Проверка/установка SQL
 					// ============================================
 
 					else if (step.Name == "Установка SQL")
 					{
-						// Ищем SQLEXPRESS
 						var sql =
-							_sqlService.FindSqlExpress();
+							_sqlService
+							.EnsureSqlInstalled();
 
-						if (!sql.Exists)
-						{
-							throw new Exception(
-								"SQLEXPRESS не найден");
-						}
-
-						// Сохраняем найденный instance
 						appConfig.SqlInstance =
 							sql.InstanceName;
 
@@ -117,9 +113,33 @@ namespace RRStoSQL.Services
 							$"{appConfig.SqlInstance}");
 					}
 
+
 					// ============================================
 					// Остальные шаги пока заглушки
 					// ============================================
+
+					// ============================================
+					// Разрешаем mixed authentication
+					// ============================================
+
+					else if (step.Name == "Разрешаем mixed authentication")
+					{
+						_sqlService
+							.EnableMixedAuthentication(
+								appConfig.SqlInstance);
+					}
+
+					// ============================================
+					// Перезапуск службы SQL
+					// ============================================
+
+					else if (step.Name == "Перезапуск службы SQL")
+					{
+						_sqlService
+							.RestartSqlService(
+								appConfig.SqlInstance);
+					}
+
 
 					else
 					{
