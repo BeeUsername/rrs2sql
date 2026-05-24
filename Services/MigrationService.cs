@@ -1,9 +1,10 @@
-﻿using RRStoSQL.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using RRStoSQL.Helpers;
+using RRStoSQL.Models;
 
 //using System.Diagnostics;
 //using System.Threading;
@@ -29,6 +30,9 @@ namespace RRStoSQL.Services
 		private readonly SqlService
 			_sqlService =
 				new SqlService();
+		private readonly AccessToSqlConverter
+	_converter =
+		new AccessToSqlConverter();
 
 		/// <summary>
 		/// Запускает миграцию.
@@ -114,6 +118,7 @@ namespace RRStoSQL.Services
 					}
 
 
+
 					// ============================================
 					// Остальные шаги пока заглушки
 					// ============================================
@@ -133,11 +138,70 @@ namespace RRStoSQL.Services
 					// Перезапуск службы SQL
 					// ============================================
 
-					else if (step.Name == "Перезапуск службы SQL")
+					else if (
+						step.Name ==
+						"Перезапуск службы SQL")
 					{
 						_sqlService
 							.RestartSqlService(
 								appConfig.SqlInstance);
+					}
+
+
+
+					// ============================================
+					// Создаём RRUser
+					// ============================================
+
+					else if (
+						step.Name ==
+						"Создаём RRUser")
+					{
+						_sqlService
+							.CreateRRUser(
+								appConfig.SqlInstance);
+					}
+
+
+					// ============================================
+					// Конвертируем базу
+					// ============================================
+
+					else if (
+	step.Name ==
+	"Конвертируем базу")
+					{
+						// создаём БД
+						_converter.CreateDatabase(
+							appConfig.SqlInstance,
+							appConfig.SqlDatabaseName);
+
+						// создаём структуру
+						_converter.CreateTables(
+							appConfig.MdbPath,
+							appConfig.SqlInstance,
+							appConfig.SqlDatabaseName);
+
+						// переносим данные
+						_converter.CopyData(
+							appConfig.MdbPath,
+							appConfig.SqlInstance,
+							appConfig.SqlDatabaseName);
+					}
+
+
+					// ============================================
+					// Выдаём права RRUser
+					// ============================================
+
+					else if (
+						step.Name ==
+						"Выдаём права RRUser")
+					{
+						_sqlService
+							.GrantDatabaseRights(
+								appConfig.SqlInstance,
+								appConfig.SqlDatabaseName);
 					}
 
 
@@ -151,15 +215,29 @@ namespace RRStoSQL.Services
 						step.Name,
 						StepStatus.Success);
 				}
-				catch
+				catch (Exception ex)
 				{
 					// Помечаем шаг ошибкой
 					updateStep(
 						step.Name,
 						StepStatus.Error);
 
-					throw;
+					// Показываем нормальное окно
+					MessageHelper.Show(
+						ex.ToString(),
+						"Ошибка");
+
+					return;
 				}
+				//catch
+				//{
+				//	// Помечаем шаг ошибкой
+				//	updateStep(
+				//		step.Name,
+				//		StepStatus.Error);
+
+				//	throw;
+				//}
 			}
 		}
 
@@ -192,43 +270,21 @@ namespace RRStoSQL.Services
 		private List<MigrationStep> GetSteps()
 		{
 			return new List<MigrationStep>
-			{
-				new MigrationStep(
-					"Читаем конфиг"),
-
-				new MigrationStep(
-					"Установка SQL"),
-
-				new MigrationStep(
-					"Разрешаем mixed authentication"),
-
-				new MigrationStep(
-					"Создаём RRUser"),
-
-				new MigrationStep(
-					"Перезапуск службы SQL"),
-
-				new MigrationStep(
-					"Конвертируем базу"),
-
-				new MigrationStep(
-					"Разрешаем TCP 1433"),
-
-				new MigrationStep(
-					"Открываем порт 1433"),
-
-				new MigrationStep(
-					"Меняем connectionStrings"),
-
-				new MigrationStep(
-					"Выполняем патчи"),
-
-				new MigrationStep(
-					"Копируем строку подключения"),
-
-				new MigrationStep(
-					"Запускаем УР")
-			};
+	{
+		new MigrationStep("Читаем конфиг"),
+		new MigrationStep("Установка SQL"),
+		new MigrationStep("Разрешаем mixed authentication"),
+		new MigrationStep("Перезапуск службы SQL"),
+		new MigrationStep("Создаём RRUser"),		
+		new MigrationStep("Конвертируем базу"),
+		new MigrationStep("Выдаём права RRUser"),
+		new MigrationStep("Разрешаем TCP 1433"),
+		new MigrationStep("Открываем порт 1433"),
+		new MigrationStep("Меняем connectionStrings"),
+		new MigrationStep("Выполняем патчи"),
+		new MigrationStep("Копируем строку подключения"),
+		new MigrationStep("Запускаем УР")
+	};
 		}
 	}
 }

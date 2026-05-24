@@ -6,6 +6,9 @@ using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using RRStoSQL.Models;
+using System.Data.SqlClient;
+//using System.ServiceProcess;
+
 
 
 namespace RRStoSQL.Services
@@ -15,12 +18,137 @@ namespace RRStoSQL.Services
 	/// </summary>
 	public class SqlService
 	{
+
+		/// <summary>
+		/// Создаёт пользователя в базе
+		/// и выдаёт права
+		/// </summary>
+		public void GrantDatabaseRights(
+			string sqlInstance,
+			string databaseName)
+		{
+			string connectionString =
+				$"Server={sqlInstance};" +
+				$"Database={databaseName};" +
+				$"Integrated Security=True;" +
+				$"TrustServerCertificate=True;";
+
+			using (var connection =
+				new SqlConnection(
+					connectionString))
+			{
+				connection.Open();
+
+				string sql =
+		@"
+IF NOT EXISTS
+(
+    SELECT *
+    FROM sys.database_principals
+    WHERE name='RRUser'
+)
+BEGIN
+    CREATE USER RRUser
+    FOR LOGIN RRUser
+END
+
+ALTER ROLE db_owner
+ADD MEMBER RRUser
+";
+
+				using (var command =
+					new SqlCommand(
+						sql,
+						connection))
+				{
+					command.ExecuteNonQuery();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Перезапускает SQL службу
+		/// </summary>
+		public void RestartSqlService(
+			string sqlInstance)
+		{
+			// .\SQLEXPRESS → SQLEXPRESS
+			string serviceName =
+				"MSSQL$" +
+				sqlInstance.Replace(
+					@".\",
+					"");
+
+			using (var service =
+				new ServiceController(
+					serviceName))
+			{
+				if (
+					service.Status ==
+					ServiceControllerStatus.Running)
+				{
+					service.Stop();
+
+					service.WaitForStatus(
+						ServiceControllerStatus.Stopped,
+						TimeSpan.FromMinutes(1));
+				}
+
+				service.Start();
+
+				service.WaitForStatus(
+					ServiceControllerStatus.Running,
+					TimeSpan.FromMinutes(1));
+			}
+		}
+
+		/// <summary>
+		/// Создаёт логин RRUser и пользователя
+		/// </summary>
+		public void CreateRRUser(
+			string sqlInstance)
+		{
+			// Подключаемся через Windows Authentication
+			// т.к. RRUser ещё не существует
+			string connectionString =
+				$"Server={sqlInstance};" +
+				$"Integrated Security=True;" +
+				$"TrustServerCertificate=True;";
+
+			using (var connection =
+				new SqlConnection(
+					connectionString))
+			{
+				connection.Open();
+
+				string sql =
+		@"
+IF NOT EXISTS(
+    SELECT *
+    FROM sys.server_principals
+    WHERE name='RRUser'
+)
+BEGIN
+
+    CREATE LOGIN RRUser
+    WITH PASSWORD='RRS_999999999!';
+
+END
+";
+
+				using (var command =
+					new SqlCommand(
+						sql,
+						connection))
+				{
+					command.ExecuteNonQuery();
+				}
+			}
+		}
 		/// <summary>
 		/// Ищет установленный SQLEXPRESS
 		/// </summary>
-		/// <summary>
-		/// Ищет установленный SQLEXPRESS
-		/// </summary>
+
 		public SqlInstanceInfo FindSqlExpress()
 		{
 			// Проверяем 64-битный раздел
@@ -107,6 +235,11 @@ namespace RRStoSQL.Services
 				GetInstanceId(
 					instanceName);
 
+			MessageBox.Show(
+	"InstanceId:\n" +
+	instanceId);
+
+
 			if (string.IsNullOrEmpty(
 				instanceId))
 			{
@@ -146,62 +279,98 @@ namespace RRStoSQL.Services
 		}
 
 		/// <summary>
-		/// Получает внутренний SQL ID
-		/// например:
-		/// SQLEXPRESS -> MSSQL16.SQLEXPRESS
+		/// Возвращает внутренний SQL Instance ID
+		/// Например:
+		/// SQLEXPRESS -> MSSQL17.SQLEXPRESS
 		/// </summary>
 		private string GetInstanceId(
 			string instanceName)
 		{
-			string path =
-				@"SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL";
+			// Сначала пробуем 64-битный реестр
+			string result =
+				GetInstanceIdInternal(
+					instanceName,
+					RegistryView.Registry64);
 
-			using (RegistryKey key =
-				Registry.LocalMachine.OpenSubKey(
-					path))
+			if (!string.IsNullOrEmpty(
+				result))
 			{
-				if (key == null)
-				{
-					return null;
-				}
+				return result;
+			}
 
-				return key.GetValue(
-					instanceName)
-					?.ToString();
+			// Потом 32-битный
+			return GetInstanceIdInternal(
+				instanceName,
+				RegistryView.Registry32);
+		}
+
+		/// <summary>
+		/// Получение InstanceID
+		/// из конкретного раздела реестра
+		/// </summary>
+		private string GetInstanceIdInternal(
+			string instanceName,
+			RegistryView view)
+		{
+			using (var baseKey =
+				RegistryKey.OpenBaseKey(
+					RegistryHive.LocalMachine,
+					view))
+			{
+				using (var key =
+					baseKey.OpenSubKey(
+						@"SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL"))
+				{
+					if (key == null)
+					{
+						return null;
+					}
+
+					object value =
+						key.GetValue(
+							instanceName);
+
+					if (value == null)
+					{
+						return null;
+					}
+
+					return value.ToString();
+				}
 			}
 		}
 
 		/// <summary>
 		/// Перезапуск службы SQL
 		/// </summary>
-		public void RestartSqlService(
-			string sqlInstance)
-		{
-			string serviceName =
-				"MSSQL$" +
-				sqlInstance.Replace(@".\", "");
+		//public void RestartSqlService(
+		//	string sqlInstance)
+		//{
+		//	string serviceName =
+		//		"MSSQL$" +
+		//		sqlInstance.Replace(@".\", "");
 
-			using (var service =
-				new ServiceController(
-					serviceName))
-			{
-				if (service.Status ==
-					ServiceControllerStatus.Running)
-				{
-					service.Stop();
+		//	using (var service =
+		//		new ServiceController(
+		//			serviceName))
+		//	{
+		//		if (service.Status ==
+		//			ServiceControllerStatus.Running)
+		//		{
+		//			service.Stop();
 
-					service.WaitForStatus(
-						ServiceControllerStatus.Stopped,
-						TimeSpan.FromMinutes(1));
-				}
+		//			service.WaitForStatus(
+		//				ServiceControllerStatus.Stopped,
+		//				TimeSpan.FromMinutes(1));
+		//		}
 
-				service.Start();
+		//		service.Start();
 
-				service.WaitForStatus(
-					ServiceControllerStatus.Running,
-					TimeSpan.FromMinutes(1));
-			}
-		}
+		//		service.WaitForStatus(
+		//			ServiceControllerStatus.Running,
+		//			TimeSpan.FromMinutes(1));
+		//	}
+		//}
 
 		/// <summary>
 		/// Проверяет наличие SQL.

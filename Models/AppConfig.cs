@@ -67,5 +67,7 @@ namespace RRStoSQL.Models
 		/// Новая SQL строка подключения
 		/// </summary>
 		public string SqlConnectionString { get; set; }
+
+		
 	}
 }
