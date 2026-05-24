@@ -14,6 +14,7 @@ namespace RRStoSQL.Forms.UI
 			AddStep(listView, "Создаём RRUser");
 			AddStep(listView, "Перезапуск службы SQL");
 			AddStep(listView, "Конвертируем базу");
+			AddStep(listView, "Выдаём права RRUser");
 			AddStep(listView, "Разрешаем TCP 1433");
 			AddStep(listView, "Открываем порт 1433 в firewall");
 			AddStep(listView, "Меняем connectionStrings");
