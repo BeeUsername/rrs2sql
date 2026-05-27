@@ -11,12 +11,12 @@ namespace RRStoSQL.Forms.UI
 			AddStep(listView, "Читаем конфиг");
 			AddStep(listView, "Установка SQL");
 			AddStep(listView, "Разрешаем mixed authentication");
-			AddStep(listView, "Создаём RRUser");
 			AddStep(listView, "Перезапуск службы SQL");
+			AddStep(listView, "Создаём RRUser");			
 			AddStep(listView, "Конвертируем базу");
 			AddStep(listView, "Выдаём права RRUser");
-			AddStep(listView, "Разрешаем TCP 1433");
-			AddStep(listView, "Открываем порт 1433 в firewall");
+			AddStep(listView, "Назначаем порт 1433 для SQL");
+			AddStep(listView, "Открываем 1433 в брандмауэре");
 			AddStep(listView, "Меняем connectionStrings");
 			AddStep(listView, "Выполняем патчи");
 			AddStep(listView, "Копируем строку подключения");
@@ -27,7 +27,7 @@ namespace RRStoSQL.Forms.UI
 			ListView listView,
 			string stepName)
 		{
-			var item = new ListViewItem("⌛");
+			var item = new ListViewItem("...");
 
 			item.SubItems.Add(stepName);
 

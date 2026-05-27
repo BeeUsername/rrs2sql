@@ -33,31 +33,14 @@ namespace RRStoSQL
 		public MainForm()
 		{
 			InitializeComponent();
-			//InitializeSteps();
-			//LoadConfigs();
-			//SetStepStatus("Читаем коффиг", StepStatus.Success);
-			//SetStepStatus("Читаем конфиг", StepStatus.Error);
-			//SetStepStatus(2, StepStatus.Error);
-
-
+			
 			_stepInitializer.Initialize(listViewSteps);
 
 			_stepManager =
 				new StepStatusManager(listViewSteps);
 
 			LoadConfigs();
-
-			_stepManager.SetStatus(
-				"Читаем конфиг",
-				StepStatus.Success);
-
-			_stepManager.SetStatus(
-				"Установка SQL",
-				StepStatus.Running);
-
-			_stepManager.SetStatus(
-				"Разрешаем mixed authentication",
-				StepStatus.Error);
+						
 		}
 
 	
@@ -74,14 +57,6 @@ namespace RRStoSQL
 		}
 
 		
-
-
-
-
-
-
-
-
 		private void panel1_Paint(object sender, PaintEventArgs e)
 		{
 
@@ -159,9 +134,7 @@ namespace RRStoSQL
 
 		}
 
-		private async void btnConvert_Click(
-	object sender,
-	EventArgs e)
+		private async void btnConvert_Click(object sender,EventArgs e)
 		{
 			if (listBoxConfigs.SelectedItem == null)
 			{
@@ -175,8 +148,7 @@ namespace RRStoSQL
 
 			try
 			{
-				//await _migrationService.RunAsync(
-
+				
 					var selectedConfig =
 					(ConfigItem)
 					listBoxConfigs.SelectedItem;

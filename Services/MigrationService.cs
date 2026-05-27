@@ -20,19 +20,12 @@ namespace RRStoSQL.Services
 		/// <summary>
 		/// Работа с RemoteReg.exe.config
 		/// </summary>
-		private readonly ConfigService
-			_configService =
-				new ConfigService();
-
+		private readonly ConfigService _configService = new ConfigService();
 		/// <summary>
 		/// Работа с SQL Server
 		/// </summary>
-		private readonly SqlService
-			_sqlService =
-				new SqlService();
-		private readonly AccessToSqlConverter
-	_converter =
-		new AccessToSqlConverter();
+		private readonly SqlService _sqlService = new SqlService();
+		private readonly AccessToSqlConverter _converter = new AccessToSqlConverter();
 
 		/// <summary>
 		/// Запускает миграцию.
@@ -119,9 +112,6 @@ namespace RRStoSQL.Services
 
 
 
-					// ============================================
-					// Остальные шаги пока заглушки
-					// ============================================
 
 					// ============================================
 					// Разрешаем mixed authentication
@@ -203,12 +193,41 @@ namespace RRStoSQL.Services
 								appConfig.SqlInstance,
 								appConfig.SqlDatabaseName);
 					}
+					// ============================================
+					// Разрешаем TCP 1433 SQL. Назначаем порт 1433 для SQL
+					// ============================================
 
+					else if (
+						step.Name ==
+						"Назначаем порт 1433 для SQL")
+					{
+						_sqlService.EnableTcp(
+							appConfig.SqlInstance);
+
+						// настройки TCP применяются
+						// только после рестарта службы
+						_sqlService.RestartSqlService(
+							appConfig.SqlInstance);
+					}
+
+					// ============================================
+					// Открываем порт 1433 в брандмауэре Windows
+					// ============================================
+
+					else if (
+						step.Name ==
+						"Открываем порт 1433 в брандмауэре")
+					{
+						_sqlService
+							.OpenFirewallPort();
+					}
 
 					else
 					{
 						await ExecuteStep(step);
 					}
+
+					
 
 					// Шаг успешно завершён
 					updateStep(
@@ -278,8 +297,8 @@ namespace RRStoSQL.Services
 		new MigrationStep("Создаём RRUser"),		
 		new MigrationStep("Конвертируем базу"),
 		new MigrationStep("Выдаём права RRUser"),
-		new MigrationStep("Разрешаем TCP 1433"),
-		new MigrationStep("Открываем порт 1433"),
+		new MigrationStep("Назначаем порт 1433 для SQL"),
+		new MigrationStep("Открываем порт 1433 в брандмауэре"),
 		new MigrationStep("Меняем connectionStrings"),
 		new MigrationStep("Выполняем патчи"),
 		new MigrationStep("Копируем строку подключения"),

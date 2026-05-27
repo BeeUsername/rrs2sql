@@ -7,6 +7,8 @@ using System.Windows.Forms;
 using Microsoft.Win32;
 using RRStoSQL.Models;
 using System.Data.SqlClient;
+
+
 //using System.ServiceProcess;
 
 
@@ -340,42 +342,7 @@ END
 			}
 		}
 
-		/// <summary>
-		/// Перезапуск службы SQL
-		/// </summary>
-		//public void RestartSqlService(
-		//	string sqlInstance)
-		//{
-		//	string serviceName =
-		//		"MSSQL$" +
-		//		sqlInstance.Replace(@".\", "");
-
-		//	using (var service =
-		//		new ServiceController(
-		//			serviceName))
-		//	{
-		//		if (service.Status ==
-		//			ServiceControllerStatus.Running)
-		//		{
-		//			service.Stop();
-
-		//			service.WaitForStatus(
-		//				ServiceControllerStatus.Stopped,
-		//				TimeSpan.FromMinutes(1));
-		//		}
-
-		//		service.Start();
-
-		//		service.WaitForStatus(
-		//			ServiceControllerStatus.Running,
-		//			TimeSpan.FromMinutes(1));
-		//	}
-		//}
-
-		/// <summary>
-		/// Проверяет наличие SQL.
-		/// Если SQL отсутствует — устанавливает.
-		/// </summary>
+		
 		public SqlInstanceInfo EnsureSqlInstalled()
 		{
 			// Ищем существующий SQL
@@ -472,5 +439,102 @@ END
 			}
 		}
 
+		
+
+/// <summary>
+/// Включает TCP и назначает порт 1433
+/// </summary>
+public void EnableTcp(
+	string sqlInstance)
+	{
+		// SQLEXPRESS
+		string instanceName =
+			sqlInstance.Replace(
+				@".\",
+				"");
+
+		string instanceId =
+			GetInstanceId(
+				instanceName);
+
+		if (string.IsNullOrEmpty(
+			instanceId))
+		{
+			throw new Exception(
+				"Не найден SQL InstanceID");
+		}
+
+		string registryPath =
+			@"SOFTWARE\Microsoft\Microsoft SQL Server\" +
+			instanceId +
+			@"\MSSQLServer\SuperSocketNetLib\Tcp\IPAll";
+
+		using (RegistryKey baseKey =
+			RegistryKey.OpenBaseKey(
+				RegistryHive.LocalMachine,
+				RegistryView.Registry64))
+
+		using (RegistryKey key =
+			baseKey.OpenSubKey(
+				registryPath,
+				true))
+		{
+			if (key == null)
+			{
+				throw new Exception(
+					"Не найден раздел TCP");
+			}
+
+			// отключаем динамические порты
+			key.SetValue(
+				"TcpDynamicPorts",
+				"");
+
+			// фиксированный порт
+			key.SetValue(
+				"TcpPort",
+				"1433");
+		}
 	}
+
+	
+/// <summary>
+/// Открывает порт 1433
+/// в Windows Firewall
+/// </summary>
+public void OpenFirewallPort()
+	{
+		Process process =
+			new Process();
+
+		process.StartInfo.FileName =
+			"netsh";
+
+		process.StartInfo.Arguments =
+			"advfirewall firewall add rule " +
+			"name=\"SQL Server 1433\" " +
+			"dir=in " +
+			"action=allow " +
+			"protocol=TCP " +
+			"localport=1433";
+
+		process.StartInfo.UseShellExecute =
+			false;
+
+		process.StartInfo.CreateNoWindow =
+			true;
+
+		process.Start();
+
+		process.WaitForExit();
+
+		// Код 0 = успешно
+		if (process.ExitCode != 0)
+		{
+			throw new Exception(
+				"Не удалось открыть порт 1433");
+		}
+	}
+
+}
 }
