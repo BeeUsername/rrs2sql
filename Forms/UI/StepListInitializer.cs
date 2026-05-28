@@ -19,7 +19,7 @@ namespace RRStoSQL.Forms.UI
 			AddStep(listView, "Открываем 1433 в брандмауэре");
 			AddStep(listView, "Меняем connectionStrings");
 			AddStep(listView, "Выполняем патчи");
-			AddStep(listView, "Копируем строку подключения");
+			AddStep(listView, "Строка подключения в буфер обмена");
 			AddStep(listView, "Запускаем УР");
 		}
 

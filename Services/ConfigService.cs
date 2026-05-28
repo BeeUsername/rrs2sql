@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Data.OleDb;
 using System.Xml.Linq;
+using System.Windows.Forms;
 
 namespace RRStoSQL.Services
 {
@@ -211,5 +212,37 @@ namespace RRStoSQL.Services
 			doc.Save(
 				configPath);
 		}
+
+		/// <summary>
+		/// Формирует SQL connection string
+		/// </summary>
+		public string BuildSqlConnectionString(
+			AppConfig appConfig)
+		{
+			return
+				"Provider=SQLOLEDB;" +
+				$"Data Source={Environment.MachineName}" +
+				$"\\SQLEXPRESS,1433;" +
+				"Password=RRS_999999999!;" +
+				"User ID=RRUser;" +
+				$"Initial Catalog={appConfig.SqlDatabaseName}";
+		}
+
+		/// <summary>
+		/// Копирует строку подключения
+		/// в буфер обмена
+		/// </summary>
+		public void CopyConnectionString(
+			AppConfig appConfig)
+		{
+			string connectionString =
+				BuildSqlConnectionString(
+					appConfig);
+
+			Clipboard.SetText(
+				connectionString);
+		}
+
+
 	}
 }

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using RRStoSQL.Helpers;
 using RRStoSQL.Models;
+using System.Diagnostics;
 
 //using System.Diagnostics;
 //using System.Threading;
@@ -237,6 +238,31 @@ namespace RRStoSQL.Services
 					}
 
 
+					// ============================================
+					// Строка подключения в буфер обмена
+					// ============================================
+
+					else if (
+						step.Name ==
+						"Строка подключения в буфер обмена")
+					{
+						_configService
+							.CopyConnectionString(
+								appConfig);
+					}
+
+					// ============================================
+					// Запускаем УР
+					// ============================================
+
+					else if (
+						step.Name ==
+						"Запускаем УР")
+					{
+						StartRemoteReg(
+							appConfig);
+					}
+
 					else
 					{
 						await ExecuteStep(step);
@@ -315,9 +341,26 @@ namespace RRStoSQL.Services
 		new MigrationStep("Открываем порт 1433 в брандмауэре"),
 		new MigrationStep("Меняем connectionStrings"),
 		new MigrationStep("Выполняем патчи"),
-		new MigrationStep("Копируем строку подключения"),
+		new MigrationStep("Строка подключения в буфер обмена"),
 		new MigrationStep("Запускаем УР")
 	};
+		}
+
+		/// <summary>
+		/// Запускает RemoteReg.exe
+		/// </summary>
+		private void StartRemoteReg(
+			AppConfig appConfig)
+		{
+			if (!File.Exists(
+				appConfig.ExePath))
+			{
+				throw new Exception(
+					"RemoteReg.exe не найден");
+			}
+
+			Process.Start(
+				appConfig.ExePath);
 		}
 	}
 }
