@@ -1,15 +1,13 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.ServiceProcess;
 using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using RRStoSQL.Models;
-using System.Data.SqlClient;
-
-
-//using System.ServiceProcess;
 
 
 
@@ -536,5 +534,96 @@ public void OpenFirewallPort()
 		}
 	}
 
-}
+		/// <summary>
+		/// Выполняет все SQL patch-файлы
+		/// из папки SQL_patches
+		/// </summary>
+		public void ExecuteSqlPatches(
+			string sqlInstance,
+			string databaseName)
+		{
+			// Папка с exe
+			string appFolder =
+				AppDomain.CurrentDomain.BaseDirectory;
+
+			// SQL_patches
+			string patchesFolder =
+				Path.Combine(
+					appFolder,
+					"SQL_patches");
+
+			// Если папки нет
+			if (!Directory.Exists(
+				patchesFolder))
+			{
+				return;
+			}
+
+			// Получаем все *.sql
+			string[] files =
+				Directory.GetFiles(
+					patchesFolder,
+					"*.sql");
+
+			// Стабильный порядок выполнения
+			files =
+				files
+				.OrderBy(
+					x => x)
+				.ToArray();
+
+			string connectionString =
+				$"Server={sqlInstance};" +
+				$"Database={databaseName};" +
+				$"Integrated Security=True;" +
+				$"TrustServerCertificate=True;";
+
+			using (var connection =
+				new SqlConnection(
+					connectionString))
+			{
+				connection.Open();
+
+				foreach (string file
+					in files)
+				{
+					string sql =
+						File.ReadAllText(
+							file);
+					string fileName =
+						Path.GetFileName(
+							file);
+
+					// Пустой файл
+					if (string.IsNullOrWhiteSpace(
+						sql))
+					{
+						continue;
+					}
+
+					try
+					{
+						using (var command =
+							new SqlCommand(
+								sql,
+								connection))
+						{
+							command.CommandTimeout =
+								600;
+
+							command.ExecuteNonQuery();
+						}
+					}
+					catch (Exception ex)
+					{
+						throw new Exception(
+							$"Ошибка SQL patch:\n\n" +
+							$"{fileName}\n\n" +
+							ex.ToString());
+					}
+				}
+			}
+		}
+
+	}
 }

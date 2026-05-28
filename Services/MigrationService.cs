@@ -158,8 +158,8 @@ namespace RRStoSQL.Services
 					// ============================================
 
 					else if (
-	step.Name ==
-	"Конвертируем базу")
+						step.Name ==
+						"Конвертируем базу")
 					{
 						// создаём БД
 						_converter.CreateDatabase(
@@ -222,12 +222,26 @@ namespace RRStoSQL.Services
 							.OpenFirewallPort();
 					}
 
+
+					// ============================================
+					// Меняем connectionStrings
+					// ============================================
+
+					else if (
+						step.Name ==
+						"Меняем connectionStrings")
+					{
+						_configService.SwitchToSql(
+							configPath,
+							appConfig);
+					}
+
+
 					else
 					{
 						await ExecuteStep(step);
 					}
-
-					
+									
 
 					// Шаг успешно завершён
 					updateStep(

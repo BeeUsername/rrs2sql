@@ -4,6 +4,7 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Data.OleDb;
+using System.Xml.Linq;
 
 namespace RRStoSQL.Services
 {
@@ -117,6 +118,98 @@ namespace RRStoSQL.Services
 
 			return Path.GetFullPath(
 				dataSource);
+		}
+
+		/// <summary>
+		/// Переключает конфиг на SQL Server
+		/// </summary>
+		public void SwitchToSql(
+			string configPath,
+			AppConfig appConfig)
+		{
+			XDocument doc =
+				XDocument.Load(
+					configPath);
+
+			// =====================================================
+			// Меняем DbType="Mssql"
+			// =====================================================
+
+			var dbTypeElement =
+				doc.Descendants(
+					"add")
+				.FirstOrDefault(
+					x =>
+						(string)x.Attribute("key")
+						== "DBType");
+
+			if (dbTypeElement != null)
+			{
+				dbTypeElement.SetAttributeValue(
+					"value",
+					"Mssql");
+			}
+
+			// =====================================================
+			// Формируем строку подключения SQL
+			// =====================================================
+
+			string sqlConnectionString =
+				"Provider=SQLOLEDB;" +
+				$"Data Source={Environment.MachineName}" +
+				$"\\SQLEXPRESS,1433;" +
+				"Password=RRS_999999999!;" +
+				"User ID=RRUser;" +
+				$"Initial Catalog={appConfig.SqlDatabaseName}";
+
+			// =====================================================
+			// Ищем connectionStrings
+			// =====================================================
+
+			var connectionElement =
+				doc.Descendants(
+					"add")
+				.FirstOrDefault(
+					x =>
+					{
+						var attr =
+							x.Attribute(
+								"connectionString");
+
+						if (attr == null)
+						{
+							return false;
+						}
+
+						string value =
+							attr.Value;
+
+						return value.IndexOf(
+							"Provider=",
+							StringComparison.OrdinalIgnoreCase)
+							>= 0;
+					});
+
+			if (connectionElement == null)
+			{
+				throw new Exception(
+					"connectionString не найден");
+			}
+
+			// =====================================================
+			// Меняем connectionString
+			// =====================================================
+
+			connectionElement.SetAttributeValue(
+				"connectionString",
+				sqlConnectionString);
+
+			// =====================================================
+			// Сохраняем config
+			// =====================================================
+
+			doc.Save(
+				configPath);
 		}
 	}
 }
