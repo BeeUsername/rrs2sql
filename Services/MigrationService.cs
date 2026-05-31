@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using RRStoSQL.Forms;
 using RRStoSQL.Helpers;
 using RRStoSQL.Models;
-using System.Diagnostics;
 
 //using System.Diagnostics;
 //using System.Threading;
@@ -26,7 +27,8 @@ namespace RRStoSQL.Services
 		/// Работа с SQL Server
 		/// </summary>
 		private readonly SqlService _sqlService = new SqlService();
-		private readonly AccessToSqlConverter _converter = new AccessToSqlConverter();
+	//	private readonly AccessToSqlConverter _converter = new AccessToSqlConverter();
+		private readonly AccessConverterService _converter = new AccessConverterService();
 
 		/// <summary>
 		/// Запускает миграцию.
@@ -78,10 +80,10 @@ namespace RRStoSQL.Services
 							$"RRS_{DateTime.Now:yyyyMMdd_HHmmss}";
 
 						// Временно выводим отладочную информацию
-						MessageBox.Show(
-							$"MDB:\n{appConfig.MdbPath}\n\n" +
-							$"EXE:\n{appConfig.ExePath}\n\n" +
-							$"DB:\n{appConfig.SqlDatabaseName}");
+						//MessageBox.Show(
+						//	$"MDB:\n{appConfig.MdbPath}\n\n" +
+						//	$"EXE:\n{appConfig.ExePath}\n\n" +
+						//	$"DB:\n{appConfig.SqlDatabaseName}");
 
 						// Проверяем существование MDB
 						if (!File.Exists(
@@ -107,7 +109,7 @@ namespace RRStoSQL.Services
 
 						// Временно выводим найденный SQL
 						MessageBox.Show(
-							$"SQL найден:\n" +
+							$"Конвертация будет выполнена в экземпляр :\n" +
 							$"{appConfig.SqlInstance}");
 					}
 
@@ -162,22 +164,37 @@ namespace RRStoSQL.Services
 						step.Name ==
 						"Конвертируем базу")
 					{
-						// создаём БД
-						_converter.CreateDatabase(
-							appConfig.SqlInstance,
-							appConfig.SqlDatabaseName);
+						// запускаем Bullzip
+						Process process =
+							_converter.Convert(
+								appConfig);
 
-						// создаём структуру
-						_converter.CreateTables(
-							appConfig.MdbPath,
-							appConfig.SqlInstance,
-							appConfig.SqlDatabaseName);
+	//					MessageBox.Show(
+	//"Лог:\n\n" +
+	//_converter.GetLogFilePath());
+	//					// показываем окно лога
+						using (
+							var logForm =
+								new ConversionLogForm(
+									_converter.GetLogFilePath(),
+									process))
+						{
+							logForm.ShowDialog();
+						}
 
-						// переносим данные
-						_converter.CopyData(
-							appConfig.MdbPath,
-							appConfig.SqlInstance,
-							appConfig.SqlDatabaseName);
+						// проверяем результат
+						if (!process.HasExited)
+						{
+							process.WaitForExit();
+						}
+
+						if (process.ExitCode != 0)
+						{
+							throw new Exception(
+								"Ошибка конвертации Bullzip.\n\n" +
+								"Код завершения: " +
+								process.ExitCode);
+						}
 					}
 
 
@@ -217,7 +234,7 @@ namespace RRStoSQL.Services
 
 					else if (
 						step.Name ==
-						"Открываем порт 1433 в брандмауэре")
+						"Открываем 1433 в брандмауэре")
 					{
 						_sqlService
 							.OpenFirewallPort();
@@ -338,7 +355,7 @@ namespace RRStoSQL.Services
 		new MigrationStep("Конвертируем базу"),
 		new MigrationStep("Выдаём права RRUser"),
 		new MigrationStep("Назначаем порт 1433 для SQL"),
-		new MigrationStep("Открываем порт 1433 в брандмауэре"),
+		new MigrationStep("Открываем 1433 в брандмауэре"),
 		new MigrationStep("Меняем connectionStrings"),
 		new MigrationStep("Выполняем патчи"),
 		new MigrationStep("Строка подключения в буфер обмена"),

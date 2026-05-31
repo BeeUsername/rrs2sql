@@ -136,18 +136,14 @@ namespace RRStoSQL.Services
 			// Меняем DbType="Mssql"
 			// =====================================================
 
-			var dbTypeElement =
-				doc.Descendants(
-					"add")
-				.FirstOrDefault(
-					x =>
-						(string)x.Attribute("key")
-						== "DBType");
+			var programSettings =
+	doc.Descendants("ProgramSettings")
+	.FirstOrDefault();
 
-			if (dbTypeElement != null)
+			if (programSettings != null)
 			{
-				dbTypeElement.SetAttributeValue(
-					"value",
+				programSettings.SetAttributeValue(
+					"DbType",
 					"Mssql");
 			}
 
@@ -233,14 +229,19 @@ namespace RRStoSQL.Services
 		/// в буфер обмена
 		/// </summary>
 		public void CopyConnectionString(
-			AppConfig appConfig)
+	AppConfig appConfig)
 		{
 			string connectionString =
 				BuildSqlConnectionString(
 					appConfig);
 
+			string xml =
+		$@"<connectionStrings>
+		 <add name=""Citilab.RemoteReg.Properties.Settings.CitilabConnectionString"" connectionString=""{connectionString}"" providerName=""System.Data.OleDb"" />
+		</connectionStrings>";
+
 			Clipboard.SetText(
-				connectionString);
+				xml);
 		}
 
 

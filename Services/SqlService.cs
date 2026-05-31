@@ -235,9 +235,9 @@ END
 				GetInstanceId(
 					instanceName);
 
-			MessageBox.Show(
-	"InstanceId:\n" +
-	instanceId);
+	//		MessageBox.Show(
+	//"InstanceId:\n" +
+	//instanceId);
 
 
 			if (string.IsNullOrEmpty(
@@ -409,8 +409,8 @@ END
 				// текущий пользователь Windows
 				// станет SQL администратором
 				"/ADDCURRENTUSERASSQLADMIN " +
-
-				"/IACCEPTSQLSERVERLICENSETERMS";
+				  "/INDICATEPROGRESS "+
+			"/IACCEPTSQLSERVERLICENSETERMS";
 
 			process.StartInfo.UseShellExecute =
 				true;
@@ -423,18 +423,28 @@ END
 
 			process.WaitForExit();
 
-			MessageBox.Show(
-				"ExitCode: " +
-				process.ExitCode +
-				"\n\nArguments:\n" +
-				process.StartInfo.Arguments);
-
+			// ПОКАЗЫВАЕМ ТОЛЬКО ПРИ ОШИБКЕ
 			if (process.ExitCode != 0)
 			{
+				MessageBox.Show(
+					"Ошибка установки SQL!\n\n" +
+					"ExitCode: " + process.ExitCode +
+					"\n\nArguments:\n" + process.StartInfo.Arguments,
+					"Ошибка установки SQL",
+					MessageBoxButtons.OK,
+					MessageBoxIcon.Error);
+
 				throw new Exception(
 					"Ошибка установки SQL: " +
 					process.ExitCode);
 			}
+
+			//if (process.ExitCode != 0)
+			//{
+			//	throw new Exception(
+			//		"Ошибка установки SQL: " +
+			//		process.ExitCode);
+			//}
 		}
 
 		
