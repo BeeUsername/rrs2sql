@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Windows.Forms;
 
 namespace RRStoSQL.Services
 {
@@ -31,6 +32,11 @@ namespace RRStoSQL.Services
 					AppDomain.CurrentDomain.BaseDirectory,
 					"Bullzip",
 					"msa2sql_5_5_0_281.exe");
+
+	//		MessageBox.Show(
+	//$"BaseDirectory:\n{AppDomain.CurrentDomain.BaseDirectory}\n\n" +
+	//$"Installer:\n{installerPath}\n\n" +
+	//$"Exists: {File.Exists(installerPath)}");
 
 			if (!File.Exists(installerPath))
 			{

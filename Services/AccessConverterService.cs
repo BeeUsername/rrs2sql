@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using RRStoSQL.Models;
 
@@ -70,7 +71,8 @@ namespace RRStoSQL.Services
 
 			File.WriteAllText(
 				settingsFile,
-				text);
+				text,
+				Encoding.Default);
 		}
 
 		/// <summary>

@@ -48,7 +48,7 @@
 			this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
 			this.groupBox1.Location = new System.Drawing.Point(0, 0);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(303, 106);
+			this.groupBox1.Size = new System.Drawing.Size(301, 106);
 			this.groupBox1.TabIndex = 0;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Конфиги:";
@@ -61,7 +61,7 @@
 			this.listBoxConfigs.HorizontalScrollbar = true;
 			this.listBoxConfigs.Location = new System.Drawing.Point(3, 16);
 			this.listBoxConfigs.Name = "listBoxConfigs";
-			this.listBoxConfigs.Size = new System.Drawing.Size(297, 87);
+			this.listBoxConfigs.Size = new System.Drawing.Size(295, 87);
 			this.listBoxConfigs.TabIndex = 0;
 			this.listBoxConfigs.SelectedIndexChanged += new System.EventHandler(this.listBoxConfigs_SelectedIndexChanged);
 			// 
@@ -69,15 +69,16 @@
 			// 
 			this.panelButtons.Controls.Add(this.btnAddConfig);
 			this.panelButtons.Controls.Add(this.btnConvert);
-			this.panelButtons.Location = new System.Drawing.Point(3, 109);
+			this.panelButtons.Dock = System.Windows.Forms.DockStyle.Top;
+			this.panelButtons.Location = new System.Drawing.Point(0, 106);
 			this.panelButtons.Name = "panelButtons";
-			this.panelButtons.Size = new System.Drawing.Size(298, 52);
+			this.panelButtons.Size = new System.Drawing.Size(301, 52);
 			this.panelButtons.TabIndex = 1;
 			this.panelButtons.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint_1);
 			// 
 			// btnAddConfig
 			// 
-			this.btnAddConfig.Location = new System.Drawing.Point(3, 3);
+			this.btnAddConfig.Location = new System.Drawing.Point(6, 3);
 			this.btnAddConfig.Name = "btnAddConfig";
 			this.btnAddConfig.Size = new System.Drawing.Size(84, 46);
 			this.btnAddConfig.TabIndex = 1;
@@ -98,9 +99,9 @@
 			// groupBox2
 			// 
 			this.groupBox2.Controls.Add(this.listViewSteps);
-			this.groupBox2.Location = new System.Drawing.Point(6, 164);
+			this.groupBox2.Location = new System.Drawing.Point(6, 161);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(292, 272);
+			this.groupBox2.Size = new System.Drawing.Size(292, 286);
 			this.groupBox2.TabIndex = 2;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Enter += new System.EventHandler(this.groupBox2_Enter);
@@ -116,7 +117,7 @@
 			this.listViewSteps.HideSelection = false;
 			this.listViewSteps.Location = new System.Drawing.Point(3, 16);
 			this.listViewSteps.Name = "listViewSteps";
-			this.listViewSteps.Size = new System.Drawing.Size(286, 253);
+			this.listViewSteps.Size = new System.Drawing.Size(286, 267);
 			this.listViewSteps.TabIndex = 0;
 			this.listViewSteps.UseCompatibleStateImageBehavior = false;
 			this.listViewSteps.View = System.Windows.Forms.View.Details;
@@ -138,7 +139,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(303, 439);
+			this.ClientSize = new System.Drawing.Size(301, 452);
 			this.Controls.Add(this.groupBox2);
 			this.Controls.Add(this.panelButtons);
 			this.Controls.Add(this.groupBox1);
