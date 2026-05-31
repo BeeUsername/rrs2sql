@@ -10,6 +10,7 @@ namespace RRStoSQL.Forms.UI
 
 			AddStep(listView, "Читаем конфиг");
 			AddStep(listView, "Установка SQL");
+			AddStep(listView, "Установка Bullzip msa2sql");			
 			AddStep(listView, "Разрешаем mixed authentication");
 			AddStep(listView, "Перезапуск службы SQL");
 			AddStep(listView, "Создаём RRUser");			

@@ -27,9 +27,9 @@ namespace RRStoSQL.Services
 		/// Работа с SQL Server
 		/// </summary>
 		private readonly SqlService _sqlService = new SqlService();
-	//	private readonly AccessToSqlConverter _converter = new AccessToSqlConverter();
 		private readonly AccessConverterService _converter = new AccessConverterService();
 		private readonly SqlPatchService _patchService = new SqlPatchService();
+		private readonly BullzipService _bullzipService = new BullzipService();
 
 		/// <summary>
 		/// Запускает миграцию.
@@ -114,7 +114,22 @@ namespace RRStoSQL.Services
 							$"{appConfig.SqlInstance}");
 					}
 
+					// ============================================
+					// Установка Bullzip msa2sql
+					// ============================================
 
+					else if (
+						step.Name ==
+						"Установка Bullzip msa2sql")
+					{
+						string exePath =
+							_bullzipService
+								.EnsureInstalled();
+
+						MessageBox.Show(
+							"Bullzip найден:\n\n" +
+							exePath);
+					}
 
 
 					// ============================================
@@ -386,6 +401,7 @@ namespace RRStoSQL.Services
 	{
 		new MigrationStep("Читаем конфиг"),
 		new MigrationStep("Установка SQL"),
+		new MigrationStep("Установка Bullzip msa2sql"),
 		new MigrationStep("Разрешаем mixed authentication"),
 		new MigrationStep("Перезапуск службы SQL"),
 		new MigrationStep("Создаём RRUser"),		

@@ -36,6 +36,35 @@ namespace RRStoSQL.Services
 				return;
 			}
 
+			// ============================================
+			// Создаём лог
+			// ============================================
+
+			string logFolder =
+				Path.Combine(
+					AppDomain.CurrentDomain.BaseDirectory,
+					"Logs");
+
+			Directory.CreateDirectory(
+				logFolder);
+
+			string logFile =
+				Path.Combine(
+					logFolder,
+					$"SqlPatch_{DateTime.Now:yyyyMMdd_HHmmss}.log");
+
+			WriteLog(
+				logFile,
+				"===== НАЧАЛО ПРИМЕНЕНИЯ ПАТЧЕЙ =====");
+
+			WriteLog(
+				logFile,
+				$"Сервер: {sqlInstance}");
+
+			WriteLog(
+				logFile,
+				$"База: {databaseName}");
+
 			string connectionString =
 				$"Server={sqlInstance};" +
 				$"Database={databaseName};" +
@@ -50,6 +79,14 @@ namespace RRStoSQL.Services
 
 				foreach (string file in files)
 				{
+					WriteLog(
+						logFile,
+						$"==============================");
+
+					WriteLog(
+						logFile,
+						$"ФАЙЛ: {Path.GetFileName(file)}");
+
 					try
 					{
 						string script =
@@ -59,6 +96,10 @@ namespace RRStoSQL.Services
 						if (string.IsNullOrWhiteSpace(
 							script))
 						{
+							WriteLog(
+								logFile,
+								"Файл пустой");
+
 							continue;
 						}
 
@@ -77,34 +118,81 @@ namespace RRStoSQL.Services
 								continue;
 							}
 
-							using (var command =
-								new SqlCommand(
-									sql,
-									connection))
-							{
-								command.CommandTimeout =
-									0;
+							WriteLog(
+								logFile,
+								"SQL:");
 
-								command.ExecuteNonQuery();
+							WriteLog(
+								logFile,
+								sql);
+
+							try
+							{
+								using (var command =
+									new SqlCommand(
+										sql,
+										connection))
+								{
+									command.CommandTimeout =
+										0;
+
+									command.ExecuteNonQuery();
+								}
+
+								WriteLog(
+									logFile,
+									"РЕЗУЛЬТАТ: УСПЕШНО");
+							}
+							catch (Exception ex)
+							{
+								WriteLog(
+									logFile,
+									"РЕЗУЛЬТАТ: ОШИБКА");
+
+								WriteLog(
+									logFile,
+									ex.ToString());
+
+								// Если объект уже существует,
+								// просто продолжаем
+								if (ex.ToString().Contains(
+									"There is already an object named"))
+								{
+									WriteLog(
+										logFile,
+										"ПРОПУЩЕНО: объект уже существует");
+
+									continue;
+								}
+
+								continue;
+								//throw;
 							}
 						}
 					}
 					catch (Exception ex)
 					{
-						if (ex.ToString().Contains(
-							"There is already an object named"))
-						{
-							return;
-						}
+						WriteLog(
+							logFile,
+							"КРИТИЧЕСКАЯ ОШИБКА ФАЙЛА");
+
+						WriteLog(
+							logFile,
+							ex.ToString());
 
 						throw new Exception(
 							$"Ошибка выполнения SQL-патча:{Environment.NewLine}{Environment.NewLine}" +
 							$"{Path.GetFileName(file)}{Environment.NewLine}{Environment.NewLine}" +
-							ex.Message,
+							$"Подробности см. в логе:{Environment.NewLine}" +
+							logFile,
 							ex);
 					}
 				}
 			}
+
+			WriteLog(
+				logFile,
+				"===== ПАТЧИ ЗАВЕРШЕНЫ =====");
 		}
 
 		private string[] SplitSqlBatches(
@@ -115,6 +203,17 @@ namespace RRStoSQL.Services
 				@"^\s*GO\s*$",
 				RegexOptions.Multiline |
 				RegexOptions.IgnoreCase);
+		}
+
+		private void WriteLog(
+			string logFile,
+			string text)
+		{
+			File.AppendAllText(
+				logFile,
+				$"[{DateTime.Now:HH:mm:ss}] {text}" +
+				Environment.NewLine +
+				Environment.NewLine);
 		}
 	}
 }

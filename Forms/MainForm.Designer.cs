@@ -48,7 +48,7 @@
 			this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
 			this.groupBox1.Location = new System.Drawing.Point(0, 0);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(307, 106);
+			this.groupBox1.Size = new System.Drawing.Size(303, 106);
 			this.groupBox1.TabIndex = 0;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Конфиги:";
@@ -61,7 +61,7 @@
 			this.listBoxConfigs.HorizontalScrollbar = true;
 			this.listBoxConfigs.Location = new System.Drawing.Point(3, 16);
 			this.listBoxConfigs.Name = "listBoxConfigs";
-			this.listBoxConfigs.Size = new System.Drawing.Size(301, 87);
+			this.listBoxConfigs.Size = new System.Drawing.Size(297, 87);
 			this.listBoxConfigs.TabIndex = 0;
 			this.listBoxConfigs.SelectedIndexChanged += new System.EventHandler(this.listBoxConfigs_SelectedIndexChanged);
 			// 
@@ -79,7 +79,7 @@
 			// 
 			this.btnAddConfig.Location = new System.Drawing.Point(3, 3);
 			this.btnAddConfig.Name = "btnAddConfig";
-			this.btnAddConfig.Size = new System.Drawing.Size(102, 46);
+			this.btnAddConfig.Size = new System.Drawing.Size(84, 46);
 			this.btnAddConfig.TabIndex = 1;
 			this.btnAddConfig.Text = "Добавить конфиг";
 			this.btnAddConfig.UseVisualStyleBackColor = true;
@@ -87,9 +87,9 @@
 			// 
 			// btnConvert
 			// 
-			this.btnConvert.Location = new System.Drawing.Point(111, 3);
+			this.btnConvert.Location = new System.Drawing.Point(93, 3);
 			this.btnConvert.Name = "btnConvert";
-			this.btnConvert.Size = new System.Drawing.Size(177, 46);
+			this.btnConvert.Size = new System.Drawing.Size(202, 46);
 			this.btnConvert.TabIndex = 0;
 			this.btnConvert.Text = "Конвертировать";
 			this.btnConvert.UseVisualStyleBackColor = true;
@@ -98,9 +98,9 @@
 			// groupBox2
 			// 
 			this.groupBox2.Controls.Add(this.listViewSteps);
-			this.groupBox2.Location = new System.Drawing.Point(13, 179);
+			this.groupBox2.Location = new System.Drawing.Point(6, 164);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(288, 270);
+			this.groupBox2.Size = new System.Drawing.Size(292, 272);
 			this.groupBox2.TabIndex = 2;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Enter += new System.EventHandler(this.groupBox2_Enter);
@@ -116,7 +116,7 @@
 			this.listViewSteps.HideSelection = false;
 			this.listViewSteps.Location = new System.Drawing.Point(3, 16);
 			this.listViewSteps.Name = "listViewSteps";
-			this.listViewSteps.Size = new System.Drawing.Size(282, 251);
+			this.listViewSteps.Size = new System.Drawing.Size(286, 253);
 			this.listViewSteps.TabIndex = 0;
 			this.listViewSteps.UseCompatibleStateImageBehavior = false;
 			this.listViewSteps.View = System.Windows.Forms.View.Details;
@@ -125,20 +125,20 @@
 			// columnHeader2
 			// 
 			this.columnHeader2.DisplayIndex = 1;
-			this.columnHeader2.Text = "Этап";
-			this.columnHeader2.Width = 50;
+			this.columnHeader2.Text = "Статус";
+			this.columnHeader2.Width = 65;
 			// 
 			// columnHeader1
 			// 
 			this.columnHeader1.DisplayIndex = 0;
-			this.columnHeader1.Text = "Статус";
-			this.columnHeader1.Width = 200;
+			this.columnHeader1.Text = "Этап";
+			this.columnHeader1.Width = 215;
 			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(307, 461);
+			this.ClientSize = new System.Drawing.Size(303, 439);
 			this.Controls.Add(this.groupBox2);
 			this.Controls.Add(this.panelButtons);
 			this.Controls.Add(this.groupBox1);

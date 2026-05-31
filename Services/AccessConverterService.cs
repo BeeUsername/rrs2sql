@@ -14,7 +14,7 @@ namespace RRStoSQL.Services
 		/// через Bullzip msa2sql.exe
 		/// </summary>
 		public Process Convert(
-	AppConfig appConfig)
+			AppConfig appConfig)
 		{
 			UpdateSettingsFile(
 				appConfig);
@@ -130,12 +130,18 @@ namespace RRStoSQL.Services
 		/// </summary>
 		private Process RunBullzip()
 		{
+			//string exeFile =
+			//	Path.Combine(
+			//		AppDomain.CurrentDomain.BaseDirectory,
+			//		"Bullzip",
+			//		//"msa2sql.exe");
+			//		"Bullzip.exe");
+
 			string exeFile =
 				Path.Combine(
-					AppDomain.CurrentDomain.BaseDirectory,
-					"Bullzip",
-					//"msa2sql.exe");
-					"Bullzip.exe");
+					Environment.GetFolderPath(
+						Environment.SpecialFolder.ProgramFilesX86),
+					@"Bullzip\MS Access to MSSQL\msa2sql.exe");
 
 			string settingsFile =
 				Path.Combine(
@@ -173,14 +179,18 @@ namespace RRStoSQL.Services
 		public string GetLogFilePath()
 		{
 			return Path.Combine(
-				AppDomain.CurrentDomain.BaseDirectory,
-				"Bullzip",
-				"Bullzip MS Access to MSSQL.cameyo.files",
-				"CHANGES",
-				"%AppData%",
-				"Bullzip",
-				"MS Access to MSSQL",
-				"msa2sql.log");
+				Environment.GetFolderPath(
+					Environment.SpecialFolder.ApplicationData),
+					@"Bullzip\MS Access to MSSQL\msa2sql.log");
+			//return Path.Combine(
+			//	AppDomain.CurrentDomain.BaseDirectory,
+			//	"Bullzip",
+			//	"Bullzip MS Access to MSSQL.cameyo.files",
+			//	"CHANGES",
+			//	"%AppData%",
+			//	"Bullzip",
+			//	"MS Access to MSSQL",
+			//	"msa2sql.log");
 
 
 		}
