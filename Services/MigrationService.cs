@@ -29,6 +29,7 @@ namespace RRStoSQL.Services
 		private readonly SqlService _sqlService = new SqlService();
 	//	private readonly AccessToSqlConverter _converter = new AccessToSqlConverter();
 		private readonly AccessConverterService _converter = new AccessConverterService();
+		private readonly SqlPatchService _patchService = new SqlPatchService();
 
 		/// <summary>
 		/// Запускает миграцию.
@@ -253,8 +254,16 @@ namespace RRStoSQL.Services
 							configPath,
 							appConfig);
 					}
+					// ============================================
+					// Патчим SQL базу
+					// ============================================
 
-
+					else if (step.Name =="Патчим SQL базу")
+					{
+						_patchService.ExecutePatches(
+							appConfig.SqlInstance,
+							appConfig.SqlDatabaseName);
+					}
 					// ============================================
 					// Строка подключения в буфер обмена
 					// ============================================
@@ -293,30 +302,58 @@ namespace RRStoSQL.Services
 				}
 				catch (Exception ex)
 				{
-					// Помечаем шаг ошибкой
 					updateStep(
 						step.Name,
 						StepStatus.Error);
 
-					// Показываем нормальное окно
 					MessageHelper.Show(
 						ex.ToString(),
 						"Ошибка");
 
-					return;
+					if (IsCriticalStep(step.Name))
+					{
+						return;
+					}
+
+					// идём к следующему шагу
+					continue;
 				}
-				//catch
+				//catch (Exception ex)
 				//{
 				//	// Помечаем шаг ошибкой
 				//	updateStep(
 				//		step.Name,
 				//		StepStatus.Error);
 
-				//	throw;
+				//	// Показываем нормальное окно
+				//	MessageHelper.Show(
+				//		ex.ToString(),
+				//		"Ошибка");
+
+				//	return;
 				//}
+
 			}
 		}
 
+		private bool IsCriticalStep(
+	string stepName)
+		{
+			switch (stepName)
+			{
+				case "Читаем конфиг":
+				case "Установка SQL":
+				case "Разрешаем mixed authentication":
+				case "Перезапуск службы SQL":
+				case "Создаём RRUser":
+				case "Конвертируем базу":
+				case "Выдаём права RRUser":
+					return true;
+
+				default:
+					return false;
+			}
+		}
 		/// <summary>
 		/// Временная заглушка для
 		/// ещё не реализованных шагов.
@@ -357,7 +394,7 @@ namespace RRStoSQL.Services
 		new MigrationStep("Назначаем порт 1433 для SQL"),
 		new MigrationStep("Открываем 1433 в брандмауэре"),
 		new MigrationStep("Меняем connectionStrings"),
-		new MigrationStep("Выполняем патчи"),
+		new MigrationStep("Патчим SQL базу"),
 		new MigrationStep("Строка подключения в буфер обмена"),
 		new MigrationStep("Запускаем УР")
 	};

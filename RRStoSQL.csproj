@@ -78,6 +78,7 @@
     <Compile Include="Services\ConfigFinderService.cs" />
     <Compile Include="Services\ConfigService.cs" />
     <Compile Include="Services\MigrationService.cs" />
+    <Compile Include="Services\SqlPatchService.cs" />
     <Compile Include="Services\SqlService.cs" />
     <EmbeddedResource Include="Forms\ConversionLogForm.resx">
       <DependentUpon>ConversionLogForm.cs</DependentUpon>

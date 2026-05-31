@@ -18,7 +18,7 @@ namespace RRStoSQL.Forms.UI
 			AddStep(listView, "Назначаем порт 1433 для SQL");
 			AddStep(listView, "Открываем 1433 в брандмауэре");
 			AddStep(listView, "Меняем connectionStrings");
-			AddStep(listView, "Выполняем патчи");
+			AddStep(listView, "Патчим SQL базу");
 			AddStep(listView, "Строка подключения в буфер обмена");
 			AddStep(listView, "Запускаем УР");
 		}
