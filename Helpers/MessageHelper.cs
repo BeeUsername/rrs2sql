@@ -20,6 +20,9 @@ namespace RRStoSQL.Helpers
 			form.Text =
 				title;
 
+			form.StartPosition =
+				FormStartPosition.CenterScreen;
+
 			form.Width = 700;
 			form.Height = 400;
 

@@ -136,6 +136,9 @@ namespace RRStoSQL
 
 		private async void btnConvert_Click(object sender,EventArgs e)
 		{
+
+			_stepInitializer.Initialize(listViewSteps);
+
 			if (listBoxConfigs.SelectedItem == null)
 			{
 				MessageBox.Show(
@@ -148,7 +151,6 @@ namespace RRStoSQL
 
 			try
 			{
-				
 					var selectedConfig =
 					(ConfigItem)
 					listBoxConfigs.SelectedItem;
@@ -164,8 +166,8 @@ namespace RRStoSQL
 						Application.DoEvents();
 					});
 
-				MessageBox.Show(
-					"Конвертация завершена");
+				//MessageBox.Show(
+				//	"Конвертация завершена");
 			}
 			catch (Exception ex)
 			{

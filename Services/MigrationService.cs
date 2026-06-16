@@ -30,6 +30,7 @@ namespace RRStoSQL.Services
 		private readonly AccessConverterService _converter = new AccessConverterService();
 		private readonly SqlPatchService _patchService = new SqlPatchService();
 		private readonly BullzipService _bullzipService = new BullzipService();
+		private readonly AccessPatchService _accessPatchService = new AccessPatchService();
 
 		/// <summary>
 		/// Запускает миграцию.
@@ -109,9 +110,9 @@ namespace RRStoSQL.Services
 							sql.InstanceName;
 
 						// Временно выводим найденный SQL
-						MessageBox.Show(
-							$"Конвертация будет выполнена в экземпляр :\n" +
-							$"{appConfig.SqlInstance}");
+						//MessageBox.Show(
+						//	$"Конвертация будет выполнена в экземпляр :\n" +
+						//	$"{appConfig.SqlInstance}");
 					}
 
 					// ============================================
@@ -126,9 +127,9 @@ namespace RRStoSQL.Services
 							_bullzipService
 								.EnsureInstalled();
 
-						MessageBox.Show(
-							"Bullzip найден:\n\n" +
-							exePath);
+						//MessageBox.Show(
+						//	"Bullzip найден:\n\n" +
+						//	exePath);
 					}
 
 
@@ -171,6 +172,19 @@ namespace RRStoSQL.Services
 								appConfig.SqlInstance);
 					}
 
+					// ============================================
+					//  Патчим Access базу
+					// ============================================
+
+					else if (
+						step.Name ==
+						"Патчим Access базу")
+					{
+						_accessPatchService
+							.ExecutePatches(
+								appConfig.MdbPath);
+						
+					}
 
 					// ============================================
 					// Конвертируем базу
@@ -185,17 +199,21 @@ namespace RRStoSQL.Services
 							_converter.Convert(
 								appConfig);
 
-	//					MessageBox.Show(
-	//"Лог:\n\n" +
-	//_converter.GetLogFilePath());
-	//					// показываем окно лога
-						using (
-							var logForm =
-								new ConversionLogForm(
-									_converter.GetLogFilePath(),
-									process))
+						
+
+						using (var logForm =
+							new ConversionLogForm(
+								_converter.GetLogFilePath(),
+								process))
 						{
-							logForm.ShowDialog();
+							var result =
+								logForm.ShowDialog();
+
+							if (result == DialogResult.Abort)
+							{
+								throw new Exception(
+									"Конвертация Bullzip завершилась с ошибкой.");
+							}
 						}
 
 						// проверяем результат
@@ -203,6 +221,16 @@ namespace RRStoSQL.Services
 						{
 							process.WaitForExit();
 						}
+
+						try
+						{
+							 _bullzipService.CopyBullzipLog();
+						}
+						catch
+						{
+							// лог не должен ломать миграцию
+						}
+
 
 						if (process.ExitCode != 0)
 						{
@@ -404,7 +432,8 @@ namespace RRStoSQL.Services
 		new MigrationStep("Установка Bullzip msa2sql"),
 		new MigrationStep("Разрешаем mixed authentication"),
 		new MigrationStep("Перезапуск службы SQL"),
-		new MigrationStep("Создаём RRUser"),		
+		new MigrationStep("Создаём RRUser"),
+		new MigrationStep("Патчим Access базу"),
 		new MigrationStep("Конвертируем базу"),
 		new MigrationStep("Выдаём права RRUser"),
 		new MigrationStep("Назначаем порт 1433 для SQL"),

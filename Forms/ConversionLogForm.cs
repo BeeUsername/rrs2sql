@@ -34,7 +34,7 @@ namespace RRStoSQL.Forms
 			object sender,
 			EventArgs e)
 		{
-			_timer.Start();
+			//_timer.Start(); вроде как лишний вызов, таймер уже запущен в конструкторе
 		}
 
 		private void Timer_Tick(
@@ -62,8 +62,8 @@ namespace RRStoSQL.Forms
 				txtLog.ScrollToCaret();
 
 				if (text.IndexOf(
-		"Transfer completed",
-		StringComparison.OrdinalIgnoreCase) >= 0)
+					"Transfer completed",
+					StringComparison.OrdinalIgnoreCase) >= 0)
 				{
 					_timer.Stop();
 
@@ -74,8 +74,8 @@ namespace RRStoSQL.Forms
 				}
 
 				if (text.IndexOf(
-		"error",
-		StringComparison.OrdinalIgnoreCase) >= 0)
+					"error",
+					StringComparison.OrdinalIgnoreCase) >= 0)
 				{
 					_timer.Stop();
 
@@ -93,6 +93,11 @@ namespace RRStoSQL.Forms
 			{
 				// лог ещё пишется
 			}
+		}
+
+		private void txtLog_TextChanged(object sender, EventArgs e)
+		{
+
 		}
 	}
 }

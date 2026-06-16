@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
+using static System.Resources.ResXFileRef;
 
 namespace RRStoSQL.Services
 {
@@ -81,6 +82,38 @@ namespace RRStoSQL.Services
 			}
 
 			return exePath;
+		}
+
+		public void CopyBullzipLog()
+		{
+			string sourceLog =
+				Path.Combine(
+					Environment.GetFolderPath(
+						Environment.SpecialFolder.ApplicationData),
+					@"Bullzip\MS Access to MSSQL\msa2sql.log");
+
+			if (!File.Exists(sourceLog))
+			{
+				return;
+			}
+
+			string logsFolder =
+				Path.Combine(
+					AppDomain.CurrentDomain.BaseDirectory,
+					"logs");
+
+			Directory.CreateDirectory(
+				logsFolder);
+
+			string destLog =
+				Path.Combine(
+					logsFolder,
+					$"msa2sql_{DateTime.Now:yyyyMMdd_HHmmss}.log");
+
+			File.Copy(
+				sourceLog,
+				destLog,
+				true);
 		}
 	}
 }

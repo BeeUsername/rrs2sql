@@ -153,8 +153,9 @@ namespace RRStoSQL.Services
 
 			string sqlConnectionString =
 				"Provider=SQLOLEDB;" +
-				$"Data Source={Environment.MachineName}" +
-				$"\\SQLEXPRESS,1433;" +
+				//$"Data Source={Environment.MachineName}" +
+				"Data Source=localhost\\SQLEXPRESS,1433;" +
+ 				//$"\\SQLEXPRESS,1433;" +
 				"Password=RRS_999999999!;" +
 				"User ID=RRUser;" +
 				$"Initial Catalog={appConfig.SqlDatabaseName}";
@@ -218,6 +219,7 @@ namespace RRStoSQL.Services
 			return
 				"Provider=SQLOLEDB;" +
 				$"Data Source={Environment.MachineName}" +
+				//"Data Source=localhost\\SQLEXPRESS,1433;" +
 				$"\\SQLEXPRESS,1433;" +
 				"Password=RRS_999999999!;" +
 				"User ID=RRUser;" +

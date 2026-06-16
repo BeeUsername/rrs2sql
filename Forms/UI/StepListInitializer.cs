@@ -1,4 +1,5 @@
 ﻿using System.Windows.Forms;
+using RRStoSQL.Models;
 
 namespace RRStoSQL.Forms.UI
 {
@@ -13,7 +14,8 @@ namespace RRStoSQL.Forms.UI
 			AddStep(listView, "Установка Bullzip msa2sql");			
 			AddStep(listView, "Разрешаем mixed authentication");
 			AddStep(listView, "Перезапуск службы SQL");
-			AddStep(listView, "Создаём RRUser");			
+			AddStep(listView, "Создаём RRUser");
+			AddStep(listView, "Патчим Access базу");			
 			AddStep(listView, "Конвертируем базу");
 			AddStep(listView, "Выдаём права RRUser");
 			AddStep(listView, "Назначаем порт 1433 для SQL");

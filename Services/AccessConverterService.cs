@@ -163,11 +163,17 @@ namespace RRStoSQL.Services
 				"HIDE " +
 				"CLEARLOG";
 
+			//process.StartInfo.UseShellExecute =
+			//	false;
+
+			//process.StartInfo.CreateNoWindow =
+			//	true;
+
 			process.StartInfo.UseShellExecute =
-				false;
+				true;
 
 			process.StartInfo.CreateNoWindow =
-				true;
+				false;
 
 			process.Start();
 
@@ -184,17 +190,7 @@ namespace RRStoSQL.Services
 				Environment.GetFolderPath(
 					Environment.SpecialFolder.ApplicationData),
 					@"Bullzip\MS Access to MSSQL\msa2sql.log");
-			//return Path.Combine(
-			//	AppDomain.CurrentDomain.BaseDirectory,
-			//	"Bullzip",
-			//	"Bullzip MS Access to MSSQL.cameyo.files",
-			//	"CHANGES",
-			//	"%AppData%",
-			//	"Bullzip",
-			//	"MS Access to MSSQL",
-			//	"msa2sql.log");
-
-
+			
 		}
 	}
 }

@@ -74,6 +74,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\AccessConverterService.cs" />
+    <Compile Include="Services\AccessPatchService.cs" />
     <Compile Include="Services\AccessToSqlConverter.cs" />
     <Compile Include="Services\BullzipService.cs" />
     <Compile Include="Services\ConfigFinderService.cs" />

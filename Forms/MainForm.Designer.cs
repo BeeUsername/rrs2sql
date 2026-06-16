@@ -48,7 +48,7 @@
 			this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
 			this.groupBox1.Location = new System.Drawing.Point(0, 0);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(301, 106);
+			this.groupBox1.Size = new System.Drawing.Size(282, 106);
 			this.groupBox1.TabIndex = 0;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Конфиги:";
@@ -61,26 +61,26 @@
 			this.listBoxConfigs.HorizontalScrollbar = true;
 			this.listBoxConfigs.Location = new System.Drawing.Point(3, 16);
 			this.listBoxConfigs.Name = "listBoxConfigs";
-			this.listBoxConfigs.Size = new System.Drawing.Size(295, 87);
+			this.listBoxConfigs.Size = new System.Drawing.Size(276, 87);
 			this.listBoxConfigs.TabIndex = 0;
 			this.listBoxConfigs.SelectedIndexChanged += new System.EventHandler(this.listBoxConfigs_SelectedIndexChanged);
 			// 
 			// panelButtons
 			// 
+			this.panelButtons.Anchor = System.Windows.Forms.AnchorStyles.Top;
 			this.panelButtons.Controls.Add(this.btnAddConfig);
 			this.panelButtons.Controls.Add(this.btnConvert);
-			this.panelButtons.Dock = System.Windows.Forms.DockStyle.Top;
-			this.panelButtons.Location = new System.Drawing.Point(0, 106);
+			this.panelButtons.Location = new System.Drawing.Point(4, 109);
 			this.panelButtons.Name = "panelButtons";
-			this.panelButtons.Size = new System.Drawing.Size(301, 52);
+			this.panelButtons.Size = new System.Drawing.Size(275, 52);
 			this.panelButtons.TabIndex = 1;
 			this.panelButtons.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint_1);
 			// 
 			// btnAddConfig
 			// 
-			this.btnAddConfig.Location = new System.Drawing.Point(6, 3);
+			this.btnAddConfig.Location = new System.Drawing.Point(-1, 3);
 			this.btnAddConfig.Name = "btnAddConfig";
-			this.btnAddConfig.Size = new System.Drawing.Size(84, 46);
+			this.btnAddConfig.Size = new System.Drawing.Size(94, 46);
 			this.btnAddConfig.TabIndex = 1;
 			this.btnAddConfig.Text = "Добавить конфиг";
 			this.btnAddConfig.UseVisualStyleBackColor = true;
@@ -88,9 +88,9 @@
 			// 
 			// btnConvert
 			// 
-			this.btnConvert.Location = new System.Drawing.Point(93, 3);
+			this.btnConvert.Location = new System.Drawing.Point(99, 3);
 			this.btnConvert.Name = "btnConvert";
-			this.btnConvert.Size = new System.Drawing.Size(202, 46);
+			this.btnConvert.Size = new System.Drawing.Size(176, 46);
 			this.btnConvert.TabIndex = 0;
 			this.btnConvert.Text = "Конвертировать";
 			this.btnConvert.UseVisualStyleBackColor = true;
@@ -99,9 +99,9 @@
 			// groupBox2
 			// 
 			this.groupBox2.Controls.Add(this.listViewSteps);
-			this.groupBox2.Location = new System.Drawing.Point(6, 161);
+			this.groupBox2.Location = new System.Drawing.Point(3, 158);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(292, 286);
+			this.groupBox2.Size = new System.Drawing.Size(277, 302);
 			this.groupBox2.TabIndex = 2;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Enter += new System.EventHandler(this.groupBox2_Enter);
@@ -117,7 +117,7 @@
 			this.listViewSteps.HideSelection = false;
 			this.listViewSteps.Location = new System.Drawing.Point(3, 16);
 			this.listViewSteps.Name = "listViewSteps";
-			this.listViewSteps.Size = new System.Drawing.Size(286, 267);
+			this.listViewSteps.Size = new System.Drawing.Size(271, 283);
 			this.listViewSteps.TabIndex = 0;
 			this.listViewSteps.UseCompatibleStateImageBehavior = false;
 			this.listViewSteps.View = System.Windows.Forms.View.Details;
@@ -127,25 +127,24 @@
 			// 
 			this.columnHeader2.DisplayIndex = 1;
 			this.columnHeader2.Text = "Статус";
-			this.columnHeader2.Width = 65;
+			this.columnHeader2.Width = 58;
 			// 
 			// columnHeader1
 			// 
 			this.columnHeader1.DisplayIndex = 0;
 			this.columnHeader1.Text = "Этап";
-			this.columnHeader1.Width = 215;
+			this.columnHeader1.Width = 207;
 			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(301, 452);
+			this.ClientSize = new System.Drawing.Size(282, 463);
 			this.Controls.Add(this.groupBox2);
 			this.Controls.Add(this.panelButtons);
 			this.Controls.Add(this.groupBox1);
 			this.Name = "MainForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-			this.Text = "RRStoSQL";
 			this.Load += new System.EventHandler(this.MainForm_Load);
 			this.groupBox1.ResumeLayout(false);
 			this.panelButtons.ResumeLayout(false);
