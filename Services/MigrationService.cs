@@ -81,11 +81,7 @@ namespace RRStoSQL.Services
 						appConfig.SqlDatabaseName =
 							$"RRS_{DateTime.Now:yyyyMMdd_HHmmss}";
 
-						// Временно выводим отладочную информацию
-						//MessageBox.Show(
-						//	$"MDB:\n{appConfig.MdbPath}\n\n" +
-						//	$"EXE:\n{appConfig.ExePath}\n\n" +
-						//	$"DB:\n{appConfig.SqlDatabaseName}");
+						
 
 						// Проверяем существование MDB
 						if (!File.Exists(
@@ -108,11 +104,7 @@ namespace RRStoSQL.Services
 
 						appConfig.SqlInstance =
 							sql.InstanceName;
-
-						// Временно выводим найденный SQL
-						//MessageBox.Show(
-						//	$"Конвертация будет выполнена в экземпляр :\n" +
-						//	$"{appConfig.SqlInstance}");
+												
 					}
 
 					// ============================================
@@ -126,10 +118,7 @@ namespace RRStoSQL.Services
 						string exePath =
 							_bullzipService
 								.EnsureInstalled();
-
-						//MessageBox.Show(
-						//	"Bullzip найден:\n\n" +
-						//	exePath);
+												
 					}
 
 
@@ -198,9 +187,7 @@ namespace RRStoSQL.Services
 						Process process =
 							_converter.Convert(
 								appConfig);
-
-						
-
+											
 						using (var logForm =
 							new ConversionLogForm(
 								_converter.GetLogFilePath(),
@@ -216,7 +203,7 @@ namespace RRStoSQL.Services
 							}
 						}
 
-						// проверяем результат
+						//проверяем результат
 						if (!process.HasExited)
 						{
 							process.WaitForExit();
@@ -224,16 +211,16 @@ namespace RRStoSQL.Services
 
 						try
 						{
-							 _bullzipService.CopyBullzipLog();
+							_bullzipService.CopyBullzipLog();
 						}
 						catch
 						{
 							// лог не должен ломать миграцию
 						}
-
-
+						
 						if (process.ExitCode != 0)
 						{
+							_bullzipService.CopyBullzipLog();
 							throw new Exception(
 								"Ошибка конвертации Bullzip.\n\n" +
 								"Код завершения: " +
@@ -361,36 +348,22 @@ namespace RRStoSQL.Services
 					// идём к следующему шагу
 					continue;
 				}
-				//catch (Exception ex)
-				//{
-				//	// Помечаем шаг ошибкой
-				//	updateStep(
-				//		step.Name,
-				//		StepStatus.Error);
-
-				//	// Показываем нормальное окно
-				//	MessageHelper.Show(
-				//		ex.ToString(),
-				//		"Ошибка");
-
-				//	return;
-				//}
-
+				
 			}
 		}
 
 		private bool IsCriticalStep(
-	string stepName)
+			string stepName)
 		{
 			switch (stepName)
 			{
 				case "Читаем конфиг":
 				case "Установка SQL":
-				case "Разрешаем mixed authentication":
+				//case "Разрешаем mixed authentication":
 				case "Перезапуск службы SQL":
 				case "Создаём RRUser":
 				case "Конвертируем базу":
-				case "Выдаём права RRUser":
+				//case "Выдаём права RRUser":
 					return true;
 
 				default:
@@ -405,18 +378,7 @@ namespace RRStoSQL.Services
 			MigrationStep step)
 		{
 			await Task.Delay(1000);
-
-			// Потом здесь будут:
-			//
-			// EnableMixedAuthentication()
-			// CreateSqlUser()
-			// RestartSqlService()
-			// ConvertAccessDatabase()
-			// EnableTcp1433()
-			// OpenFirewallPort()
-			// UpdateConnectionStrings()
-			// ExecuteScripts()
-			// LaunchRemoteReg()
+			
 		}
 
 		/// <summary>

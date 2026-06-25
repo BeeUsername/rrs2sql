@@ -211,8 +211,9 @@ namespace RRStoSQL.Services
 		{
 			File.AppendAllText(
 				logFile,
-				$"[{DateTime.Now:HH:mm:ss}] {text}" +
-				Environment.NewLine +
+                //$"[{DateTime.Now:HH:mm:ss}] {text}" +
+                $"{text}" +
+                Environment.NewLine +
 				Environment.NewLine);
 		}
 	}

@@ -168,9 +168,10 @@ namespace RRStoSQL.Services
 
 			//process.StartInfo.CreateNoWindow =
 			//	true;
-
-			process.StartInfo.UseShellExecute =
-				true;
+			process.StartInfo.UseShellExecute = true;
+			process.StartInfo.Verb = "runas"; // Запуск от имени администратора
+			process.StartInfo.CreateNoWindow = false; // Должно быть false при UseShellExecute = true
+			
 
 			process.StartInfo.CreateNoWindow =
 				false;

@@ -237,10 +237,12 @@ namespace RRStoSQL.Services
 				BuildSqlConnectionString(
 					appConfig);
 
-			string xml =
-		$@"<connectionStrings>
-		 <add name=""Citilab.RemoteReg.Properties.Settings.CitilabConnectionString"" connectionString=""{connectionString}"" providerName=""System.Data.OleDb"" />
-		</connectionStrings>";
+			//	string xml =
+			//$@"<connectionStrings>
+			// <add name=""Citilab.RemoteReg.Properties.Settings.CitilabConnectionString"" connectionString=""{connectionString}"" providerName=""System.Data.OleDb"" />\n</connectionStrings>\n";
+
+			string xml = $@"<connectionStrings>
+ <add name=""Citilab.RemoteReg.Properties.Settings.CitilabConnectionString"" connectionString=""{connectionString}"" providerName=""System.Data.OleDb"" />{Environment.NewLine}</connectionStrings>{Environment.NewLine}";
 
 			Clipboard.SetText(
 				xml);

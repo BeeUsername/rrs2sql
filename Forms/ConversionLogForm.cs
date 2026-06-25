@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace RRStoSQL.Forms
@@ -13,8 +14,8 @@ namespace RRStoSQL.Forms
 			new Timer();
 
 		public ConversionLogForm(
-	string logFile,
-	Process process)
+			string logFile,
+			Process process)
 		{
 			InitializeComponent();
 
@@ -41,6 +42,8 @@ namespace RRStoSQL.Forms
 			object sender,
 			EventArgs e)
 		{
+
+			//return;
 			try
 			{
 				if (!File.Exists(
@@ -65,6 +68,11 @@ namespace RRStoSQL.Forms
 					"Transfer completed",
 					StringComparison.OrdinalIgnoreCase) >= 0)
 				{
+					//==========
+					//System.Threading.Thread.Sleep(3000);
+					//===========	
+
+
 					_timer.Stop();
 
 					DialogResult =

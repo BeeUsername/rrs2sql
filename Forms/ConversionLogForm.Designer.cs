@@ -28,33 +28,35 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.txtLog = new System.Windows.Forms.TextBox();
-			this.SuspendLayout();
-			// 
-			// txtLog
-			// 
-			this.txtLog.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.txtLog.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.txtLog.Location = new System.Drawing.Point(0, 0);
-			this.txtLog.Multiline = true;
-			this.txtLog.Name = "txtLog";
-			this.txtLog.ReadOnly = true;
-			this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-			this.txtLog.Size = new System.Drawing.Size(374, 381);
-			this.txtLog.TabIndex = 0;
-			this.txtLog.TextChanged += new System.EventHandler(this.txtLog_TextChanged);
-			// 
-			// ConversionLogForm
-			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(374, 381);
-			this.Controls.Add(this.txtLog);
-			this.Name = "ConversionLogForm";
-			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-			this.Text = "Лог ковертации";
-			this.ResumeLayout(false);
-			this.PerformLayout();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ConversionLogForm));
+            this.txtLog = new System.Windows.Forms.TextBox();
+            this.SuspendLayout();
+            // 
+            // txtLog
+            // 
+            this.txtLog.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtLog.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.txtLog.Location = new System.Drawing.Point(0, 0);
+            this.txtLog.Multiline = true;
+            this.txtLog.Name = "txtLog";
+            this.txtLog.ReadOnly = true;
+            this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtLog.Size = new System.Drawing.Size(374, 381);
+            this.txtLog.TabIndex = 0;
+            this.txtLog.TextChanged += new System.EventHandler(this.txtLog_TextChanged);
+            // 
+            // ConversionLogForm
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(374, 381);
+            this.Controls.Add(this.txtLog);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Name = "ConversionLogForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Лог конвертации";
+            this.ResumeLayout(false);
+            this.PerformLayout();
 
 		}
 

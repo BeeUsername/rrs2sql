@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
+using Microsoft.Win32;
 using static System.Resources.ResXFileRef;
 
 namespace RRStoSQL.Services
@@ -24,6 +25,7 @@ namespace RRStoSQL.Services
 			// Уже установлен
 			if (File.Exists(exePath))
 			{
+				SetWin7Compatibility(exePath);
 				return exePath;
 			}
 
@@ -34,11 +36,7 @@ namespace RRStoSQL.Services
 					"Bullzip",
 					"msa2sql_5_5_0_281.exe");
 
-	//		MessageBox.Show(
-	//$"BaseDirectory:\n{AppDomain.CurrentDomain.BaseDirectory}\n\n" +
-	//$"Installer:\n{installerPath}\n\n" +
-	//$"Exists: {File.Exists(installerPath)}");
-
+	
 			if (!File.Exists(installerPath))
 			{
 				throw new Exception(
@@ -80,7 +78,7 @@ namespace RRStoSQL.Services
 				throw new Exception(
 					"Bullzip установлен, но msa2sql.exe не найден.");
 			}
-
+			SetWin7Compatibility(exePath);
 			return exePath;
 		}
 
@@ -115,5 +113,24 @@ namespace RRStoSQL.Services
 				destLog,
 				true);
 		}
-	}
+
+		
+
+			private void SetWin7Compatibility(
+				string exePath)
+				{
+					const string keyPath =
+						@"Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers";
+
+					using (RegistryKey key =
+						Registry.CurrentUser.CreateSubKey(
+							keyPath))
+					{
+						key.SetValue(
+							exePath,
+							"~ WIN7RTM RUNASADMIN",
+							RegistryValueKind.String);
+					}
+				}
+}
 }

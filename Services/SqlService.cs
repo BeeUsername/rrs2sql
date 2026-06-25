@@ -105,46 +105,84 @@ ADD MEMBER RRUser
 		/// <summary>
 		/// Создаёт логин RRUser и пользователя
 		/// </summary>
-		public void CreateRRUser(
-			string sqlInstance)
+		/// 
+		public void CreateRRUser(string sqlInstance)
 		{
-			// Подключаемся через Windows Authentication
-			// т.к. RRUser ещё не существует
 			string connectionString =
 				$"Server={sqlInstance};" +
 				$"Integrated Security=True;" +
 				$"TrustServerCertificate=True;";
 
-			using (var connection =
-				new SqlConnection(
-					connectionString))
+			using (var connection = new SqlConnection(connectionString))
 			{
 				connection.Open();
 
-				string sql =
-		@"
-IF NOT EXISTS(
+				string sql = @"
+IF EXISTS(
     SELECT *
     FROM sys.server_principals
     WHERE name='RRUser'
 )
 BEGIN
-
+    -- Если существует - меняем пароль
+    ALTER LOGIN RRUser
+    WITH PASSWORD='RRS_999999999!';
+END
+ELSE
+BEGIN
+    -- Если не существует - создаем
     CREATE LOGIN RRUser
     WITH PASSWORD='RRS_999999999!';
-
 END
 ";
 
-				using (var command =
-					new SqlCommand(
-						sql,
-						connection))
+				using (var command = new SqlCommand(sql, connection))
 				{
 					command.ExecuteNonQuery();
 				}
 			}
 		}
+
+		//		public void CreateRRUser(
+		//			string sqlInstance)
+		//		{
+		//			// Подключаемся через Windows Authentication
+		//			// т.к. RRUser ещё не существует
+		//			string connectionString =
+		//				$"Server={sqlInstance};" +
+		//				$"Integrated Security=True;" +
+		//				$"TrustServerCertificate=True;";
+
+		//			using (var connection =
+		//				new SqlConnection(
+		//					connectionString))
+		//			{
+		//				connection.Open();
+
+		//				string sql =
+		//		@"
+		//IF NOT EXISTS(
+		//    SELECT *
+		//    FROM sys.server_principals
+		//    WHERE name='RRUser'
+		//)
+		//BEGIN
+
+		//    CREATE LOGIN RRUser
+		//    WITH PASSWORD='RRS_999999999!';
+
+		//END
+		//";
+
+		//				using (var command =
+		//					new SqlCommand(
+		//						sql,
+		//						connection))
+		//				{
+		//					command.ExecuteNonQuery();
+		//				}
+		//			}
+		//		}
 		/// <summary>
 		/// Ищет установленный SQLEXPRESS
 		/// </summary>
@@ -381,10 +419,10 @@ END
 		{
 			// Папка лежит рядом с нашей утилитой
 			string setupPath =
-	Path.Combine(
-		AppDomain.CurrentDomain.BaseDirectory,
-		"Sql_distrib",
-		"setup.exe");
+				Path.Combine(
+					AppDomain.CurrentDomain.BaseDirectory,
+					"Sql_distrib",
+					"setup.exe");
 
 			if (!File.Exists(setupPath))
 			{
@@ -409,8 +447,8 @@ END
 				// текущий пользователь Windows
 				// станет SQL администратором
 				"/ADDCURRENTUSERASSQLADMIN " +
-				  "/INDICATEPROGRESS "+
-			"/IACCEPTSQLSERVERLICENSETERMS";
+				"/INDICATEPROGRESS "+
+				"/IACCEPTSQLSERVERLICENSETERMS";
 
 			process.StartInfo.UseShellExecute =
 				true;
@@ -439,12 +477,7 @@ END
 					process.ExitCode);
 			}
 
-			//if (process.ExitCode != 0)
-			//{
-			//	throw new Exception(
-			//		"Ошибка установки SQL: " +
-			//		process.ExitCode);
-			//}
+			
 		}
 
 		
