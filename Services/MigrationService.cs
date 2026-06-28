@@ -32,20 +32,25 @@ namespace RRStoSQL.Services
 		private readonly BullzipService _bullzipService = new BullzipService();
 		private readonly AccessPatchService _accessPatchService = new AccessPatchService();
 
-		/// <summary>
-		/// Запускает миграцию.
-		/// </summary>
-		/// <param name="configPath">
-		/// Полный путь к выбранному
-		/// RemoteReg.exe.config
-		/// </param>
-		/// <param name="updateStep">
-		/// Делегат обновления статуса шага
-		/// </param>
-		public async Task RunAsync(
+        /// <summary>
+        /// Запускает миграцию.
+        /// </summary>
+        /// <param name="configPath">
+        /// Полный путь к выбранному
+        /// RemoteReg.exe.config
+        /// </param>
+        /// <param name="updateStep">
+        /// Делегат обновления статуса шага
+        /// </param>
+
+        //public async Task RunAsync(
+        //	string configPath,
+        //	Action<string, StepStatus> updateStep)
+        public async Task RunAsync(
+			Form owner,
 			string configPath,
 			Action<string, StepStatus> updateStep)
-		{
+        {
 			// Получаем список шагов
 			var steps = GetSteps();
 
@@ -187,24 +192,37 @@ namespace RRStoSQL.Services
 						Process process =
 							_converter.Convert(
 								appConfig);
-											
-						using (var logForm =
+
+                        using (var logForm =
 							new ConversionLogForm(
-								_converter.GetLogFilePath(),
-								process))
-						{
-							var result =
-								logForm.ShowDialog();
+								owner,
+								_converter.GetLogFilePath()))
+                        {
+                            var result = logForm.ShowDialog(owner);
 
-							if (result == DialogResult.Abort)
-							{
-								throw new Exception(
-									"Конвертация Bullzip завершилась с ошибкой.");
-							}
-						}
+                            if (result == DialogResult.Abort)
+                            {
+                                throw new Exception(
+                                    "Конвертация Bullzip завершилась с ошибкой.");
+                            }
+                        }
+                        //using (var logForm =
+                        //	new ConversionLogForm(
+                        //		_converter.GetLogFilePath(),
+                        //		process))
+                        //{
+                        //	var result =
+                        //		logForm.ShowDialog();
 
-						//проверяем результат
-						if (!process.HasExited)
+                        //	if (result == DialogResult.Abort)
+                        //	{
+                        //		throw new Exception(
+                        //			"Конвертация Bullzip завершилась с ошибкой.");
+                        //	}
+                        //}
+
+                        //проверяем результат
+                        if (!process.HasExited)
 						{
 							process.WaitForExit();
 						}

@@ -155,9 +155,10 @@ namespace RRStoSQL
 					(ConfigItem)
 					listBoxConfigs.SelectedItem;
 
-					await _migrationService.RunAsync(
+                await _migrationService.RunAsync(
+					this,
 					selectedConfig.ConfigPath,
-									(step, status) =>
+					(step, status) =>
 					{
 						_stepManager.SetStatus(
 							step,
@@ -166,9 +167,20 @@ namespace RRStoSQL
 						Application.DoEvents();
 					});
 
-				//MessageBox.Show(
-				//	"Конвертация завершена");
-			}
+                //await _migrationService.RunAsync(
+                //selectedConfig.ConfigPath,
+                //				(step, status) =>
+                //{
+                //	_stepManager.SetStatus(
+                //		step,
+                //		status);
+
+                //	Application.DoEvents();
+                //});
+
+                //MessageBox.Show(
+                //	"Конвертация завершена");
+            }
 			catch (Exception ex)
 			{
 				MessageBox.Show(

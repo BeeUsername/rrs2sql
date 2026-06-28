@@ -1,111 +1,116 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace RRStoSQL.Forms
 {
-	public partial class ConversionLogForm : Form
-	{
-		private readonly string _logFile;
+    public partial class ConversionLogForm : Form
+    {
+        // Путь к логу Bullzip
+        private readonly string _logFile;
 
-		private readonly Timer _timer =
-			new Timer();
+        // Таймер для периодического обновления содержимого лога
+        private readonly Timer _timer =
+            new Timer();
 
-		public ConversionLogForm(
-			string logFile,
-			Process process)
-		{
-			InitializeComponent();
+        public ConversionLogForm(
+            Form owner,
+            string logFile)
+        {
+            InitializeComponent();
 
-			_logFile =
-				logFile;
+            // Запоминаем путь к файлу лога
+            _logFile =
+                logFile;
 
-			_timer.Interval =
-				1000;
+            // Размещаем окно справа от основной формы
+            StartPosition =
+                FormStartPosition.Manual;
 
-			_timer.Tick +=
-				Timer_Tick;
+            Left =
+                owner.Right + 10;
 
-			_timer.Start();   
-		}
+            // Выравниваем по центру основной формы по вертикали
+            Top =
+                owner.Top +
+                (owner.Height - Height) / 2;
 
-		private void ConversionLogForm_Load(
-			object sender,
-			EventArgs e)
-		{
-			//_timer.Start(); вроде как лишний вызов, таймер уже запущен в конструкторе
-		}
+            // Проверяем лог раз в секунду
+            _timer.Interval =
+                1000;
 
-		private void Timer_Tick(
-			object sender,
-			EventArgs e)
-		{
+            _timer.Tick +=
+                Timer_Tick;
 
-			//return;
-			try
-			{
-				if (!File.Exists(
-					_logFile))
-				{
-					return;
-				}
+            _timer.Start();
+        }
 
-				string text =
-					File.ReadAllText(
-						_logFile);
+        private void Timer_Tick(
+            object sender,
+            EventArgs e)
+        {
+            try
+            {
+                // Лог ещё не появился
+                if (!File.Exists(
+                    _logFile))
+                {
+                    return;
+                }
 
-				txtLog.Text =
-					text;
+                // Читаем текущее содержимое лога
+                string text =
+                    File.ReadAllText(
+                        _logFile);
 
-				txtLog.SelectionStart =
-					txtLog.TextLength;
+                // Обновляем текстовое поле
+                txtLog.Text =
+                    text;
 
-				txtLog.ScrollToCaret();
+                // Автопрокрутка вниз
+                txtLog.SelectionStart =
+                    txtLog.TextLength;
 
-				if (text.IndexOf(
-					"Transfer completed",
-					StringComparison.OrdinalIgnoreCase) >= 0)
-				{
-					//==========
-					//System.Threading.Thread.Sleep(3000);
-					//===========	
+                txtLog.ScrollToCaret();
 
+                // Bullzip успешно завершил перенос
+                if (text.IndexOf(
+                    "Transfer completed",
+                    StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    _timer.Stop();
 
-					_timer.Stop();
+                    DialogResult =
+                        DialogResult.OK;
 
-					DialogResult =
-						DialogResult.OK;
+                    Close();
+                }
 
-					Close();
-				}
+                // Bullzip завершился с ошибкой
+                if (text.IndexOf(
+                    "Error in function",
+                    StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    _timer.Stop();
 
-				if (text.IndexOf(
-					"error",
-					StringComparison.OrdinalIgnoreCase) >= 0)
-				{
-					_timer.Stop();
+                    MessageBox.Show(
+                        "Во время конвертации обнаружена ошибка.\n\n" +
+                        "Проверьте лог конвертации.",
+                        "Ошибка",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
 
-					MessageBox.Show(
-						"Во время конвертации обнаружена ошибка.\n\n" +
-						"Проверьте лог.");
+                    DialogResult =
+                        DialogResult.Abort;
 
-					DialogResult =
-						DialogResult.Abort;
-
-					Close();
-				}
-			}
-			catch
-			{
-				// лог ещё пишется
-			}
-		}
-
-		private void txtLog_TextChanged(object sender, EventArgs e)
-		{
-
-		}
-	}
+                    Close();
+                }
+            }
+            catch
+            {
+                // Bullzip может писать в лог в момент чтения.
+                // В этом случае просто попробуем ещё раз через секунду.
+            }
+        }
+    }
 }
