@@ -417,28 +417,132 @@ END
 		/// </summary>
 		private void InstallSqlExpress()
 		{
-			// Папка лежит рядом с нашей утилитой
-			string setupPath =
-				Path.Combine(
-					AppDomain.CurrentDomain.BaseDirectory,
-					"Sql_distrib",
-					"setup.exe");
+            // Папка лежит рядом с нашей утилитой
+            //string setupPath =
+            //	Path.Combine(
+            //		AppDomain.CurrentDomain.BaseDirectory,
+            //		"Sql_distrib",
+            //		"setup.exe");
 
-			if (!File.Exists(setupPath))
+            //if (!File.Exists(setupPath))
+            //{
+            //	throw new Exception(
+            //		"Не найден Sql_distrib\\setup.exe");
+            //}
+
+            // Каталог локального кэша SQL дистрибутива
+            string sqlDistribFolder =
+                Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "sql_distrib");
+
+            // Создаем каталог если его нет
+            Directory.CreateDirectory(
+                sqlDistribFolder);
+
+
+
+            //// setup.exe оффлайн дистрибутива
+            //string setupPath =
+            //    Path.Combine(
+            //        sqlDistribFolder,
+            //        "setup.exe");
+
+            //if (!File.Exists(setupPath))
+            //{
+            //    DownloadSqlMedia(
+            //        sqlDistribFolder);
+            //}
+
+            //if (!File.Exists(setupPath))
+            //{
+            //    throw new Exception(
+            //        "После загрузки setup.exe не найден.");
+            //}
+
+            string sqlInstaller =
+				Path.Combine(
+					sqlDistribFolder,
+                    "SQLEXPR_x64_RUS.exe");
+
+			if (!File.Exists(sqlInstaller))
 			{
-				throw new Exception(
-					"Не найден Sql_distrib\\setup.exe");
+				DownloadSqlMedia(
+					sqlDistribFolder);
 			}
 
-			var process =
+			if (!File.Exists(sqlInstaller))
+            {
+                throw new Exception(
+                    "После загрузки установщик SQL Server не найден.");
+            }
+            string extractFolder =
+                Path.Combine(
+                    sqlDistribFolder,
+                    "SQLEXPR_x64_RUS");
+
+            // Если папка уже существует — удалить полностью
+            if (Directory.Exists(
+                    extractFolder))
+            {
+                Directory.Delete(
+                    extractFolder,
+                    true);
+            }
+
+            // Создать заново пустую папку
+            Directory.CreateDirectory(
+                extractFolder);
+
+            var extractProcess =
+                new Process();
+
+            extractProcess.StartInfo.FileName =
+                sqlInstaller;
+
+            extractProcess.StartInfo.Arguments =
+                $"/x:\"{extractFolder}\" /q";
+
+            extractProcess.StartInfo.UseShellExecute =
+                true;
+
+            extractProcess.StartInfo.Verb =
+                "runas";
+
+            extractProcess.Start();
+
+            extractProcess.WaitForExit();
+
+            if (extractProcess.ExitCode != 0)
+            {
+                throw new Exception(
+                    "Ошибка распаковки SQL Server.\n\n" +
+                    "Command:\n" +
+                    extractProcess.StartInfo.FileName + " " +
+                    extractProcess.StartInfo.Arguments +
+                    "\n\nExitCode=" +
+                    extractProcess.ExitCode);
+            }
+
+
+
+            var process =
 				new Process();
 
-			process.StartInfo.FileName =
-				setupPath;
+            string setupPath =
+				Path.Combine(
+					sqlDistribFolder,
+					"SQLEXPR_x64_RUS",
+					"setup.exe");
+
+            process.StartInfo.FileName =
+                setupPath;
+
 
 			process.StartInfo.Arguments =
-				"/Q " +
-				"/ACTION=Install " +
+                //"/QS " +
+                "/Q " +
+                "/ACTION=Install " +
 				"/FEATURES=SQLEngine " +
 				"/INSTANCENAME=SQLEXPRESS " +
 				"/SQLSVCSTARTUPTYPE=Automatic " +
@@ -447,8 +551,31 @@ END
 				// текущий пользователь Windows
 				// станет SQL администратором
 				"/ADDCURRENTUSERASSQLADMIN " +
-				"/INDICATEPROGRESS "+
+				"/INDICATEPROGRESS " +
 				"/IACCEPTSQLSERVERLICENSETERMS";
+
+			//        process.StartInfo.Arguments =
+			//"/QS " +
+			//"/ACTION=Install " +
+			//"/FEATURES=SQLEngine " +
+			//"/INSTANCENAME=SQLEXPRESS " +
+			//"/SQLSVCSTARTUPTYPE=Automatic " +
+			//"/TCPENABLED=1 " +
+
+			//// Не искать обновления
+			//"/UpdateEnabled=False " +
+
+			//// Не использовать Microsoft Update
+			//"/USEMICROSOFTUPDATE=False " +
+
+			//// Не предлагать Azure
+			//"/AZUREEXTENSION=0 " +
+
+			//// Текущий пользователь станет sysadmin
+			//"/ADDCURRENTUSERASSQLADMIN " +
+
+			////"/INDICATEPROGRESS " +
+			//"/IACCEPTSQLSERVERLICENSETERMS";
 
 			process.StartInfo.UseShellExecute =
 				true;
@@ -480,12 +607,65 @@ END
 			
 		}
 
-		
+        private void DownloadSqlMedia(
+    string sqlDistribFolder)
+        {
+            // web installer рядом с RRStoSQL.exe
+            string installerPath =
+                Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "web_installers",
+                    "SQL2022-SSEI-Expr.exe");
 
-/// <summary>
-/// Включает TCP и назначает порт 1433
-/// </summary>
-public void EnableTcp(
+            if (!File.Exists(installerPath))
+            {
+                throw new Exception(
+                    "Не найден web installer SQL Server:\n\n" +
+                    installerPath);
+            }
+
+            Process process =
+                new Process();
+
+            process.StartInfo.FileName =
+                installerPath;
+
+            //process.StartInfo.Arguments =
+            //    "/ACTION=Download " +
+            //    $"/MEDIAPATH=\"{sqlDistribFolder}\" " +
+            //    "/QUIET";
+
+            process.StartInfo.Arguments =
+				"/Action=Download " +
+				"/MediaType=Core " +
+				$"/MediaPath=\"{sqlDistribFolder}\" " +
+                //"/Passive"; ;
+				"/Quiet"; ;
+
+
+            process.StartInfo.UseShellExecute =
+                true;
+
+            process.StartInfo.Verb =
+                "runas";
+
+            process.Start();
+
+            process.WaitForExit();
+
+            if (process.ExitCode != 0)
+            {
+                throw new Exception(
+                    "Ошибка загрузки SQL Server Express.\n\n" +
+                    "ExitCode=" +
+                    process.ExitCode);
+            }
+        }
+
+        /// <summary>
+        /// Включает TCP и назначает порт 1433
+        /// </summary>
+        public void EnableTcp(
 	string sqlInstance)
 	{
 		// SQLEXPRESS

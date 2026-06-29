@@ -71,6 +71,7 @@
     <Compile Include="Helpers\MessageHelper.cs" />
     <Compile Include="Models\AppConfig.cs" />
     <Compile Include="Models\ConfigItem.cs.cs" />
+    <Compile Include="Models\MigrationOptions.cs" />
     <Compile Include="Models\MigrationStep.cs" />
     <Compile Include="Models\SqlInstanceInfo.cs" />
     <Compile Include="Models\StepStatus.cs" />
@@ -85,6 +86,7 @@
     <Compile Include="Services\MigrationService.cs" />
     <Compile Include="Services\SqlPatchService.cs" />
     <Compile Include="Services\SqlService.cs" />
+    <Compile Include="Services\SsmsService.cs" />
     <EmbeddedResource Include="Forms\ConversionLogForm.resx">
       <DependentUpon>ConversionLogForm.cs</DependentUpon>
     </EmbeddedResource>

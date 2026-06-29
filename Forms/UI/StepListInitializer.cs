@@ -24,7 +24,10 @@ namespace RRStoSQL.Forms.UI
 			AddStep(listView, "Патчим SQL базу");
 			AddStep(listView, "Строка подключения в буфер обмена");
 			AddStep(listView, "Запускаем УР");
-		}
+            AddStep(listView, "Установка SQL Management");
+            AddStep(listView, "Удаляем Bullzip");
+
+        }
 
 		private void AddStep(
 			ListView listView,

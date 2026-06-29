@@ -37,7 +37,7 @@ namespace RRStoSQL.Forms
 
             // Проверяем лог раз в секунду
             _timer.Interval =
-                1000;
+                5000;
 
             _timer.Tick +=
                 Timer_Tick;
@@ -111,6 +111,11 @@ namespace RRStoSQL.Forms
                 // Bullzip может писать в лог в момент чтения.
                 // В этом случае просто попробуем ещё раз через секунду.
             }
+        }
+
+        private void txtLog_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

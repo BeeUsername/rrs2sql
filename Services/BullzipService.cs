@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
@@ -7,130 +8,205 @@ using static System.Resources.ResXFileRef;
 
 namespace RRStoSQL.Services
 {
-	public class BullzipService
-	{
-		private const string InstallFolder =
-			@"C:\Program Files (x86)\Bullzip\MS Access to MSSQL";
+    public class BullzipService
+    {
+        // Стандартный каталог установки Bullzip
+        private const string InstallFolder =
+            @"C:\Program Files (x86)\Bullzip\MS Access to MSSQL";
 
-		private const string ExeName =
-			"msa2sql.exe";
+        // Основной исполняемый файл конвертера
+        private const string ExeName =
+            "msa2sql.exe";
 
-		public string EnsureInstalled()
-		{
-			string exePath =
-				Path.Combine(
-					InstallFolder,
-					ExeName);
+        // Проверяет установлен ли Bullzip.
+        // Если нет — устанавливает его.
+        // Возвращает полный путь до msa2sql.exe
+        public string EnsureInstalled()
+        {
+            string exePath =
+                Path.Combine(
+                    InstallFolder,
+                    ExeName);
 
-			// Уже установлен
-			if (File.Exists(exePath))
-			{
-				SetWin7Compatibility(exePath);
-				return exePath;
-			}
+            // Bullzip уже установлен
+            if (File.Exists(exePath))
+            {
+                // На всякий случай повторно устанавливаем
+                // режим совместимости Windows 7
+                SetWin7Compatibility(exePath);
 
-			// Установщик рядом с RRStoSQL.exe
-			string installerPath =
-				Path.Combine(
-					AppDomain.CurrentDomain.BaseDirectory,
-					"Bullzip",
-					"msa2sql_5_5_0_281.exe");
+                return exePath;
+            }
 
-	
-			if (!File.Exists(installerPath))
-			{
-				throw new Exception(
-					"Не найден установщик Bullzip:\n\n" +
-					installerPath);
-			}
+            // Установщик лежит рядом с RRStoSQL.exe
+            string installerPath =
+                Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "Bullzip",
+                    "msa2sql_5_5_0_281.exe");
 
-			Process process =
-				new Process();
+            // Проверяем наличие установщика
+            if (!File.Exists(installerPath))
+            {
+                throw new Exception(
+                    "Не найден установщик Bullzip:\n\n" +
+                    installerPath);
+            }
 
-			process.StartInfo.FileName =
-				installerPath;
+            Process process =
+                new Process();
 
-			process.StartInfo.Arguments =
-				"/VERYSILENT " +
-				"/SUPPRESSMSGBOXES " +
-				"/NORESTART";
+            process.StartInfo.FileName =
+                installerPath;
 
-			process.StartInfo.UseShellExecute =
-				true;
+            // Тихая установка:
+            // /VERYSILENT - без интерфейса
+            // /SUPPRESSMSGBOXES - без диалоговых окон
+            // /NORESTART - без перезагрузки
+            process.StartInfo.Arguments =
+                "/VERYSILENT " +
+                "/SUPPRESSMSGBOXES " +
+                "/NORESTART";
 
-			process.StartInfo.Verb =
-				"runas";
+            // Используем ShellExecute для поддержки UAC
+            process.StartInfo.UseShellExecute =
+                true;
 
-			process.Start();
+            // Запуск от имени администратора
+            process.StartInfo.Verb =
+                "runas";
 
-			process.WaitForExit();
+            process.Start();
 
-			if (process.ExitCode != 0)
-			{
-				throw new Exception(
-					"Ошибка установки Bullzip.\n\n" +
-					"ExitCode=" +
-					process.ExitCode);
-			}
+            // Ожидаем завершения установки
+            process.WaitForExit();
 
-			if (!File.Exists(exePath))
-			{
-				throw new Exception(
-					"Bullzip установлен, но msa2sql.exe не найден.");
-			}
-			SetWin7Compatibility(exePath);
-			return exePath;
-		}
+            // Проверяем код завершения
+            if (process.ExitCode != 0)
+            {
+                throw new Exception(
+                    "Ошибка установки Bullzip.\n\n" +
+                    "ExitCode=" +
+                    process.ExitCode);
+            }
 
-		public void CopyBullzipLog()
-		{
-			string sourceLog =
-				Path.Combine(
-					Environment.GetFolderPath(
-						Environment.SpecialFolder.ApplicationData),
-					@"Bullzip\MS Access to MSSQL\msa2sql.log");
+            // Проверяем что exe действительно появился
+            if (!File.Exists(exePath))
+            {
+                throw new Exception(
+                    "Bullzip установлен, но msa2sql.exe не найден.");
+            }
 
-			if (!File.Exists(sourceLog))
-			{
-				return;
-			}
+            // Включаем режим совместимости Windows 7
+            SetWin7Compatibility(exePath);
 
-			string logsFolder =
-				Path.Combine(
-					AppDomain.CurrentDomain.BaseDirectory,
-					"logs");
+            return exePath;
+        }
 
-			Directory.CreateDirectory(
-				logsFolder);
+        // Копирует лог Bullzip в папку logs нашей утилиты
+        public void CopyBullzipLog()
+        {
+            // Стандартное расположение лога Bullzip
+            string sourceLog =
+                Path.Combine(
+                    Environment.GetFolderPath(
+                        Environment.SpecialFolder.ApplicationData),
+                    @"Bullzip\MS Access to MSSQL\msa2sql.log");
 
-			string destLog =
-				Path.Combine(
-					logsFolder,
-					$"msa2sql_{DateTime.Now:yyyyMMdd_HHmmss}.log");
+            // Если лога нет — просто выходим
+            if (!File.Exists(sourceLog))
+            {
+                return;
+            }
 
-			File.Copy(
-				sourceLog,
-				destLog,
-				true);
-		}
+            // Папка логов нашей программы
+            string logsFolder =
+                Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "logs");
 
-		
+            // Создаем папку если её нет
+            Directory.CreateDirectory(
+                logsFolder);
 
-			private void SetWin7Compatibility(
-				string exePath)
-				{
-					const string keyPath =
-						@"Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers";
+            // Имя файла содержит дату и время
+            string destLog =
+                Path.Combine(
+                    logsFolder,
+                    $"msa2sql_{DateTime.Now:yyyyMMdd_HHmmss}.log");
 
-					using (RegistryKey key =
-						Registry.CurrentUser.CreateSubKey(
-							keyPath))
-					{
-						key.SetValue(
-							exePath,
-							"~ WIN7RTM RUNASADMIN",
-							RegistryValueKind.String);
-					}
-				}
+            // Копируем лог с перезаписью
+            File.Copy(
+                sourceLog,
+                destLog,
+                true);
+        }
+
+        // Включает для msa2sql.exe:
+        // - режим совместимости Windows 7
+        // - запуск от имени администратора
+        private void SetWin7Compatibility(
+            string exePath)
+        {
+            const string keyPath =
+                @"Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers";
+
+            using (RegistryKey key =
+                Registry.CurrentUser.CreateSubKey(
+                    keyPath))
+            {
+                key.SetValue(
+                    exePath,
+                    "~ WIN7RTM RUNASADMIN",
+                    RegistryValueKind.String);
+            }
+        }
+
+        // Удаляет Bullzip если он установлен
+        public void Uninstall()
+        {
+            string uninstallExe =
+                Path.Combine(
+                    InstallFolder,
+                    "unins000.exe");
+
+            // Bullzip уже удален
+            if (!File.Exists(uninstallExe))
+            {
+                return;
+            }
+
+            var process =
+                new Process();
+
+            process.StartInfo.FileName =
+                uninstallExe;
+
+            // Тихое удаление
+            process.StartInfo.Arguments =
+                "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART";
+
+            process.StartInfo.UseShellExecute =
+                true;
+
+            // Требуются права администратора
+            process.StartInfo.Verb =
+                "runas";
+
+            process.Start();
+
+            // Ожидаем завершения удаления
+            process.WaitForExit();
+
+            // Проверяем успешность удаления
+            if (process.ExitCode != 0)
+            {
+                throw new Exception(
+                    "Ошибка удаления Bullzip.\n\n" +
+                    "ExitCode=" +
+                    process.ExitCode);
+            }
+        }
+    }
 }
-}
+

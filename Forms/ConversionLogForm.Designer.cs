@@ -43,7 +43,7 @@
             this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.txtLog.Size = new System.Drawing.Size(374, 381);
             this.txtLog.TabIndex = 0;
-            //this.txtLog.TextChanged += new System.EventHandler(this.txtLog_TextChanged);
+            this.txtLog.TextChanged += new System.EventHandler(this.txtLog_TextChanged);
             // 
             // ConversionLogForm
             // 

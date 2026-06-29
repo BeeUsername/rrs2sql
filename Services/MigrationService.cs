@@ -1,12 +1,13 @@
-﻿using System;
+﻿using RRStoSQL.Forms;
+using RRStoSQL.Helpers;
+using RRStoSQL.Models;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using RRStoSQL.Forms;
-using RRStoSQL.Helpers;
-using RRStoSQL.Models;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 //using System.Diagnostics;
 //using System.Threading;
@@ -31,6 +32,7 @@ namespace RRStoSQL.Services
 		private readonly SqlPatchService _patchService = new SqlPatchService();
 		private readonly BullzipService _bullzipService = new BullzipService();
 		private readonly AccessPatchService _accessPatchService = new AccessPatchService();
+        private readonly SsmsService _ssmsService = new SsmsService();
 
         /// <summary>
         /// Запускает миграцию.
@@ -49,13 +51,17 @@ namespace RRStoSQL.Services
         public async Task RunAsync(
 			Form owner,
 			string configPath,
-			Action<string, StepStatus> updateStep)
+            MigrationOptions options,
+            Action<string, StepStatus> updateStep)
         {
 			// Получаем список шагов
-			var steps = GetSteps();
+			var steps = GetSteps(options);
 
 			// Объект с параметрами текущей миграции
 			AppConfig appConfig = null;
+
+			//_ssmsService.EnsureInstalled();
+			//return;
 
 			foreach (var step in steps)
 			{
@@ -109,8 +115,10 @@ namespace RRStoSQL.Services
 
 						appConfig.SqlInstance =
 							sql.InstanceName;
-												
-					}
+
+                        //return;
+
+                    }
 
 					// ============================================
 					// Установка Bullzip msa2sql
@@ -206,21 +214,7 @@ namespace RRStoSQL.Services
                                     "Конвертация Bullzip завершилась с ошибкой.");
                             }
                         }
-                        //using (var logForm =
-                        //	new ConversionLogForm(
-                        //		_converter.GetLogFilePath(),
-                        //		process))
-                        //{
-                        //	var result =
-                        //		logForm.ShowDialog();
-
-                        //	if (result == DialogResult.Abort)
-                        //	{
-                        //		throw new Exception(
-                        //			"Конвертация Bullzip завершилась с ошибкой.");
-                        //	}
-                        //}
-
+                        
                         //проверяем результат
                         if (!process.HasExited)
 						{
@@ -337,7 +331,31 @@ namespace RRStoSQL.Services
 							appConfig);
 					}
 
-					else
+                    // ============================================
+                    // Установка SQL Managment
+                    // ============================================
+
+                    else if (
+                        step.Name ==
+                        "Установка SQL Management")
+                    {
+                        _ssmsService.EnsureInstalled();
+                    }
+
+
+                    // ============================================
+                    // Удаляем Bullzip
+                    // ============================================
+
+
+                    else if (
+						step.Name ==
+						"Удаляем Bullzip")
+                    {
+                        _bullzipService.Uninstall();
+                    }
+
+                    else
 					{
 						await ExecuteStep(step);
 					}
@@ -399,15 +417,18 @@ namespace RRStoSQL.Services
 			
 		}
 
-		/// <summary>
-		/// Возвращает список шагов миграции.
-		/// Порядок важен.
-		/// </summary>
-		private List<MigrationStep> GetSteps()
-		{
-			return new List<MigrationStep>
-	{
-		new MigrationStep("Читаем конфиг"),
+        /// <summary>
+        /// Возвращает список шагов миграции.
+        /// Порядок важен.
+        /// </summary>
+        //private List<MigrationStep> GetSteps()
+        private List<MigrationStep> GetSteps(
+			 MigrationOptions options)
+        {
+            var steps =
+            new List<MigrationStep>
+            {
+        new MigrationStep("Читаем конфиг"),
 		new MigrationStep("Установка SQL"),
 		new MigrationStep("Установка Bullzip msa2sql"),
 		new MigrationStep("Разрешаем mixed authentication"),
@@ -421,9 +442,25 @@ namespace RRStoSQL.Services
 		new MigrationStep("Меняем connectionStrings"),
 		new MigrationStep("Патчим SQL базу"),
 		new MigrationStep("Строка подключения в буфер обмена"),
-		new MigrationStep("Запускаем УР")
-	};
-		}
+		new MigrationStep("Запускаем УР"),
+		};
+
+            if (options.InstallSsms)
+            {
+                steps.Add(
+                    new MigrationStep(
+                        "Установка SQL Management"));
+            }
+
+            if (options.DeleteBullzip)
+            {
+                steps.Add(
+                    new MigrationStep(
+                        "Удаляем Bullzip"));
+            }
+
+            return steps;
+        }
 
 		/// <summary>
 		/// Запускает RemoteReg.exe

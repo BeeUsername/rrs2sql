@@ -149,16 +149,27 @@ namespace RRStoSQL
 
 			btnConvert.Enabled = false;
 
-			try
-			{
+            var options =
+				new MigrationOptions
+				{
+					InstallSsms =
+						chkInstallSSMS.Checked,
+
+					DeleteBullzip =
+						chkDeleteBullzip.Checked
+				};
+
+
+            try
+            {
 					var selectedConfig =
 					(ConfigItem)
 					listBoxConfigs.SelectedItem;
 
                 await _migrationService.RunAsync(
 					this,
-					selectedConfig.ConfigPath,
-					(step, status) =>
+					selectedConfig.ConfigPath, options,
+                    (step, status) =>
 					{
 						_stepManager.SetStatus(
 							step,
