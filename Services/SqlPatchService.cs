@@ -6,215 +6,480 @@ using System.Text.RegularExpressions;
 
 namespace RRStoSQL.Services
 {
-	public class SqlPatchService
-	{
-		public void ExecutePatches(
-			string sqlInstance,
-			string databaseName)
-		{
-			string patchesFolder =
-				Path.Combine(
-					AppDomain.CurrentDomain.BaseDirectory,
-					"sql_patches");
+    /// <summary>
+    /// Выполняет SQL-патчи после конвертации
+    /// базы Access в SQL Server.
+    /// </summary>
+    public class SqlPatchService
+    {
+        /// <summary>
+        /// Выполняет все SQL-скрипты из каталога
+        /// sql_patches по порядку.
+        /// </summary>
+        /// <param name="sqlInstance">
+        /// Имя экземпляра SQL Server.
+        /// </param>
+        /// <param name="databaseName">
+        /// Имя базы данных, в которой будут
+        /// выполняться патчи.
+        /// </param>
+        public void ExecutePatches(
+            string sqlInstance,
+            string databaseName)
+        {
+            // Каталог с SQL-патчами
+            string patchesFolder =
+                Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "sql_patches");
 
-			if (!Directory.Exists(
-				patchesFolder))
-			{
-				return;
-			}
+            // Если каталога нет —
+            // патчи выполнять не нужно
+            if (!Directory.Exists(
+                patchesFolder))
+            {
+                return;
+            }
 
-			string[] files =
-				Directory.GetFiles(
-					patchesFolder,
-					"*.sql")
-				.OrderBy(
-					Path.GetFileName)
-				.ToArray();
+            // Получаем список SQL-файлов
+            // и сортируем по имени файла
+            string[] files =
+                Directory.GetFiles(
+                    patchesFolder,
+                    "*.sql")
+                .OrderBy(
+                    Path.GetFileName)
+                .ToArray();
 
-			if (files.Length == 0)
-			{
-				return;
-			}
+            // Нет файлов для выполнения
+            if (files.Length == 0)
+            {
+                return;
+            }
 
-			// ============================================
-			// Создаём лог
-			// ============================================
+            // ============================================
+            // Создаём лог
+            // ============================================
 
-			string logFolder =
-				Path.Combine(
-					AppDomain.CurrentDomain.BaseDirectory,
-					"Logs");
+            string logFolder =
+                Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "Logs");
 
-			Directory.CreateDirectory(
-				logFolder);
+            Directory.CreateDirectory(
+                logFolder);
 
-			string logFile =
-				Path.Combine(
-					logFolder,
-					$"SqlPatch_{DateTime.Now:yyyyMMdd_HHmmss}.log");
+            // Имя лог-файла содержит дату и время
+            string logFile =
+                Path.Combine(
+                    logFolder,
+                    $"SqlPatch_{DateTime.Now:yyyyMMdd_HHmmss}.log");
 
-			WriteLog(
-				logFile,
-				"===== НАЧАЛО ПРИМЕНЕНИЯ ПАТЧЕЙ =====");
+            WriteLog(
+                logFile,
+                "===== НАЧАЛО ПРИМЕНЕНИЯ ПАТЧЕЙ =====");
 
-			WriteLog(
-				logFile,
-				$"Сервер: {sqlInstance}");
+            WriteLog(
+                logFile,
+                $"Сервер: {sqlInstance}");
 
-			WriteLog(
-				logFile,
-				$"База: {databaseName}");
+            WriteLog(
+                logFile,
+                $"База: {databaseName}");
 
-			string connectionString =
-				$"Server={sqlInstance};" +
-				$"Database={databaseName};" +
-				"Trusted_Connection=True;" +
-				"TrustServerCertificate=True;";
+            // Формируем строку подключения
+            // к SQL Server
+            string connectionString =
+                $"Server={sqlInstance};" +
+                $"Database={databaseName};" +
+                "Trusted_Connection=True;" +
+                "TrustServerCertificate=True;";
 
-			using (var connection =
-				new SqlConnection(
-					connectionString))
-			{
-				connection.Open();
+            using (var connection =
+                new SqlConnection(
+                    connectionString))
+            {
+                // Открываем соединение
+                connection.Open();
 
-				foreach (string file in files)
-				{
-					WriteLog(
-						logFile,
-						$"==============================");
+                // Выполняем патчи по порядку
+                foreach (string file in files)
+                {
+                    WriteLog(
+                        logFile,
+                        $"==============================");
 
-					WriteLog(
-						logFile,
-						$"ФАЙЛ: {Path.GetFileName(file)}");
+                    WriteLog(
+                        logFile,
+                        $"ФАЙЛ: {Path.GetFileName(file)}");
 
-					try
-					{
-						string script =
-							File.ReadAllText(
-								file);
+                    try
+                    {
+                        // Читаем содержимое SQL-файла
+                        string script =
+                            File.ReadAllText(
+                                file);
 
-						if (string.IsNullOrWhiteSpace(
-							script))
-						{
-							WriteLog(
-								logFile,
-								"Файл пустой");
+                        // Пустые файлы пропускаем
+                        if (string.IsNullOrWhiteSpace(
+                            script))
+                        {
+                            WriteLog(
+                                logFile,
+                                "Файл пустой");
 
-							continue;
-						}
+                            continue;
+                        }
 
-						string[] batches =
-							SplitSqlBatches(
-								script);
+                        // Разбиваем скрипт по GO
+                        string[] batches =
+                            SplitSqlBatches(
+                                script);
 
-						foreach (string batch in batches)
-						{
-							string sql =
-								batch.Trim();
+                        // Выполняем каждый блок отдельно
+                        foreach (string batch in batches)
+                        {
+                            string sql =
+                                batch.Trim();
 
-							if (string.IsNullOrWhiteSpace(
-								sql))
-							{
-								continue;
-							}
+                            // Пустые блоки пропускаем
+                            if (string.IsNullOrWhiteSpace(
+                                sql))
+                            {
+                                continue;
+                            }
 
-							WriteLog(
-								logFile,
-								"SQL:");
+                            WriteLog(
+                                logFile,
+                                "SQL:");
 
-							WriteLog(
-								logFile,
-								sql);
+                            WriteLog(
+                                logFile,
+                                sql);
 
-							try
-							{
-								using (var command =
-									new SqlCommand(
-										sql,
-										connection))
-								{
-									command.CommandTimeout =
-										0;
+                            try
+                            {
+                                using (var command =
+                                    new SqlCommand(
+                                        sql,
+                                        connection))
+                                {
+                                    // Без ограничения времени выполнения
+                                    command.CommandTimeout =
+                                        0;
 
-									command.ExecuteNonQuery();
-								}
+                                    command.ExecuteNonQuery();
+                                }
 
-								WriteLog(
-									logFile,
-									"РЕЗУЛЬТАТ: УСПЕШНО");
-							}
-							catch (Exception ex)
-							{
-								WriteLog(
-									logFile,
-									"РЕЗУЛЬТАТ: ОШИБКА");
+                                WriteLog(
+                                    logFile,
+                                    "РЕЗУЛЬТАТ: УСПЕШНО");
+                            }
+                            catch (Exception ex)
+                            {
+                                WriteLog(
+                                    logFile,
+                                    "РЕЗУЛЬТАТ: ОШИБКА");
 
-								WriteLog(
-									logFile,
-									ex.ToString());
+                                WriteLog(
+                                    logFile,
+                                    ex.ToString());
 
-								// Если объект уже существует,
-								// просто продолжаем
-								if (ex.ToString().Contains(
-									"There is already an object named"))
-								{
-									WriteLog(
-										logFile,
-										"ПРОПУЩЕНО: объект уже существует");
+                                // Если объект уже существует,
+                                // считаем это допустимой ситуацией
+                                // и продолжаем выполнение
+                                if (ex.ToString().Contains(
+                                    "There is already an object named"))
+                                {
+                                    WriteLog(
+                                        logFile,
+                                        "ПРОПУЩЕНО: объект уже существует");
 
-									continue;
-								}
+                                    continue;
+                                }
 
-								continue;
-								//throw;
-							}
-						}
-					}
-					catch (Exception ex)
-					{
-						WriteLog(
-							logFile,
-							"КРИТИЧЕСКАЯ ОШИБКА ФАЙЛА");
+                                // Остальные ошибки записываем в лог,
+                                // но выполнение остальных патчей продолжаем
+                                continue;
 
-						WriteLog(
-							logFile,
-							ex.ToString());
+                                //throw;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        WriteLog(
+                            logFile,
+                            "КРИТИЧЕСКАЯ ОШИБКА ФАЙЛА");
 
-						throw new Exception(
-							$"Ошибка выполнения SQL-патча:{Environment.NewLine}{Environment.NewLine}" +
-							$"{Path.GetFileName(file)}{Environment.NewLine}{Environment.NewLine}" +
-							$"Подробности см. в логе:{Environment.NewLine}" +
-							logFile,
-							ex);
-					}
-				}
-			}
+                        WriteLog(
+                            logFile,
+                            ex.ToString());
 
-			WriteLog(
-				logFile,
-				"===== ПАТЧИ ЗАВЕРШЕНЫ =====");
-		}
+                        throw new Exception(
+                            $"Ошибка выполнения SQL-патча:{Environment.NewLine}{Environment.NewLine}" +
+                            $"{Path.GetFileName(file)}{Environment.NewLine}{Environment.NewLine}" +
+                            $"Подробности см. в логе:{Environment.NewLine}" +
+                            logFile,
+                            ex);
+                    }
+                }
+            }
 
-		private string[] SplitSqlBatches(
-			string script)
-		{
-			return Regex.Split(
-				script,
-				@"^\s*GO\s*$",
-				RegexOptions.Multiline |
-				RegexOptions.IgnoreCase);
-		}
+            WriteLog(
+                logFile,
+                "===== ПАТЧИ ЗАВЕРШЕНЫ =====");
+        }
 
-		private void WriteLog(
-			string logFile,
-			string text)
-		{
-			File.AppendAllText(
-				logFile,
+        /// <summary>
+        /// Разбивает SQL-скрипт на отдельные блоки
+        /// по инструкции GO.
+        /// </summary>
+        private string[] SplitSqlBatches(
+            string script)
+        {
+            return Regex.Split(
+                script,
+                @"^\s*GO\s*$",
+                RegexOptions.Multiline |
+                RegexOptions.IgnoreCase);
+        }
+
+        /// <summary>
+        /// Добавляет строку в лог-файл.
+        /// </summary>
+        private void WriteLog(
+            string logFile,
+            string text)
+        {
+            File.AppendAllText(
+                logFile,
                 //$"[{DateTime.Now:HH:mm:ss}] {text}" +
                 $"{text}" +
                 Environment.NewLine +
-				Environment.NewLine);
-		}
-	}
+                Environment.NewLine);
+        }
+    }
 }
+
+
+//using System;
+//using System.Data.SqlClient;
+//using System.IO;
+//using System.Linq;
+//using System.Text.RegularExpressions;
+
+//namespace RRStoSQL.Services
+//{
+//	public class SqlPatchService
+//	{
+//		public void ExecutePatches(
+//			string sqlInstance,
+//			string databaseName)
+//		{
+//			string patchesFolder =
+//				Path.Combine(
+//					AppDomain.CurrentDomain.BaseDirectory,
+//					"sql_patches");
+
+//			if (!Directory.Exists(
+//				patchesFolder))
+//			{
+//				return;
+//			}
+
+//			string[] files =
+//				Directory.GetFiles(
+//					patchesFolder,
+//					"*.sql")
+//				.OrderBy(
+//					Path.GetFileName)
+//				.ToArray();
+
+//			if (files.Length == 0)
+//			{
+//				return;
+//			}
+
+//			// ============================================
+//			// Создаём лог
+//			// ============================================
+
+//			string logFolder =
+//				Path.Combine(
+//					AppDomain.CurrentDomain.BaseDirectory,
+//					"Logs");
+
+//			Directory.CreateDirectory(
+//				logFolder);
+
+//			string logFile =
+//				Path.Combine(
+//					logFolder,
+//					$"SqlPatch_{DateTime.Now:yyyyMMdd_HHmmss}.log");
+
+//			WriteLog(
+//				logFile,
+//				"===== НАЧАЛО ПРИМЕНЕНИЯ ПАТЧЕЙ =====");
+
+//			WriteLog(
+//				logFile,
+//				$"Сервер: {sqlInstance}");
+
+//			WriteLog(
+//				logFile,
+//				$"База: {databaseName}");
+
+//			string connectionString =
+//				$"Server={sqlInstance};" +
+//				$"Database={databaseName};" +
+//				"Trusted_Connection=True;" +
+//				"TrustServerCertificate=True;";
+
+//			using (var connection =
+//				new SqlConnection(
+//					connectionString))
+//			{
+//				connection.Open();
+
+//				foreach (string file in files)
+//				{
+//					WriteLog(
+//						logFile,
+//						$"==============================");
+
+//					WriteLog(
+//						logFile,
+//						$"ФАЙЛ: {Path.GetFileName(file)}");
+
+//					try
+//					{
+//						string script =
+//							File.ReadAllText(
+//								file);
+
+//						if (string.IsNullOrWhiteSpace(
+//							script))
+//						{
+//							WriteLog(
+//								logFile,
+//								"Файл пустой");
+
+//							continue;
+//						}
+
+//						string[] batches =
+//							SplitSqlBatches(
+//								script);
+
+//						foreach (string batch in batches)
+//						{
+//							string sql =
+//								batch.Trim();
+
+//							if (string.IsNullOrWhiteSpace(
+//								sql))
+//							{
+//								continue;
+//							}
+
+//							WriteLog(
+//								logFile,
+//								"SQL:");
+
+//							WriteLog(
+//								logFile,
+//								sql);
+
+//							try
+//							{
+//								using (var command =
+//									new SqlCommand(
+//										sql,
+//										connection))
+//								{
+//									command.CommandTimeout =
+//										0;
+
+//									command.ExecuteNonQuery();
+//								}
+
+//								WriteLog(
+//									logFile,
+//									"РЕЗУЛЬТАТ: УСПЕШНО");
+//							}
+//							catch (Exception ex)
+//							{
+//								WriteLog(
+//									logFile,
+//									"РЕЗУЛЬТАТ: ОШИБКА");
+
+//								WriteLog(
+//									logFile,
+//									ex.ToString());
+
+//								// Если объект уже существует,
+//								// просто продолжаем
+//								if (ex.ToString().Contains(
+//									"There is already an object named"))
+//								{
+//									WriteLog(
+//										logFile,
+//										"ПРОПУЩЕНО: объект уже существует");
+
+//									continue;
+//								}
+
+//								continue;
+//								//throw;
+//							}
+//						}
+//					}
+//					catch (Exception ex)
+//					{
+//						WriteLog(
+//							logFile,
+//							"КРИТИЧЕСКАЯ ОШИБКА ФАЙЛА");
+
+//						WriteLog(
+//							logFile,
+//							ex.ToString());
+
+//						throw new Exception(
+//							$"Ошибка выполнения SQL-патча:{Environment.NewLine}{Environment.NewLine}" +
+//							$"{Path.GetFileName(file)}{Environment.NewLine}{Environment.NewLine}" +
+//							$"Подробности см. в логе:{Environment.NewLine}" +
+//							logFile,
+//							ex);
+//					}
+//				}
+//			}
+
+//			WriteLog(
+//				logFile,
+//				"===== ПАТЧИ ЗАВЕРШЕНЫ =====");
+//		}
+
+//		private string[] SplitSqlBatches(
+//			string script)
+//		{
+//			return Regex.Split(
+//				script,
+//				@"^\s*GO\s*$",
+//				RegexOptions.Multiline |
+//				RegexOptions.IgnoreCase);
+//		}
+
+//		private void WriteLog(
+//			string logFile,
+//			string text)
+//		{
+//			File.AppendAllText(
+//				logFile,
+//                //$"[{DateTime.Now:HH:mm:ss}] {text}" +
+//                $"{text}" +
+//                Environment.NewLine +
+//				Environment.NewLine);
+//		}
+//	}
+//}

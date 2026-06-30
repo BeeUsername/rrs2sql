@@ -7,175 +7,401 @@ using System.Text.RegularExpressions;
 
 namespace RRStoSQL.Services
 {
-	public class AccessPatchService
-	{
-		private string _logFile;
+    /// <summary>
+    /// Выполняет SQL-патчи для Access базы данных.
+    /// Патчи берутся из папки access_patches.
+    /// </summary>
+    public class AccessPatchService
+    {
+        /// <summary>
+        /// Путь к текущему лог-файлу выполнения патчей.
+        /// </summary>
+        private string _logFile;
 
-		public void ExecutePatches(string mdbPath)
-		{
-			string patchesFolder =
-				Path.Combine(
-					AppDomain.CurrentDomain.BaseDirectory,
-					"access_patches");
+        /// <summary>
+        /// Выполняет все SQL-патчи для указанной MDB базы.
+        /// </summary>
+        /// <param name="mdbPath">
+        /// Полный путь к Access базе данных.
+        /// </param>
+        public void ExecutePatches(string mdbPath)
+        {
+            // Каталог с sql-патчами
+            string patchesFolder =
+                Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "access_patches");
 
-			if (!Directory.Exists(
-				patchesFolder))
-			{
-				return;
-			}
+            // Если папки нет — патчить нечего
+            if (!Directory.Exists(
+                patchesFolder))
+            {
+                return;
+            }
 
-			string[] files =
-				Directory.GetFiles(
-					patchesFolder,
-					"*.sql")
-				.OrderBy(Path.GetFileName)
-				.ToArray();
+            // Получаем список *.sql файлов
+            // и сортируем их по имени
+            string[] files =
+                Directory.GetFiles(
+                    patchesFolder,
+                    "*.sql")
+                .OrderBy(Path.GetFileName)
+                .ToArray();
 
-			if (files.Length == 0)
-			{
-				return;
-			}
+            // Если файлов нет — завершаем работу
+            if (files.Length == 0)
+            {
+                return;
+            }
 
-			string logsFolder =
-				Path.Combine(
-					AppDomain.CurrentDomain.BaseDirectory,
-					"logs");
+            // Папка логов
+            string logsFolder =
+                Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "logs");
 
-			Directory.CreateDirectory(
-				logsFolder);
+            Directory.CreateDirectory(
+                logsFolder);
 
-			_logFile =
-				Path.Combine(
-					logsFolder,
-					$"AccessPatchLog_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
+            // Создаем лог текущего запуска
+            _logFile =
+                Path.Combine(
+                    logsFolder,
+                    $"AccessPatchLog_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
 
-			Log("===== НАЧАЛО ПРИМЕНЕНИЯ ACCESS ПАТЧЕЙ =====");
-			Log("");
-			Log($"MDB: {mdbPath}");
-			Log("");
-			Log("===========================================");
-			Log("");
+            // Заголовок лога
+            Log("===== НАЧАЛО ПРИМЕНЕНИЯ ACCESS ПАТЧЕЙ =====");
+            Log("");
+            Log($"MDB: {mdbPath}");
+            Log("");
+            Log("===========================================");
+            Log("");
 
-			bool hasErrors = false;
+            // Флаг наличия ошибок
+            bool hasErrors = false;
 
-			string connectionString =
-				$"Provider=Microsoft.Jet.OLEDB.4.0;" +
-				$"Data Source={mdbPath};";
+            // Строка подключения к Access
+            string connectionString =
+                $"Provider=Microsoft.Jet.OLEDB.4.0;" +
+                $"Data Source={mdbPath};";
 
-			using (var connection =
-				new OleDbConnection(
-					connectionString))
-			{
-				connection.Open();
+            // Открываем подключение к MDB
+            using (var connection =
+                new OleDbConnection(
+                    connectionString))
+            {
+                connection.Open();
 
-				foreach (string file in files)
-				{
-					Log($"ФАЙЛ: {Path.GetFileName(file)}");
-					Log("");
+                // Выполняем каждый sql-файл
+                foreach (string file in files)
+                {
+                    Log($"ФАЙЛ: {Path.GetFileName(file)}");
+                    Log("");
 
-					try
-					{
-						string script =
-							File.ReadAllText(
-								file,
-								Encoding.UTF8);
+                    try
+                    {
+                        // Читаем содержимое файла
+                        string script =
+                            File.ReadAllText(
+                                file,
+                                Encoding.UTF8);
 
-						if (string.IsNullOrWhiteSpace(
-							script))
-						{
-							Log("Файл пустой");
-							Log("");
-							continue;
-						}
+                        // Пустые файлы пропускаем
+                        if (string.IsNullOrWhiteSpace(
+                            script))
+                        {
+                            Log("Файл пустой");
+                            Log("");
+                            continue;
+                        }
 
-						string[] batches =
-							SplitSqlBatches(
-								script);
+                        // Разбиваем скрипт по GO
+                        string[] batches =
+                            SplitSqlBatches(
+                                script);
 
-						foreach (string batch in batches)
-						{
-							string sql =
-								batch.Trim();
+                        // Выполняем каждый SQL-блок отдельно
+                        foreach (string batch in batches)
+                        {
+                            string sql =
+                                batch.Trim();
 
-							if (string.IsNullOrWhiteSpace(
-								sql))
-							{
-								continue;
-							}
+                            // Пустые блоки пропускаем
+                            if (string.IsNullOrWhiteSpace(
+                                sql))
+                            {
+                                continue;
+                            }
 
-							Log("SQL:");
-							Log("");
-							Log(sql);
-							Log("");
+                            // Пишем SQL в лог
+                            Log("SQL:");
+                            Log("");
+                            Log(sql);
+                            Log("");
 
-							try
-							{
-								using (var command =
-									new OleDbCommand(
-										sql,
-										connection))
-								{
-									command.CommandTimeout =
-										0;
+                            try
+                            {
+                                using (var command =
+                                    new OleDbCommand(
+                                        sql,
+                                        connection))
+                                {
+                                    // Без ограничения времени выполнения
+                                    command.CommandTimeout =
+                                        0;
 
-									command.ExecuteNonQuery();
-								}
+                                    command.ExecuteNonQuery();
+                                }
 
-								Log("РЕЗУЛЬТАТ: УСПЕШНО");
-								Log("");
-							}
-							catch (Exception ex)
-							{
-								hasErrors = true;
+                                Log("РЕЗУЛЬТАТ: УСПЕШНО");
+                                Log("");
+                            }
+                            catch (Exception ex)
+                            {
+                                hasErrors = true;
 
-								Log("РЕЗУЛЬТАТ: ОШИБКА");
-								Log("");
-								Log(ex.ToString());
-								Log("");
-							}
-						}
-					}
-					catch (Exception ex)
-					{
-						hasErrors = true;
+                                Log("РЕЗУЛЬТАТ: ОШИБКА");
+                                Log("");
+                                Log(ex.ToString());
+                                Log("");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Ошибка чтения файла
+                        // или подготовки скрипта
+                        hasErrors = true;
 
-						Log("КРИТИЧЕСКАЯ ОШИБКА ФАЙЛА");
-						Log("");
-						Log(ex.ToString());
-						Log("");
-					}
+                        Log("КРИТИЧЕСКАЯ ОШИБКА ФАЙЛА");
+                        Log("");
+                        Log(ex.ToString());
+                        Log("");
+                    }
 
-					Log("===========================================");
-					Log("");
-				}
-			}
+                    Log("===========================================");
+                    Log("");
+                }
+            }
 
-			Log("===== ЗАВЕРШЕНИЕ ACCESS ПАТЧЕЙ =====");
+            Log("===== ЗАВЕРШЕНИЕ ACCESS ПАТЧЕЙ =====");
 
-			if (hasErrors)
-			{
-				throw new Exception(
-					"При выполнении Access-патчей возникли ошибки.\n\n" +
-					$"Подробности в логе:\n{_logFile}");
-			}
-		}
+            // Если были ошибки —
+            // сообщаем пользователю
+            if (hasErrors)
+            {
+                throw new Exception(
+                    "При выполнении Access-патчей возникли ошибки.\n\n" +
+                    $"Подробности в логе:\n{_logFile}");
+            }
+        }
 
-		private string[] SplitSqlBatches(
-			string script)
-		{
-			return Regex.Split(
-				script,
-				@"^\s*GO\s*$",
-				RegexOptions.Multiline |
-				RegexOptions.IgnoreCase);
-		}
+        /// <summary>
+        /// Разбивает SQL-скрипт на отдельные блоки
+        /// по инструкции GO.
+        /// </summary>
+        private string[] SplitSqlBatches(
+            string script)
+        {
+            return Regex.Split(
+                script,
+                @"^\s*GO\s*$",
+                RegexOptions.Multiline |
+                RegexOptions.IgnoreCase);
+        }
 
-		private void Log(string text)
-		{
-			File.AppendAllText(
-				_logFile,
+        /// <summary>
+        /// Добавляет строку в лог-файл.
+        /// </summary>
+        private void Log(string text)
+        {
+            File.AppendAllText(
+                _logFile,
                 //$"[{DateTime.Now:HH:mm:ss}] {text}{Environment.NewLine}");
                 $"{text}{Environment.NewLine}");
         }
-	}
+    }
 }
+
+
+//using System;
+//using System.Data.OleDb;
+//using System.IO;
+//using System.Linq;
+//using System.Text;
+//using System.Text.RegularExpressions;
+
+//namespace RRStoSQL.Services
+//{
+//	public class AccessPatchService
+//	{
+//		private string _logFile;
+
+//		public void ExecutePatches(string mdbPath)
+//		{
+//			string patchesFolder =
+//				Path.Combine(
+//					AppDomain.CurrentDomain.BaseDirectory,
+//					"access_patches");
+
+//			if (!Directory.Exists(
+//				patchesFolder))
+//			{
+//				return;
+//			}
+
+//			string[] files =
+//				Directory.GetFiles(
+//					patchesFolder,
+//					"*.sql")
+//				.OrderBy(Path.GetFileName)
+//				.ToArray();
+
+//			if (files.Length == 0)
+//			{
+//				return;
+//			}
+
+//			string logsFolder =
+//				Path.Combine(
+//					AppDomain.CurrentDomain.BaseDirectory,
+//					"logs");
+
+//			Directory.CreateDirectory(
+//				logsFolder);
+
+//			_logFile =
+//				Path.Combine(
+//					logsFolder,
+//					$"AccessPatchLog_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
+
+//			Log("===== НАЧАЛО ПРИМЕНЕНИЯ ACCESS ПАТЧЕЙ =====");
+//			Log("");
+//			Log($"MDB: {mdbPath}");
+//			Log("");
+//			Log("===========================================");
+//			Log("");
+
+//			bool hasErrors = false;
+
+//			string connectionString =
+//				$"Provider=Microsoft.Jet.OLEDB.4.0;" +
+//				$"Data Source={mdbPath};";
+
+//			using (var connection =
+//				new OleDbConnection(
+//					connectionString))
+//			{
+//				connection.Open();
+
+//				foreach (string file in files)
+//				{
+//					Log($"ФАЙЛ: {Path.GetFileName(file)}");
+//					Log("");
+
+//					try
+//					{
+//						string script =
+//							File.ReadAllText(
+//								file,
+//								Encoding.UTF8);
+
+//						if (string.IsNullOrWhiteSpace(
+//							script))
+//						{
+//							Log("Файл пустой");
+//							Log("");
+//							continue;
+//						}
+
+//						string[] batches =
+//							SplitSqlBatches(
+//								script);
+
+//						foreach (string batch in batches)
+//						{
+//							string sql =
+//								batch.Trim();
+
+//							if (string.IsNullOrWhiteSpace(
+//								sql))
+//							{
+//								continue;
+//							}
+
+//							Log("SQL:");
+//							Log("");
+//							Log(sql);
+//							Log("");
+
+//							try
+//							{
+//								using (var command =
+//									new OleDbCommand(
+//										sql,
+//										connection))
+//								{
+//									command.CommandTimeout =
+//										0;
+
+//									command.ExecuteNonQuery();
+//								}
+
+//								Log("РЕЗУЛЬТАТ: УСПЕШНО");
+//								Log("");
+//							}
+//							catch (Exception ex)
+//							{
+//								hasErrors = true;
+
+//								Log("РЕЗУЛЬТАТ: ОШИБКА");
+//								Log("");
+//								Log(ex.ToString());
+//								Log("");
+//							}
+//						}
+//					}
+//					catch (Exception ex)
+//					{
+//						hasErrors = true;
+
+//						Log("КРИТИЧЕСКАЯ ОШИБКА ФАЙЛА");
+//						Log("");
+//						Log(ex.ToString());
+//						Log("");
+//					}
+
+//					Log("===========================================");
+//					Log("");
+//				}
+//			}
+
+//			Log("===== ЗАВЕРШЕНИЕ ACCESS ПАТЧЕЙ =====");
+
+//			if (hasErrors)
+//			{
+//				throw new Exception(
+//					"При выполнении Access-патчей возникли ошибки.\n\n" +
+//					$"Подробности в логе:\n{_logFile}");
+//			}
+//		}
+
+//		private string[] SplitSqlBatches(
+//			string script)
+//		{
+//			return Regex.Split(
+//				script,
+//				@"^\s*GO\s*$",
+//				RegexOptions.Multiline |
+//				RegexOptions.IgnoreCase);
+//		}
+
+//		private void Log(string text)
+//		{
+//			File.AppendAllText(
+//				_logFile,
+//                //$"[{DateTime.Now:HH:mm:ss}] {text}{Environment.NewLine}");
+//                $"{text}{Environment.NewLine}");
+//        }
+//	}
+//}

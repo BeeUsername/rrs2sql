@@ -40,21 +40,21 @@ namespace RRStoSQL.Services
 				connection.Open();
 
 				string sql =
-		@"
-IF NOT EXISTS
-(
-    SELECT *
-    FROM sys.database_principals
-    WHERE name='RRUser'
-)
-BEGIN
-    CREATE USER RRUser
-    FOR LOGIN RRUser
-END
+							@"
+					IF NOT EXISTS
+					(
+						SELECT *
+						FROM sys.database_principals
+						WHERE name='RRUser'
+					)
+					BEGIN
+						CREATE USER RRUser
+						FOR LOGIN RRUser
+					END
 
-ALTER ROLE db_owner
-ADD MEMBER RRUser
-";
+					ALTER ROLE db_owner
+					ADD MEMBER RRUser
+					";
 
 				using (var command =
 					new SqlCommand(
@@ -117,24 +117,24 @@ ADD MEMBER RRUser
 			{
 				connection.Open();
 
-				string sql = @"
-IF EXISTS(
-    SELECT *
-    FROM sys.server_principals
-    WHERE name='RRUser'
-)
-BEGIN
-    -- Если существует - меняем пароль
-    ALTER LOGIN RRUser
-    WITH PASSWORD='RRS_999999999!';
-END
-ELSE
-BEGIN
-    -- Если не существует - создаем
-    CREATE LOGIN RRUser
-    WITH PASSWORD='RRS_999999999!';
-END
-";
+									string sql = @"
+					IF EXISTS(
+						SELECT *
+						FROM sys.server_principals
+						WHERE name='RRUser'
+					)
+					BEGIN
+						-- Если существует - меняем пароль
+						ALTER LOGIN RRUser
+						WITH PASSWORD='RRS_999999999!';
+					END
+					ELSE
+					BEGIN
+						-- Если не существует - создаем
+						CREATE LOGIN RRUser
+						WITH PASSWORD='RRS_999999999!';
+					END
+					";
 
 				using (var command = new SqlCommand(sql, connection))
 				{
@@ -143,46 +143,7 @@ END
 			}
 		}
 
-		//		public void CreateRRUser(
-		//			string sqlInstance)
-		//		{
-		//			// Подключаемся через Windows Authentication
-		//			// т.к. RRUser ещё не существует
-		//			string connectionString =
-		//				$"Server={sqlInstance};" +
-		//				$"Integrated Security=True;" +
-		//				$"TrustServerCertificate=True;";
-
-		//			using (var connection =
-		//				new SqlConnection(
-		//					connectionString))
-		//			{
-		//				connection.Open();
-
-		//				string sql =
-		//		@"
-		//IF NOT EXISTS(
-		//    SELECT *
-		//    FROM sys.server_principals
-		//    WHERE name='RRUser'
-		//)
-		//BEGIN
-
-		//    CREATE LOGIN RRUser
-		//    WITH PASSWORD='RRS_999999999!';
-
-		//END
-		//";
-
-		//				using (var command =
-		//					new SqlCommand(
-		//						sql,
-		//						connection))
-		//				{
-		//					command.ExecuteNonQuery();
-		//				}
-		//			}
-		//		}
+		
 		/// <summary>
 		/// Ищет установленный SQLEXPRESS
 		/// </summary>
@@ -417,19 +378,7 @@ END
 		/// </summary>
 		private void InstallSqlExpress()
 		{
-            // Папка лежит рядом с нашей утилитой
-            //string setupPath =
-            //	Path.Combine(
-            //		AppDomain.CurrentDomain.BaseDirectory,
-            //		"Sql_distrib",
-            //		"setup.exe");
-
-            //if (!File.Exists(setupPath))
-            //{
-            //	throw new Exception(
-            //		"Не найден Sql_distrib\\setup.exe");
-            //}
-
+            
             // Каталог локального кэша SQL дистрибутива
             string sqlDistribFolder =
                 Path.Combine(
@@ -440,26 +389,7 @@ END
             Directory.CreateDirectory(
                 sqlDistribFolder);
 
-
-
-            //// setup.exe оффлайн дистрибутива
-            //string setupPath =
-            //    Path.Combine(
-            //        sqlDistribFolder,
-            //        "setup.exe");
-
-            //if (!File.Exists(setupPath))
-            //{
-            //    DownloadSqlMedia(
-            //        sqlDistribFolder);
-            //}
-
-            //if (!File.Exists(setupPath))
-            //{
-            //    throw new Exception(
-            //        "После загрузки setup.exe не найден.");
-            //}
-
+            
             string sqlInstaller =
 				Path.Combine(
 					sqlDistribFolder,
@@ -524,8 +454,6 @@ END
                     extractProcess.ExitCode);
             }
 
-
-
             var process =
 				new Process();
 
@@ -552,7 +480,9 @@ END
 				// станет SQL администратором
 				"/ADDCURRENTUSERASSQLADMIN " +
 				"/INDICATEPROGRESS " +
-				"/IACCEPTSQLSERVERLICENSETERMS";
+                "/UpdateEnabled=False " + // Не искать обновления экспериментально
+
+                "/IACCEPTSQLSERVERLICENSETERMS";
 
 			//        process.StartInfo.Arguments =
 			//"/QS " +

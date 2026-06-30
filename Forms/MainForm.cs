@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,192 +16,424 @@ using RRStoSQL.Services;
 
 namespace RRStoSQL
 {
-	public partial class MainForm : Form
-	{
+    /// <summary>
+    /// Главная форма приложения миграции
+    /// Access -> SQL Server.
+    /// </summary>
+    public partial class MainForm : Form
+    {
+        /// <summary>
+        /// Сервис поиска RemoteReg.exe.config
+        /// в стандартных каталогах.
+        /// </summary>
+        private readonly ConfigFinderService _finderService =
+            new ConfigFinderService();
 
-		private readonly ConfigFinderService _finderService =
-			new ConfigFinderService();
+        /// <summary>
+        /// Инициализирует список шагов миграции.
+        /// </summary>
+        private readonly StepListInitializer
+            _stepInitializer =
+                new StepListInitializer();
 
-		private readonly StepListInitializer
-	_stepInitializer =
-		new StepListInitializer();
+        /// <summary>
+        /// Управляет отображением состояний шагов:
+        /// выполняется, успешно, ошибка.
+        /// </summary>
+        private StepStatusManager _stepManager;
 
-		private StepStatusManager _stepManager;
+        /// <summary>
+        /// Основной сервис миграции.
+        /// </summary>
+        private readonly MigrationService _migrationService =
+            new MigrationService();
 
-		private readonly MigrationService _migrationService =
-			new MigrationService();
+        public MainForm()
+        {
+            InitializeComponent();
 
-		public MainForm()
-		{
-			InitializeComponent();
-			
-			_stepInitializer.Initialize(listViewSteps);
+            // Создаем список шагов миграции
+            _stepInitializer.Initialize(listViewSteps);
 
-			_stepManager =
-				new StepStatusManager(listViewSteps);
+            // Создаем менеджер статусов шагов
+            _stepManager =
+                new StepStatusManager(listViewSteps);
 
-			LoadConfigs();
-						
-		}
+            // Загружаем найденные конфиги
+            LoadConfigs();
+        }
 
-	
-		private void LoadConfigs()
-		{
-			listBoxConfigs.Items.Clear();
+        /// <summary>
+        /// Загружает найденные конфиги
+        /// в список.
+        /// </summary>
+        private void LoadConfigs()
+        {
+            listBoxConfigs.Items.Clear();
 
-			var configs = _finderService.FindConfigs();
+            var configs = _finderService.FindConfigs();
 
-			foreach (var config in configs)
-			{
-				listBoxConfigs.Items.Add(config);
-			}
-		}
+            foreach (var config in configs)
+            {
+                listBoxConfigs.Items.Add(config);
+            }
+        }
 
-		
-		private void panel1_Paint(object sender, PaintEventArgs e)
-		{
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
 
-		}
+        }
 
-		private void MainForm_Load(object sender, EventArgs e)
-		{
+        private void MainForm_Load(object sender, EventArgs e)
+        {
 
-		}
+        }
 
-		private void groupBox1_Enter(object sender, EventArgs e)
-		{
+        private void groupBox1_Enter(object sender, EventArgs e)
+        {
 
-		}
+        }
 
-		private void listBoxConfigs_SelectedIndexChanged(object sender, EventArgs e)
-		{
+        private void listBoxConfigs_SelectedIndexChanged(object sender, EventArgs e)
+        {
 
-		}
+        }
 
-		private void panel1_Paint_1(object sender, PaintEventArgs e)
-		{
+        private void panel1_Paint_1(object sender, PaintEventArgs e)
+        {
 
-		}
+        }
 
-		private void listViewSteps_SelectedIndexChanged(object sender, EventArgs e)
-		{
+        private void listViewSteps_SelectedIndexChanged(object sender, EventArgs e)
+        {
 
-		}
+        }
 
-		private void btnAddConfig_Click(
-	object sender,
-	EventArgs e)
-		{
-			using (var dialog = new OpenFileDialog())
-			{
-				dialog.Filter =
-					"RemoteReg config|RemoteReg.exe.config";
+        /// <summary>
+        /// Ручное добавление конфигурационного файла
+        /// RemoteReg.exe.config.
+        /// </summary>
+        private void btnAddConfig_Click(
+            object sender,
+            EventArgs e)
+        {
+            using (var dialog = new OpenFileDialog())
+            {
+                dialog.Filter =
+                    "RemoteReg config|RemoteReg.exe.config";
 
-				dialog.Multiselect = false;
+                dialog.Multiselect = false;
 
-				if (dialog.ShowDialog() != DialogResult.OK)
-					return;
+                if (dialog.ShowDialog() != DialogResult.OK)
+                    return;
 
-				string selectedPath = dialog.FileName;
+                string selectedPath = dialog.FileName;
 
-				foreach (ConfigItem item in listBoxConfigs.Items)
-				{
-					if (item.ConfigPath.Equals(
-						selectedPath,
-						StringComparison.OrdinalIgnoreCase))
-					{
-						listBoxConfigs.SelectedItem = item;
+                // Проверяем, не был ли конфиг
+                // добавлен ранее
+                foreach (ConfigItem item in listBoxConfigs.Items)
+                {
+                    if (item.ConfigPath.Equals(
+                        selectedPath,
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        listBoxConfigs.SelectedItem = item;
 
-						MessageBox.Show(
-							"Конфиг уже добавлен");
+                        MessageBox.Show(
+                            "Конфиг уже добавлен");
 
-						return;
-					}
-				}
+                        return;
+                    }
+                }
 
-				var config = new ConfigItem
-				{
-					ConfigPath = selectedPath
-				};
+                var config = new ConfigItem
+                {
+                    ConfigPath = selectedPath
+                };
 
-				listBoxConfigs.Items.Add(config);
+                // Добавляем конфиг в список
+                listBoxConfigs.Items.Add(config);
 
-				listBoxConfigs.SelectedItem = config;
-			}
-		}
+                // Выделяем добавленный элемент
+                listBoxConfigs.SelectedItem = config;
+            }
+        }
 
-		private void groupBox2_Enter(object sender, EventArgs e)
-		{
+        private void groupBox2_Enter(object sender, EventArgs e)
+        {
 
-		}
+        }
 
-		private async void btnConvert_Click(object sender,EventArgs e)
-		{
+        /// <summary>
+        /// Запускает процесс миграции.
+        /// </summary>
+        private async void btnConvert_Click(
+            object sender,
+            EventArgs e)
+        {
+            // Сбрасываем состояния шагов
+            // перед новой миграцией
+            _stepInitializer.Initialize(listViewSteps);
 
-			_stepInitializer.Initialize(listViewSteps);
+            // Проверяем, выбран ли конфиг
+            if (listBoxConfigs.SelectedItem == null)
+            {
+                MessageBox.Show(
+                    "Выберите конфиг");
 
-			if (listBoxConfigs.SelectedItem == null)
-			{
-				MessageBox.Show(
-					"Выберите конфиг");
+                return;
+            }
 
-				return;
-			}
+            // Блокируем кнопку на время миграции
+            btnConvert.Enabled = false;
 
-			btnConvert.Enabled = false;
-
+            // Формируем параметры миграции
             var options =
-				new MigrationOptions
-				{
-					InstallSsms =
-						chkInstallSSMS.Checked,
+                new MigrationOptions
+                {
+                    InstallSsms =
+                        chkInstallSSMS.Checked,
 
-					DeleteBullzip =
-						chkDeleteBullzip.Checked
-				};
-
+                    DeleteBullzip =
+                        chkDeleteBullzip.Checked
+                };
 
             try
             {
-					var selectedConfig =
-					(ConfigItem)
-					listBoxConfigs.SelectedItem;
+                var selectedConfig =
+                    (ConfigItem)
+                    listBoxConfigs.SelectedItem;
 
+                // Запускаем миграцию
                 await _migrationService.RunAsync(
-					this,
-					selectedConfig.ConfigPath, options,
+                    this,
+                    selectedConfig.ConfigPath,
+                    options,
                     (step, status) =>
-					{
-						_stepManager.SetStatus(
-							step,
-							status);
+                    {
+                        // Обновляем состояние шага
+                        _stepManager.SetStatus(
+                            step,
+                            status);
 
-						Application.DoEvents();
-					});
-
-                //await _migrationService.RunAsync(
-                //selectedConfig.ConfigPath,
-                //				(step, status) =>
-                //{
-                //	_stepManager.SetStatus(
-                //		step,
-                //		status);
-
-                //	Application.DoEvents();
-                //});
-
-                //MessageBox.Show(
-                //	"Конвертация завершена");
+                        // Обновляем интерфейс
+                        Application.DoEvents();
+                    });
             }
-			catch (Exception ex)
-			{
-				MessageBox.Show(
-					ex.Message);
-			}
-			finally
-			{
-				btnConvert.Enabled = true;
-			}
-		}
-	}
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    ex.Message);
+            }
+            finally
+            {
+                // Возвращаем кнопку в рабочее состояние
+                btnConvert.Enabled = true;
+            }
+        }
+
+        private void panel1_Paint_2(object sender, PaintEventArgs e)
+        {
+
+        }
+    }
 }
+
+
+
+
+
+//using System;
+//using System.Collections.Generic;
+//using System.ComponentModel;
+//using System.Data;
+//using System.Drawing;
+//using System.Linq;
+//using System.Text;
+//using System.Threading.Tasks;
+//using System.Windows.Forms;
+//using MigrateFromAccess.Models;
+//using MigrateFromAccess.Services;
+//using RRStoSQL.Forms.UI;
+//using RRStoSQL.Models;
+//using RRStoSQL.Services;
+
+//namespace RRStoSQL
+//{
+//	public partial class MainForm : Form
+//	{
+
+//		private readonly ConfigFinderService _finderService =
+//			new ConfigFinderService();
+
+//		private readonly StepListInitializer
+//	_stepInitializer =
+//		new StepListInitializer();
+
+//		private StepStatusManager _stepManager;
+
+//		private readonly MigrationService _migrationService =
+//			new MigrationService();
+
+//		public MainForm()
+//		{
+//			InitializeComponent();
+			
+//			_stepInitializer.Initialize(listViewSteps);
+
+//			_stepManager =
+//				new StepStatusManager(listViewSteps);
+
+//			LoadConfigs();
+						
+//		}
+
+	
+//		private void LoadConfigs()
+//		{
+//			listBoxConfigs.Items.Clear();
+
+//			var configs = _finderService.FindConfigs();
+
+//			foreach (var config in configs)
+//			{
+//				listBoxConfigs.Items.Add(config);
+//			}
+//		}
+
+		
+//		private void panel1_Paint(object sender, PaintEventArgs e)
+//		{
+
+//		}
+
+//		private void MainForm_Load(object sender, EventArgs e)
+//		{
+
+//		}
+
+//		private void groupBox1_Enter(object sender, EventArgs e)
+//		{
+
+//		}
+
+//		private void listBoxConfigs_SelectedIndexChanged(object sender, EventArgs e)
+//		{
+
+//		}
+
+//		private void panel1_Paint_1(object sender, PaintEventArgs e)
+//		{
+
+//		}
+
+//		private void listViewSteps_SelectedIndexChanged(object sender, EventArgs e)
+//		{
+
+//		}
+
+//		private void btnAddConfig_Click(
+//	object sender,
+//	EventArgs e)
+//		{
+//			using (var dialog = new OpenFileDialog())
+//			{
+//				dialog.Filter =
+//					"RemoteReg config|RemoteReg.exe.config";
+
+//				dialog.Multiselect = false;
+
+//				if (dialog.ShowDialog() != DialogResult.OK)
+//					return;
+
+//				string selectedPath = dialog.FileName;
+
+//				foreach (ConfigItem item in listBoxConfigs.Items)
+//				{
+//					if (item.ConfigPath.Equals(
+//						selectedPath,
+//						StringComparison.OrdinalIgnoreCase))
+//					{
+//						listBoxConfigs.SelectedItem = item;
+
+//						MessageBox.Show(
+//							"Конфиг уже добавлен");
+
+//						return;
+//					}
+//				}
+
+//				var config = new ConfigItem
+//				{
+//					ConfigPath = selectedPath
+//				};
+
+//				listBoxConfigs.Items.Add(config);
+
+//				listBoxConfigs.SelectedItem = config;
+//			}
+//		}
+
+//		private void groupBox2_Enter(object sender, EventArgs e)
+//		{
+
+//		}
+
+//		private async void btnConvert_Click(object sender,EventArgs e)
+//		{
+
+//			_stepInitializer.Initialize(listViewSteps);
+
+//			if (listBoxConfigs.SelectedItem == null)
+//			{
+//				MessageBox.Show(
+//					"Выберите конфиг");
+
+//				return;
+//			}
+
+//			btnConvert.Enabled = false;
+
+//            var options =
+//				new MigrationOptions
+//				{
+//					InstallSsms =
+//						chkInstallSSMS.Checked,
+
+//					DeleteBullzip =
+//						chkDeleteBullzip.Checked
+//				};
+
+
+//            try
+//            {
+//					var selectedConfig =
+//					(ConfigItem)
+//					listBoxConfigs.SelectedItem;
+
+//                await _migrationService.RunAsync(
+//					this,
+//					selectedConfig.ConfigPath, options,
+//                    (step, status) =>
+//					{
+//						_stepManager.SetStatus(
+//							step,
+//							status);
+
+//						Application.DoEvents();
+//					});
+
+                
+//            }
+//			catch (Exception ex)
+//			{
+//				MessageBox.Show(
+//					ex.Message);
+//			}
+//			finally
+//			{
+//				btnConvert.Enabled = true;
+//			}
+//		}
+//	}
+//}

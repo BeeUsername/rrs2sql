@@ -10,6 +10,7 @@ namespace RRStoSQL.Services
 	{
 
 		/// <summary>
+		/// Модуль не учавствует в работе программы
 		/// Переносит данные из MDB в SQL
 		/// </summary>
 		public void CopyData(
