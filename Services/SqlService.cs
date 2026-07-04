@@ -66,47 +66,89 @@ namespace RRStoSQL.Services
 			}
 		}
 
-		/// <summary>
-		/// Перезапускает SQL службу
-		/// </summary>
-		public void RestartSqlService(
+        /// <summary>
+        /// Перезапускает SQL службу
+        /// </summary>
+        public void RestartSqlService(
 			string sqlInstance)
-		{
-			// .\SQLEXPRESS → SQLEXPRESS
-			string serviceName =
-				"MSSQL$" +
-				sqlInstance.Replace(
-					@".\",
-					"");
+        {
+            // .\SQLEXPRESS -> MSSQL$SQLEXPRESS
+            string serviceName =
+                "MSSQL$" +
+                sqlInstance.Replace(
+                    @".\",
+                    "");
 
-			using (var service =
-				new ServiceController(
-					serviceName))
-			{
-				if (
-					service.Status ==
-					ServiceControllerStatus.Running)
-				{
-					service.Stop();
+            using (var service =
+                new ServiceController(
+                    serviceName))
+            {
+                service.Refresh();
 
-					service.WaitForStatus(
-						ServiceControllerStatus.Stopped,
-						TimeSpan.FromMinutes(1));
-				}
+                // Если служба уже работает —
+                // останавливаем её
+                if (service.Status !=
+                    ServiceControllerStatus.Stopped)
+                {
+                    service.Stop();
 
-				service.Start();
+                    service.WaitForStatus(
+                        ServiceControllerStatus.Stopped,
+                        TimeSpan.FromMinutes(2));
+                }
 
-				service.WaitForStatus(
-					ServiceControllerStatus.Running,
-					TimeSpan.FromMinutes(1));
-			}
-		}
+                service.Refresh();
 
-		/// <summary>
-		/// Создаёт логин RRUser и пользователя
-		/// </summary>
-		/// 
-		public void CreateRRUser(string sqlInstance)
+                // Запускаем только если действительно остановлена
+                if (service.Status ==
+                    ServiceControllerStatus.Stopped)
+                {
+                    service.Start();
+
+                    service.WaitForStatus(
+                        ServiceControllerStatus.Running,
+                        TimeSpan.FromMinutes(2));
+                }
+            }
+        }
+        //public void RestartSqlService(
+        //	string sqlInstance)
+        //{
+        //	// .\SQLEXPRESS → SQLEXPRESS
+        //	string serviceName =
+        //		"MSSQL$" +
+        //		sqlInstance.Replace(
+        //			@".\",
+        //			"");
+
+        //	using (var service =
+        //		new ServiceController(
+        //			serviceName))
+        //	{
+        //		if (
+        //			service.Status ==
+        //			ServiceControllerStatus.Running)
+        //		{
+        //			service.Stop();
+
+        //			service.WaitForStatus(
+        //				ServiceControllerStatus.Stopped,
+        //				TimeSpan.FromMinutes(1));
+        //		}
+
+        //		service.Start();
+
+        //		service.WaitForStatus(
+        //			ServiceControllerStatus.Running,
+        //			TimeSpan.FromMinutes(1));
+        //	}
+        //}
+
+        /// <summary>
+        /// Создаёт логин RRUser и пользователя
+        /// </summary>
+        /// 
+        public void CreateRRUser(string sqlInstance)
 		{
 			string connectionString =
 				$"Server={sqlInstance};" +
@@ -233,11 +275,6 @@ namespace RRStoSQL.Services
 			string instanceId =
 				GetInstanceId(
 					instanceName);
-
-	//		MessageBox.Show(
-	//"InstanceId:\n" +
-	//instanceId);
-
 
 			if (string.IsNullOrEmpty(
 				instanceId))
@@ -481,31 +518,8 @@ namespace RRStoSQL.Services
 				"/ADDCURRENTUSERASSQLADMIN " +
 				"/INDICATEPROGRESS " +
                 "/UpdateEnabled=False " + // Не искать обновления экспериментально
-
                 "/IACCEPTSQLSERVERLICENSETERMS";
 
-			//        process.StartInfo.Arguments =
-			//"/QS " +
-			//"/ACTION=Install " +
-			//"/FEATURES=SQLEngine " +
-			//"/INSTANCENAME=SQLEXPRESS " +
-			//"/SQLSVCSTARTUPTYPE=Automatic " +
-			//"/TCPENABLED=1 " +
-
-			//// Не искать обновления
-			//"/UpdateEnabled=False " +
-
-			//// Не использовать Microsoft Update
-			//"/USEMICROSOFTUPDATE=False " +
-
-			//// Не предлагать Azure
-			//"/AZUREEXTENSION=0 " +
-
-			//// Текущий пользователь станет sysadmin
-			//"/ADDCURRENTUSERASSQLADMIN " +
-
-			////"/INDICATEPROGRESS " +
-			//"/IACCEPTSQLSERVERLICENSETERMS";
 
 			process.StartInfo.UseShellExecute =
 				true;
@@ -518,9 +532,10 @@ namespace RRStoSQL.Services
 
 			process.WaitForExit();
 
-			// ПОКАЗЫВАЕМ ТОЛЬКО ПРИ ОШИБКЕ
-			if (process.ExitCode != 0)
-			{
+            // ПОКАЗЫВАЕМ ТОЛЬКО ПРИ ОШИБКЕ
+            if (process.ExitCode != 0 &&
+				process.ExitCode != 3010) //3010 - требуется перезагрузка, но установка прошла успешно
+            {
 				MessageBox.Show(
 					"Ошибка установки SQL!\n\n" +
 					"ExitCode: " + process.ExitCode +
@@ -533,12 +548,11 @@ namespace RRStoSQL.Services
 					"Ошибка установки SQL: " +
 					process.ExitCode);
 			}
-
-			
+						
 		}
 
         private void DownloadSqlMedia(
-    string sqlDistribFolder)
+			string sqlDistribFolder)
         {
             // web installer рядом с RRStoSQL.exe
             string installerPath =
@@ -596,8 +610,8 @@ namespace RRStoSQL.Services
         /// Включает TCP и назначает порт 1433
         /// </summary>
         public void EnableTcp(
-	string sqlInstance)
-	{
+			string sqlInstance)
+			{
 		// SQLEXPRESS
 		string instanceName =
 			sqlInstance.Replace(
@@ -778,5 +792,66 @@ public void OpenFirewallPort()
 			}
 		}
 
-	}
+        /// <summary>
+		///  Проверяет если база данных с таким именем уже существует и возвращает доступное имя базы данных + _1, _2 и т.д.
+		/// </summary>
+		
+        public string GetAvailableDatabaseName(
+			string sqlInstance,
+			string webServiceLogin)
+        {
+            string baseName =
+                $"RRS_{webServiceLogin}";
+
+            string databaseName =
+                baseName;
+
+            int index = 1;
+
+            while (DatabaseExists(
+                sqlInstance,
+                databaseName))
+            {
+                databaseName =
+                    $"{baseName}_{index}";
+
+                index++;
+            }
+
+            return databaseName;
+        }
+
+        //вспомогательная функция для проверки существования базы данных
+        private bool DatabaseExists(
+			string sqlInstance,
+			string databaseName)
+        {
+            string connectionString =
+                $"Server={sqlInstance};" +
+                "Database=master;" +
+                "Trusted_Connection=True;" +
+                "TrustServerCertificate=True;";
+
+            using (var connection =
+                new SqlConnection(
+                    connectionString))
+            {
+                connection.Open();
+
+                using (var command =
+                    new SqlCommand(
+                        @"SELECT COUNT(*)
+                  FROM sys.databases
+                  WHERE name = @name",
+                        connection))
+                {
+                    command.Parameters.AddWithValue(
+                        "@name",
+                        databaseName);
+
+                    return (int)command.ExecuteScalar() > 0;
+                }
+            }
+        }
+    }
 }

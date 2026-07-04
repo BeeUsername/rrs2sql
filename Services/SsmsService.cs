@@ -134,7 +134,8 @@ namespace RRStoSQL.Services
             // Ждем окончания установки
             process.WaitForExit();
 
-            if (process.ExitCode != 0)
+            if (process.ExitCode != 0 &&
+                process.ExitCode != 3010) //3010 - требуется перезагрузка, но установка прошла успешно
             {
                 throw new Exception(
                     "Ошибка установки SSMS.\n\n" +

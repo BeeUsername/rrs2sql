@@ -11,77 +11,116 @@ namespace RRStoSQL.Services
 {
 	public class ConfigService
 	{
-		/// <summary>
-		/// Читает RemoteReg.exe.config
-		/// и извлекает параметры подключения к БД.
-		/// </summary>
-		/// <param name="configPath">
-		/// Полный путь до RemoteReg.exe.config
-		/// </param>
-		/// <returns>
-		/// Объект с параметрами приложения
-		/// </returns>
-		public AppConfig Read(string configPath)
-		{
-			// Говорим ConfigurationManager,
-			// что нужно читать внешний .config файл,
-			// а не конфиг нашей утилиты.
-			var map = new ExeConfigurationFileMap
-			{
-				ExeConfigFilename = configPath
-			};
+        /// <summary>
+        /// Читает RemoteReg.exe.config
+        /// и извлекает параметры подключения к БД.
+        /// </summary>
+        /// <param name="configPath">
+        /// Полный путь до RemoteReg.exe.config
+        /// </param>
+        /// <returns>
+        /// Объект с параметрами приложения
+        /// </returns>
+        
+        public AppConfig Read(string configPath)
+        {
+            // Говорим ConfigurationManager,
+            // что нужно читать внешний .config файл,
+            // а не конфиг нашей утилиты.
+            var map =
+                new ExeConfigurationFileMap
+                {
+                    ExeConfigFilename =
+                        configPath
+                };
 
-			Configuration config =
-				ConfigurationManager
-				.OpenMappedExeConfiguration(
-					map,
-					ConfigurationUserLevel.None);
+            Configuration config =
+                ConfigurationManager
+                .OpenMappedExeConfiguration(
+                    map,
+                    ConfigurationUserLevel.None);
 
-			// В конфиге может быть несколько строк
-			// подключения (например aspnetdb).
-			// Ищем именно Access MDB.
-			var connection =
-	config.ConnectionStrings
-		  .ConnectionStrings
-		  .Cast<ConnectionStringSettings>()
-		  .FirstOrDefault(x =>
-			  x.ConnectionString
-			   .IndexOf(
-				   "Provider=Microsoft.Jet.OLEDB",
-				   StringComparison.OrdinalIgnoreCase) >= 0);
+            // В конфиге может быть несколько строк
+            // подключения (например aspnetdb).
+            // Ищем именно Access MDB.
+            var connection =
+                config.ConnectionStrings
+                      .ConnectionStrings
+                      .Cast<ConnectionStringSettings>()
+                      .FirstOrDefault(x =>
+                      {
+                          try
+                          {
+                              var builder =
+                                  new OleDbConnectionStringBuilder(
+                                      x.ConnectionString);
 
-			if (connection == null)
-			{
-				throw new Exception(
-					"Строка подключения MDB не найдена");
-			}
+                              string provider =
+                                  builder["Provider"]?.ToString();
 
-			return new AppConfig
-			{
-				ConfigPath = configPath,
+                              return
+                                  provider.Equals(
+                                      "Microsoft.Jet.OLEDB.4.0",
+                                      StringComparison.OrdinalIgnoreCase)
+                                  ||
+                                  provider.StartsWith(
+                                      "Microsoft.ACE.OLEDB",
+                                      StringComparison.OrdinalIgnoreCase);
+                          }
+                          catch
+                          {
+                              return false;
+                          }
+                      });
+            
+            if (connection == null)
+            {
+                throw new Exception(
+                    "Строка подключения MDB не найдена");
+            }
 
-				ConnectionString =
-					connection.ConnectionString,
+            // Читаем нестандартную секцию ProgramSettings
+            XDocument doc =
+                XDocument.Load(
+                    configPath);
 
-				// Получаем полный путь до MDB
-				MdbPath =
-					ExtractMdbPath(
-						connection.ConnectionString,
-						configPath),
+            var programSettings =
+                doc.Descendants(
+                    "ProgramSettings")
+                .FirstOrDefault();
 
-				// DBType понадобится позже
-				// при переключении Access → SQL
-				DbType =
-					config.AppSettings
-						  .Settings["DBType"]
-						  ?.Value
-			};
-		}
+            return new AppConfig
+            {
+                ConfigPath =
+                    configPath,
 
-		/// <summary>
-		/// Извлекает путь MDB из connectionString.
-		/// </summary>
-		private string ExtractMdbPath(
+                ConnectionString =
+                    connection.ConnectionString,
+
+                // Получаем полный путь до MDB
+                MdbPath =
+                    ExtractMdbPath(
+                        connection.ConnectionString,
+                        configPath),
+
+                // Тип БД Access/Mssql
+                DbType =
+                    programSettings?
+                        .Attribute("DbType")
+                        ?.Value,
+
+                // Логин веб-сервиса используется
+                // для формирования имени SQL базы
+                WebServiceLogin =
+                    programSettings?
+                        .Attribute("WebServiceLogin")
+                        ?.Value
+            };
+        }
+        /// <summary>
+        /// Извлекает путь MDB из connectionString.
+        /// </summary>
+        private string ExtractMdbPath(
 			string connectionString,
 			string configPath)
 		{
@@ -128,7 +167,16 @@ namespace RRStoSQL.Services
 			string configPath,
 			AppConfig appConfig)
 		{
-			XDocument doc =
+
+            // =====================================================
+            // Создаем резервную копию конфига
+            // =====================================================
+
+            CreateConfigBackup(
+                configPath);
+
+            // =====================================================
+            XDocument doc =
 				XDocument.Load(
 					configPath);
 
@@ -137,8 +185,8 @@ namespace RRStoSQL.Services
 			// =====================================================
 
 			var programSettings =
-	doc.Descendants("ProgramSettings")
-	.FirstOrDefault();
+	            doc.Descendants("ProgramSettings")
+	            .FirstOrDefault();
 
 			if (programSettings != null)
 			{
@@ -147,24 +195,19 @@ namespace RRStoSQL.Services
 					"Mssql");
 			}
 
-			// =====================================================
-			// Формируем строку подключения SQL
-			// =====================================================
+            // =====================================================
+            // Формируем строку подключения SQL
+            // =====================================================
 
-			string sqlConnectionString =
-				"Provider=SQLOLEDB;" +
-				//$"Data Source={Environment.MachineName}" +
-				"Data Source=localhost\\SQLEXPRESS,1433;" +
- 				//$"\\SQLEXPRESS,1433;" +
-				"Password=RRS_999999999!;" +
-				"User ID=RRUser;" +
-				$"Initial Catalog={appConfig.SqlDatabaseName}";
+            string sqlConnectionString =
+                BuildLocalSqlConnectionString(
+                    appConfig);
 
-			// =====================================================
-			// Ищем connectionStrings
-			// =====================================================
+            // =====================================================
+            // Ищем connectionStrings
+            // =====================================================
 
-			var connectionElement =
+            var connectionElement =
 				doc.Descendants(
 					"add")
 				.FirstOrDefault(
@@ -213,41 +256,109 @@ namespace RRStoSQL.Services
 		/// <summary>
 		/// Формирует SQL connection string
 		/// </summary>
-		public string BuildSqlConnectionString(
-			AppConfig appConfig)
-		{
-			return
-				"Provider=SQLOLEDB;" +
-				$"Data Source={Environment.MachineName}" +
-				//"Data Source=localhost\\SQLEXPRESS,1433;" +
-				$"\\SQLEXPRESS,1433;" +
-				"Password=RRS_999999999!;" +
-				"User ID=RRUser;" +
-				$"Initial Catalog={appConfig.SqlDatabaseName}";
-		}
+		//public string BuildSqlConnectionString(
+		//	AppConfig appConfig)
+		//{
+		//	return
+		//		"Provider=SQLOLEDB;" +
+		//		$"Data Source={Environment.MachineName}" +
+		//		//"Data Source=localhost\\SQLEXPRESS,1433;" +
+		//		$"\\SQLEXPRESS,1433;" +
+		//		"Password=RRS_999999999!;" +
+		//		"User ID=RRUser;" +
+		//		$"Initial Catalog={appConfig.SqlDatabaseName}";
+		//}
 
-		/// <summary>
-		/// Копирует строку подключения
-		/// в буфер обмена
-		/// </summary>
-		public void CopyConnectionString(
-	AppConfig appConfig)
-		{
-			string connectionString =
-				BuildSqlConnectionString(
-					appConfig);
+        
+        //Копирование строки подключения к SQL Server в буфер обмена
+        public void CopyConnectionString(
+            AppConfig appConfig)
+                {
+                    string connectionString =
+                        BuildRemoteSqlConnectionString(
+                            appConfig);
 
-			//	string xml =
-			//$@"<connectionStrings>
-			// <add name=""Citilab.RemoteReg.Properties.Settings.CitilabConnectionString"" connectionString=""{connectionString}"" providerName=""System.Data.OleDb"" />\n</connectionStrings>\n";
+                    string xml =
+                $@"<connectionStrings>
+            <add
+                name=""Citilab.RemoteReg.Properties.Settings.CitilabConnectionString""
+                connectionString=""{connectionString}""
+                providerName=""System.Data.OleDb"" />
+        </connectionStrings>";
 
-			string xml = $@"<connectionStrings>
- <add name=""Citilab.RemoteReg.Properties.Settings.CitilabConnectionString"" connectionString=""{connectionString}"" providerName=""System.Data.OleDb"" />{Environment.NewLine}</connectionStrings>{Environment.NewLine}";
+                    Clipboard.SetText(
+                        xml);
+                }
 
-			Clipboard.SetText(
-				xml);
-		}
+        //Билдер для подключения к SQL Server на удаленном ПК (для копирования в буфер обмена)
+        private string BuildRemoteSqlConnectionString(
+            AppConfig appConfig)
+        {
+            return
+                "Provider=SQLOLEDB;" +
+                $"Data Source={Environment.MachineName}\\SQLEXPRESS,1433;" +
+                "User ID=RRUser;" +
+                "Password=RRS_999999999!;" +
+                $"Initial Catalog={appConfig.SqlDatabaseName}";
+        }
+
+        //Билдер для подключения к SQL Server на локальном ПК (для переключения конфига на SQL)
+        private string BuildLocalSqlConnectionString(
+            AppConfig appConfig)
+                {
+                    return
+                        "Provider=SQLOLEDB;" +
+                        "Data Source=LOCALHOST\\SQLEXPRESS,1433;" +
+                        "User ID=RRUser;" +
+                        "Password=RRS_999999999!;" +
+                        $"Initial Catalog={appConfig.SqlDatabaseName}";
+                }
+
+        
+        //фукция создания резервной копии конфига
+        private void CreateConfigBackup(
+            string configPath)
+                {
+            string folder =
+                Path.GetDirectoryName(
+                    configPath);
+
+            string fileNameWithoutExtension =
+                Path.GetFileNameWithoutExtension(
+                    configPath);
+
+            string extension =
+                Path.GetExtension(
+                    configPath);
+
+            string backupPath =
+                Path.Combine(
+                    folder,
+                    fileNameWithoutExtension +
+                    "_Access_Backup" +
+                    extension);
+
+            int counter = 1;
+
+            while (File.Exists(
+                backupPath))
+            {
+                backupPath =
+                    Path.Combine(
+                        folder,
+                        fileNameWithoutExtension +
+                        "_Access_Backup_" +
+                        counter +
+                        extension);
+
+                counter++;
+            }
+
+            File.Copy(
+                configPath,
+                backupPath);
+        }
 
 
-	}
+    }
 }

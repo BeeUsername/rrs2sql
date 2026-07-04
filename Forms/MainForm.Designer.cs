@@ -54,11 +54,11 @@
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox1.Location = new System.Drawing.Point(0, 0);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(279, 94);
+            this.groupBox1.Size = new System.Drawing.Size(279, 101);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Конфиги:";
-            this.groupBox1.Enter += new System.EventHandler(this.groupBox1_Enter);
+            //this.groupBox1.Enter += new System.EventHandler(this.groupBox1_Enter);
             // 
             // listBoxConfigs
             // 
@@ -67,26 +67,26 @@
             this.listBoxConfigs.HorizontalScrollbar = true;
             this.listBoxConfigs.Location = new System.Drawing.Point(3, 16);
             this.listBoxConfigs.Name = "listBoxConfigs";
-            this.listBoxConfigs.Size = new System.Drawing.Size(273, 75);
+            this.listBoxConfigs.Size = new System.Drawing.Size(273, 82);
             this.listBoxConfigs.TabIndex = 0;
-            this.listBoxConfigs.SelectedIndexChanged += new System.EventHandler(this.listBoxConfigs_SelectedIndexChanged);
+            //this.listBoxConfigs.SelectedIndexChanged += new System.EventHandler(this.listBoxConfigs_SelectedIndexChanged);
             // 
             // panelButtons
             // 
             this.panelButtons.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.panelButtons.Controls.Add(this.btnAddConfig);
             this.panelButtons.Controls.Add(this.btnConvert);
-            this.panelButtons.Location = new System.Drawing.Point(-1, 127);
+            this.panelButtons.Location = new System.Drawing.Point(-1, 135);
             this.panelButtons.Name = "panelButtons";
             this.panelButtons.Size = new System.Drawing.Size(279, 55);
             this.panelButtons.TabIndex = 1;
-            this.panelButtons.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint_1);
+            //this.panelButtons.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint_1);
             // 
             // btnAddConfig
             // 
-            this.btnAddConfig.Location = new System.Drawing.Point(3, 2);
+            this.btnAddConfig.Location = new System.Drawing.Point(3, 3);
             this.btnAddConfig.Name = "btnAddConfig";
-            this.btnAddConfig.Size = new System.Drawing.Size(94, 46);
+            this.btnAddConfig.Size = new System.Drawing.Size(83, 46);
             this.btnAddConfig.TabIndex = 1;
             this.btnAddConfig.Text = "Добавить конфиг";
             this.btnAddConfig.UseVisualStyleBackColor = true;
@@ -94,9 +94,9 @@
             // 
             // btnConvert
             // 
-            this.btnConvert.Location = new System.Drawing.Point(103, 2);
+            this.btnConvert.Location = new System.Drawing.Point(92, 3);
             this.btnConvert.Name = "btnConvert";
-            this.btnConvert.Size = new System.Drawing.Size(174, 46);
+            this.btnConvert.Size = new System.Drawing.Size(185, 46);
             this.btnConvert.TabIndex = 0;
             this.btnConvert.Text = "Конвертировать";
             this.btnConvert.UseVisualStyleBackColor = true;
@@ -126,7 +126,7 @@
             this.listViewSteps.TabIndex = 0;
             this.listViewSteps.UseCompatibleStateImageBehavior = false;
             this.listViewSteps.View = System.Windows.Forms.View.Details;
-            this.listViewSteps.SelectedIndexChanged += new System.EventHandler(this.listViewSteps_SelectedIndexChanged);
+            //this.listViewSteps.SelectedIndexChanged += new System.EventHandler(this.listViewSteps_SelectedIndexChanged);
             // 
             // columnHeader2
             // 
@@ -144,7 +144,7 @@
             this.chkInstallSSMS.AutoSize = true;
             this.chkInstallSSMS.Checked = true;
             this.chkInstallSSMS.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkInstallSSMS.Location = new System.Drawing.Point(145, 101);
+            this.chkInstallSSMS.Location = new System.Drawing.Point(6, 3);
             this.chkInstallSSMS.Name = "chkInstallSSMS";
             this.chkInstallSSMS.Size = new System.Drawing.Size(119, 17);
             this.chkInstallSSMS.TabIndex = 3;
@@ -156,38 +156,39 @@
             this.chkDeleteBullzip.AutoSize = true;
             this.chkDeleteBullzip.Checked = true;
             this.chkDeleteBullzip.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkDeleteBullzip.Location = new System.Drawing.Point(14, 3);
+            this.chkDeleteBullzip.Location = new System.Drawing.Point(135, 3);
             this.chkDeleteBullzip.Name = "chkDeleteBullzip";
-            this.chkDeleteBullzip.Size = new System.Drawing.Size(102, 17);
+            this.chkDeleteBullzip.Size = new System.Drawing.Size(135, 17);
             this.chkDeleteBullzip.TabIndex = 4;
-            this.chkDeleteBullzip.Text = "Удалить Bullzip";
+            this.chkDeleteBullzip.Text = "Удалить Bullzip после";
             this.chkDeleteBullzip.UseVisualStyleBackColor = true;
             // 
             // panel1
             // 
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel1.Controls.Add(this.chkDeleteBullzip);
-            this.panel1.Location = new System.Drawing.Point(3, 97);
+            this.panel1.Controls.Add(this.chkInstallSSMS);
+            this.panel1.Location = new System.Drawing.Point(3, 107);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(272, 24);
             this.panel1.TabIndex = 5;
-            this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint_2);
+            //this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint_2);
             // 
             // panel2
             // 
             this.panel2.Controls.Add(this.listViewSteps);
-            this.panel2.Location = new System.Drawing.Point(3, 184);
+            this.panel2.Location = new System.Drawing.Point(3, 192);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(273, 317);
             this.panel2.TabIndex = 6;
+            //this.panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.panel2_Paint);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(279, 504);
+            this.ClientSize = new System.Drawing.Size(279, 512);
             this.Controls.Add(this.panel2);
-            this.Controls.Add(this.chkInstallSSMS);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.panelButtons);
@@ -197,14 +198,13 @@
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Load += new System.EventHandler(this.MainForm_Load);
+            //this.Load += new System.EventHandler(this.MainForm_Load);
             this.groupBox1.ResumeLayout(false);
             this.panelButtons.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.panel2.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
 		}
 

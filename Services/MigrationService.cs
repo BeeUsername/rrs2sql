@@ -44,10 +44,7 @@ namespace RRStoSQL.Services
         /// <param name="updateStep">
         /// Делегат обновления статуса шага
         /// </param>
-
-        //public async Task RunAsync(
-        //	string configPath,
-        //	Action<string, StepStatus> updateStep)
+		        
         public async Task RunAsync(
 			Form owner,
 			string configPath,
@@ -63,7 +60,29 @@ namespace RRStoSQL.Services
 			//_ssmsService.EnsureInstalled();
 			//return;
 
-			foreach (var step in steps)
+			//Объект с параметрами текущей миграции
+		    appConfig =
+			   _configService.Read(
+				   configPath);
+
+			// Проверяем, не запущен ли УР
+			if (IsRemoteRegRunning(
+					appConfig))
+			{
+				MessageBox.Show(
+					owner,
+					"Закройте УР" +
+					"и не открывайте ее до завершения миграции.",
+					"УР запущен",
+					MessageBoxButtons.OK,
+					MessageBoxIcon.Warning);
+
+				return;
+			}
+
+            //Запускаем шаги миграции
+
+            foreach (var step in steps)
 			{
 				// Устанавливаем статус:
 				// "выполняется"
@@ -88,14 +107,15 @@ namespace RRStoSQL.Services
 						appConfig.SqlInstance =
 							@".\SQLEXPRESS";
 
-						// Генерируем имя новой базы
-						appConfig.SqlDatabaseName =
-							$"RRS_{DateTime.Now:yyyyMMdd_HHmmss}";
-
-						
-
-						// Проверяем существование MDB
-						if (!File.Exists(
+                        // Формируем уникальное имя SQL базы
+                        // на основании WebServiceLogin
+                        appConfig.SqlDatabaseName =
+                            _sqlService.GetAvailableDatabaseName(
+                                appConfig.SqlInstance,
+                                appConfig.WebServiceLogin);
+												
+                        // Проверяем существование MDB
+                        if (!File.Exists(
 							appConfig.MdbPath))
 						{
 							throw new Exception(
@@ -139,7 +159,7 @@ namespace RRStoSQL.Services
 					// Разрешаем mixed authentication
 					// ============================================
 
-					else if (step.Name == "Разрешаем mixed authentication")
+					else if (step.Name == "Разрешаем Mixed authentication")
 					{
 						_sqlService
 							.EnableMixedAuthentication(
@@ -158,7 +178,6 @@ namespace RRStoSQL.Services
 							.RestartSqlService(
 								appConfig.SqlInstance);
 					}
-
 
 
 					// ============================================
@@ -200,7 +219,8 @@ namespace RRStoSQL.Services
 						Process process =
 							_converter.Convert(
 								appConfig);
-
+                        
+						// Запускаем форму с логом конвертации
                         using (var logForm =
 							new ConversionLogForm(
 								owner,
@@ -210,6 +230,7 @@ namespace RRStoSQL.Services
 
                             if (result == DialogResult.Abort)
                             {
+                                _bullzipService.CopyBullzipLog();
                                 throw new Exception(
                                     "Конвертация Bullzip завершилась с ошибкой.");
                             }
@@ -232,7 +253,7 @@ namespace RRStoSQL.Services
 						
 						if (process.ExitCode != 0)
 						{
-							_bullzipService.CopyBullzipLog();
+							//_bullzipService.CopyBullzipLog();
 							throw new Exception(
 								"Ошибка конвертации Bullzip.\n\n" +
 								"Код завершения: " +
@@ -290,7 +311,7 @@ namespace RRStoSQL.Services
 
 					else if (
 						step.Name ==
-						"Меняем connectionStrings")
+						"Меняем ConnectionStrings")
 					{
 						_configService.SwitchToSql(
 							configPath,
@@ -388,7 +409,8 @@ namespace RRStoSQL.Services
 			}
 		}
 
-		private bool IsCriticalStep(
+        //список этапов ошибка в которых приводит к остановке миграции
+        private bool IsCriticalStep(
 			string stepName)
 		{
 			switch (stepName)
@@ -431,7 +453,7 @@ namespace RRStoSQL.Services
         new MigrationStep("Читаем конфиг"),
 		new MigrationStep("Установка SQL"),
 		new MigrationStep("Установка Bullzip msa2sql"),
-		new MigrationStep("Разрешаем mixed authentication"),
+		new MigrationStep("Разрешаем Mixed authentication"),
 		new MigrationStep("Перезапуск службы SQL"),
 		new MigrationStep("Создаём RRUser"),
 		new MigrationStep("Патчим Access базу"),
@@ -439,7 +461,7 @@ namespace RRStoSQL.Services
 		new MigrationStep("Выдаём права RRUser"),
 		new MigrationStep("Назначаем порт 1433 для SQL"),
 		new MigrationStep("Открываем 1433 в брандмауэре"),
-		new MigrationStep("Меняем connectionStrings"),
+		new MigrationStep("Меняем ConnectionStrings"),
 		new MigrationStep("Патчим SQL базу"),
 		new MigrationStep("Строка подключения в буфер обмена"),
 		new MigrationStep("Запускаем УР"),
@@ -475,8 +497,50 @@ namespace RRStoSQL.Services
 					"RemoteReg.exe не найден");
 			}
 
-			Process.Start(
-				appConfig.ExePath);
-		}
-	}
+            //Process.Start(
+            //	appConfig.ExePath);
+
+            var process =
+			 new Process();
+
+            process.StartInfo.FileName =
+                appConfig.ExePath;
+
+            process.StartInfo.WorkingDirectory =
+                appConfig.AppFolder;
+
+            process.Start();
+        }
+
+        //Проверка запущен ли RemoteReg.exe, вызывается перед конвертацией базы
+        private bool IsRemoteRegRunning(
+			AppConfig appConfig)
+				{
+					string expectedPath =
+						Path.GetFullPath(
+							appConfig.ExePath);
+
+					foreach (var process in
+						Process.GetProcessesByName(
+							"RemoteReg"))
+					{
+						try
+						{
+							if (string.Equals(
+								process.MainModule.FileName,
+								expectedPath,
+								StringComparison.OrdinalIgnoreCase))
+							{
+								return true;
+							}
+						}
+						catch
+						{
+						}
+					}
+
+					return false;
+				}
+
+    }
 }

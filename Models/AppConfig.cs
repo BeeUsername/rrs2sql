@@ -28,10 +28,14 @@ namespace RRStoSQL.Models
 		/// </summary>
 		public string DbType { get; set; }
 
-		/// <summary>
-		/// Каталог программы УР
-		/// </summary>
-		public string AppFolder
+        public string WebServiceLogin { get; set; }
+
+
+
+        /// <summary>
+        /// Каталог программы УР
+        /// </summary>
+        public string AppFolder
 		{
 			get
 			{

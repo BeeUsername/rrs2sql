@@ -12,7 +12,7 @@ namespace RRStoSQL.Forms.UI
 			AddStep(listView, "Читаем конфиг");
 			AddStep(listView, "Установка SQL");
 			AddStep(listView, "Установка Bullzip msa2sql");			
-			AddStep(listView, "Разрешаем mixed authentication");
+			AddStep(listView, "Разрешаем Mixed authentication");
 			AddStep(listView, "Перезапуск службы SQL");
 			AddStep(listView, "Создаём RRUser");
 			AddStep(listView, "Патчим Access базу");			
@@ -20,7 +20,7 @@ namespace RRStoSQL.Forms.UI
 			AddStep(listView, "Выдаём права RRUser");
 			AddStep(listView, "Назначаем порт 1433 для SQL");
 			AddStep(listView, "Открываем 1433 в брандмауэре");
-			AddStep(listView, "Меняем connectionStrings");
+			AddStep(listView, "Меняем ConnectionStrings");
 			AddStep(listView, "Патчим SQL базу");
 			AddStep(listView, "Строка подключения в буфер обмена");
 			AddStep(listView, "Запускаем УР");

@@ -13,6 +13,10 @@ namespace RRStoSQL.Forms
         private readonly Timer _timer =
             new Timer();
 
+        // Последнее время изменения файла лога
+        private DateTime _lastWriteTime =
+            DateTime.MinValue;
+
         public ConversionLogForm(
             Form owner,
             string logFile)
@@ -51,14 +55,26 @@ namespace RRStoSQL.Forms
         {
             try
             {
-                // Лог ещё не появился
-                if (!File.Exists(
-                    _logFile))
+                if (!File.Exists(_logFile))
                 {
                     return;
                 }
 
-                // Читаем текущее содержимое лога
+                DateTime currentWriteTime =
+                    File.GetLastWriteTime(
+                        _logFile);
+
+                // Файл не изменился
+                if (currentWriteTime ==
+                    _lastWriteTime)
+                {
+                    return;
+                }
+
+                _lastWriteTime =
+                    currentWriteTime;
+
+                // Читаем только если файл изменился
                 string text =
                     File.ReadAllText(
                         _logFile);
@@ -87,15 +103,42 @@ namespace RRStoSQL.Forms
                 }
 
                 // Bullzip завершился с ошибкой
-                if (text.IndexOf(
-                    "Error in function",
-                    StringComparison.OrdinalIgnoreCase) >= 0)
+                bool hasError =
+                    text.IndexOf(
+                        "Error in function",
+                        StringComparison.OrdinalIgnoreCase) >= 0;
+
+                bool transferAborted =
+                    text.IndexOf(
+                        "Transfer was aborted",
+                        StringComparison.OrdinalIgnoreCase) >= 0;
+
+                bool brokenRecords =
+                    text.Contains("#########");
+
+                if (hasError || transferAborted)
                 {
                     _timer.Stop();
 
-                    MessageBox.Show(
+                    string message =
                         "Во время конвертации обнаружена ошибка.\n\n" +
-                        "Проверьте лог конвертации.",
+                        "Проверьте лог конвертации.";
+
+                    // Типичная ситуация:
+                    // битые записи в Access приводят
+                    // к вставке ######## вместо данных
+                    if (transferAborted && brokenRecords)
+                    {
+                        message =
+                            "Во время конвертации обнаружены поврежденные записи " +
+                            "в таблицах базы данных.\n\n" +
+                            "Требуется удалить или исправить поврежденные записи " +
+                            "в Access базе данных.\n\n" +
+                            "Подробности смотрите в логе конвертации.";
+                    }
+
+                    MessageBox.Show(
+                        message,
                         "Ошибка",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error);

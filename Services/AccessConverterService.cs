@@ -80,9 +80,9 @@ namespace RRStoSQL.Services
 		/// в settings.ini
 		/// </summary>
 		private string ReplaceIniValue(
-	string text,
-	string key,
-	string value)
+			string text,
+			string key,
+			string value)
 		{
 			string[] lines =
 				text.Split(
