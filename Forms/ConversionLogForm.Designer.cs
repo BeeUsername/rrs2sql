@@ -57,8 +57,9 @@
             this.Text = "Лог конвертации";
             this.ResumeLayout(false);
             this.PerformLayout();
+            this.FormClosing += ConversionLogForm_FormClosing;
 
-		}
+        }
 
 		#endregion
 

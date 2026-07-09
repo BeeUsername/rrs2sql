@@ -22,19 +22,42 @@ namespace RRStoSQL
     /// </summary>
     public partial class MainForm : Form
     {
+        ///// <summary>
+        ///// Сервис поиска RemoteReg.exe.config
+        ///// в стандартных каталогах.
+        ///// </summary>
+        //private readonly ConfigFinderService _finderService =
+        //    new ConfigFinderService();
+
+        ///// <summary>
+        ///// Инициализирует список шагов миграции.
+        ///// </summary>
+        //private readonly StepListInitializer
+        //    _stepInitializer =
+        //        new StepListInitializer();
+
+        ///// <summary>
+        ///// Управляет отображением состояний шагов:
+        ///// выполняется, успешно, ошибка.
+        ///// </summary>
+        //private StepStatusManager _stepManager;
+
+        ///// <summary>
+        ///// Основной сервис миграции.
+        ///// </summary>
+        //private readonly MigrationService _migrationService =
+        //    new MigrationService();
+
         /// <summary>
         /// Сервис поиска RemoteReg.exe.config
         /// в стандартных каталогах.
         /// </summary>
-        private readonly ConfigFinderService _finderService =
-            new ConfigFinderService();
+        private readonly ConfigFinderService _finderService;
 
         /// <summary>
         /// Инициализирует список шагов миграции.
         /// </summary>
-        private readonly StepListInitializer
-            _stepInitializer =
-                new StepListInitializer();
+        private readonly StepListInitializer _stepInitializer;
 
         /// <summary>
         /// Управляет отображением состояний шагов:
@@ -45,24 +68,35 @@ namespace RRStoSQL
         /// <summary>
         /// Основной сервис миграции.
         /// </summary>
-        private readonly MigrationService _migrationService =
-            new MigrationService();
+        private readonly MigrationService _migrationService;
+
 
         public MainForm()
         {
+            //// Сначала ВСЕГДА инициализируем компоненты
+            //InitializeComponent();
+
+            //// Если мы в режиме дизайна - выходим, не выполняя остальной код
+            //if (DesignMode)
+            //    return;
+
+            // 1. Сначала ВСЕГДА инициализируем компоненты
             InitializeComponent();
 
-            // Создаем список шагов миграции
+            // 2. Если мы в режиме дизайна - выходим, НЕ создавая сервисы
+            if (DesignMode)
+                return;
+
+            // 3. Теперь можно создавать сервисы (только в рантайме)
+            _finderService = new ConfigFinderService();
+            _stepInitializer = new StepListInitializer();
+            _migrationService = new MigrationService();
+
+            // Теперь можно выполнять остальную логику
             _stepInitializer.Initialize(listViewSteps);
-
-            // Создаем менеджер статусов шагов
-            _stepManager =
-                new StepStatusManager(listViewSteps);
-
-            // Загружаем найденные конфиги
+            _stepManager = new StepStatusManager(listViewSteps);
             LoadConfigs();
         }
-
         /// <summary>
         /// Загружает найденные конфиги
         /// в список.

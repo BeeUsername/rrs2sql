@@ -20,7 +20,7 @@ namespace RRStoSQL.Services
 		{
 			string accessConnection =
 				$@"Provider=Microsoft.Jet.OLEDB.4.0;
-Data Source={mdbPath};";
+				Data Source={mdbPath};";
 
 			string sqlConnection =
 				$"Server={sqlInstance};" +

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -33,6 +34,10 @@ namespace RRStoSQL.Services
 		private readonly BullzipService _bullzipService = new BullzipService();
 		private readonly AccessPatchService _accessPatchService = new AccessPatchService();
         private readonly SsmsService _ssmsService = new SsmsService();
+        private readonly AccessCompactService _accessCompactService = new AccessCompactService();
+        private readonly AccessCorruptedRecordsService _corruptedRecordsService = new AccessCorruptedRecordsService();
+        private readonly SqlTemplateDatabaseService _templateDatabaseService = new SqlTemplateDatabaseService();
+        private readonly AccessBaseService _accessBaseService = new AccessBaseService();
 
         /// <summary>
         /// Запускает миграцию.
@@ -44,7 +49,7 @@ namespace RRStoSQL.Services
         /// <param name="updateStep">
         /// Делегат обновления статуса шага
         /// </param>
-		        
+
         public async Task RunAsync(
 			Form owner,
 			string configPath,
@@ -73,12 +78,29 @@ namespace RRStoSQL.Services
 					owner,
 					"Закройте УР" +
 					"и не открывайте ее до завершения миграции.",
-					"УР запущен",
+					"УР запущена",
 					MessageBoxButtons.OK,
 					MessageBoxIcon.Warning);
 
 				return;
 			}
+
+            //        //переменная для проверки, является ли база УР новой 
+            //        bool isNewDatabase =
+            //_templateDatabaseService
+            //	.ShouldCreateFromTemplate(
+            //		appConfig.MdbPath);
+
+            //        if (isNewDatabase)
+            //        {
+            //            ReplaceWithBlankAccessDatabase(
+            //                appConfig);
+            ////MessageBox.Show("Проверь базу");
+            //        }
+
+            //Заменяем новую базу новой базой с правильной структурой
+            _accessBaseService.ReplaceIfNewDatabase(
+				appConfig.MdbPath);
 
             //Запускаем шаги миграции
 
@@ -103,19 +125,9 @@ namespace RRStoSQL.Services
 							_configService.Read(
 								configPath);
 
-						// SQL по умолчанию
-						appConfig.SqlInstance =
-							@".\SQLEXPRESS";
-
-                        // Формируем уникальное имя SQL базы
-                        // на основании WebServiceLogin
-                        appConfig.SqlDatabaseName =
-                            _sqlService.GetAvailableDatabaseName(
-                                appConfig.SqlInstance,
-                                appConfig.WebServiceLogin);
-												
-                        // Проверяем существование MDB
-                        if (!File.Exists(
+						
+						// Проверяем существование MDB
+						if (!File.Exists(
 							appConfig.MdbPath))
 						{
 							throw new Exception(
@@ -124,11 +136,74 @@ namespace RRStoSQL.Services
 					}
 
 					// ============================================
-					// Проверка/установка SQL
+					// Сжимаем базу Access
 					// ============================================
 
-					else if (step.Name == "Установка SQL")
+					else if (
+						step.Name ==
+						"Сжимаем базу")
 					{
+						//continue;
+						_accessCompactService.Compact(
+							appConfig.MdbPath);
+
+						//иногда Windows еще несколько десятков миллисекунд держит дескриптор файла. Поэтому перед следующим этапом можно сделать небольшое ожидание:
+						await Task.Delay(300);
+
+					}
+
+
+					// ============================================
+					// Ищем поврежденные таблицы
+					// ============================================
+
+					else if (
+						step.Name ==
+						"Ищем поврежденные таблицы")
+					{
+						//Если база новая, то проверку на битые записи пропускаем.
+						//if (!isNewDatabase)
+						//{
+
+
+							var corrupted =
+								_corruptedRecordsService
+									.FindCorruptedRecords(
+										appConfig.MdbPath);
+
+							if (corrupted.Count > 0)
+							{
+								var sb = new StringBuilder();
+
+								sb.AppendLine(
+									"В базе данных обнаружены поврежденные записи.");
+								sb.AppendLine();
+								sb.AppendLine(
+									"Проверьте следующие таблицы и поля:");
+								sb.AppendLine();
+
+								foreach (var item in corrupted)
+								{
+									sb.AppendLine(
+										$"{item.TableName} -> {item.FieldName}");
+								}
+
+								//MessageHelper.Show(
+								//	sb.ToString(),
+								//	"Обнаружены поврежденные записи");
+								throw new Exception(
+									sb.ToString());
+                        }
+													
+					}
+
+					// ============================================
+					// Проверка/Установка sql
+					// ============================================
+
+					else if (step.Name == "Установка sql")
+					{
+						//return;
 						var sql =
 							_sqlService
 							.EnsureSqlInstalled();
@@ -136,22 +211,31 @@ namespace RRStoSQL.Services
 						appConfig.SqlInstance =
 							sql.InstanceName;
 
-                        //return;
+						// SQL по умолчанию !!!!!!!!!
+						appConfig.SqlInstance =
+							@".\SQLEXPRESS";
 
-                    }
+						// Формируем уникальное имя SQL базы
+						// на основании WebServiceLogin
+						appConfig.SqlDatabaseName =
+							_sqlService.GetAvailableDatabaseName(
+								appConfig.SqlInstance,
+								appConfig.WebServiceLogin);
+
+					}
 
 					// ============================================
-					// Установка Bullzip msa2sql
+					// Установка bullzip msa2sql
 					// ============================================
 
 					else if (
 						step.Name ==
-						"Установка Bullzip msa2sql")
+						"Установка bullzip msa2sql")
 					{
 						string exePath =
 							_bullzipService
 								.EnsureInstalled();
-												
+
 					}
 
 
@@ -159,7 +243,7 @@ namespace RRStoSQL.Services
 					// Разрешаем mixed authentication
 					// ============================================
 
-					else if (step.Name == "Разрешаем Mixed authentication")
+					else if (step.Name == "Разрешаем mixed authentication")
 					{
 						_sqlService
 							.EnableMixedAuthentication(
@@ -167,12 +251,12 @@ namespace RRStoSQL.Services
 					}
 
 					// ============================================
-					// Перезапуск службы SQL
+					// Перезапуск службы sql
 					// ============================================
 
 					else if (
 						step.Name ==
-						"Перезапуск службы SQL")
+						"Перезапуск службы sql")
 					{
 						_sqlService
 							.RestartSqlService(
@@ -181,12 +265,12 @@ namespace RRStoSQL.Services
 
 
 					// ============================================
-					// Создаём RRUser
+					// Создаём rruser
 					// ============================================
 
 					else if (
 						step.Name ==
-						"Создаём RRUser")
+						"Создаём rruser")
 					{
 						_sqlService
 							.CreateRRUser(
@@ -194,81 +278,46 @@ namespace RRStoSQL.Services
 					}
 
 					// ============================================
-					//  Патчим Access базу
+					//  Патчим access базу
 					// ============================================
 
 					else if (
+
+
 						step.Name ==
-						"Патчим Access базу")
+						"Патчим access базу")
 					{
-						_accessPatchService
+						//if (!isNewDatabase)
+						//{
+							_accessPatchService
 							.ExecutePatches(
 								appConfig.MdbPath);
-						
+						//}
 					}
 
-					// ============================================
-					// Конвертируем базу
-					// ============================================
+                    
+                    // ============================================
+                    // Конвертируем базу
+                    // ============================================
 
-					else if (
-						step.Name ==
-						"Конвертируем базу")
-					{
-						// запускаем Bullzip
-						Process process =
-							_converter.Convert(
-								appConfig);
+                    else if (
+                        step.Name ==
+                        "Конвертируем базу")
+                    {
+                        // Конвертируем существующую Access-базу.
+                            ConvertAccessDatabase(
+                                owner,
+                                appConfig);
                         
-						// Запускаем форму с логом конвертации
-                        using (var logForm =
-							new ConversionLogForm(
-								owner,
-								_converter.GetLogFilePath()))
-                        {
-                            var result = logForm.ShowDialog(owner);
+                    }
 
-                            if (result == DialogResult.Abort)
-                            {
-                                _bullzipService.CopyBullzipLog();
-                                throw new Exception(
-                                    "Конвертация Bullzip завершилась с ошибкой.");
-                            }
-                        }
-                        
-                        //проверяем результат
-                        if (!process.HasExited)
-						{
-							process.WaitForExit();
-						}
+                    // ============================================
+                    // Выдаём права rruser
+                    // ============================================
 
-						try
-						{
-							_bullzipService.CopyBullzipLog();
-						}
-						catch
-						{
-							// лог не должен ломать миграцию
-						}
-						
-						if (process.ExitCode != 0)
-						{
-							//_bullzipService.CopyBullzipLog();
-							throw new Exception(
-								"Ошибка конвертации Bullzip.\n\n" +
-								"Код завершения: " +
-								process.ExitCode);
-						}
-					}
-
-
-					// ============================================
-					// Выдаём права RRUser
-					// ============================================
-
-					else if (
+                    else if (
 						step.Name ==
-						"Выдаём права RRUser")
+						"Выдаём права rruser")
 					{
 						_sqlService
 							.GrantDatabaseRights(
@@ -276,12 +325,12 @@ namespace RRStoSQL.Services
 								appConfig.SqlDatabaseName);
 					}
 					// ============================================
-					// Разрешаем TCP 1433 SQL. Назначаем порт 1433 для SQL
+					// Разрешаем TCP 1433 SQL. Назначаем порт 1433 для sql
 					// ============================================
 
 					else if (
 						step.Name ==
-						"Назначаем порт 1433 для SQL")
+						"Назначаем порт 1433 для sql")
 					{
 						_sqlService.EnableTcp(
 							appConfig.SqlInstance);
@@ -306,26 +355,28 @@ namespace RRStoSQL.Services
 
 
 					// ============================================
-					// Меняем connectionStrings
+					// Меняем connectionstrings
 					// ============================================
 
 					else if (
 						step.Name ==
-						"Меняем ConnectionStrings")
+						"Меняем connectionstrings")
 					{
 						_configService.SwitchToSql(
 							configPath,
 							appConfig);
 					}
 					// ============================================
-					// Патчим SQL базу
+					// Патчим sql базу
 					// ============================================
 
-					else if (step.Name =="Патчим SQL базу")
+					else if (step.Name == "Патчим sql базу")
 					{
-						_patchService.ExecutePatches(
-							appConfig.SqlInstance,
-							appConfig.SqlDatabaseName);
+                        
+                            _patchService.ExecutePatches(
+								appConfig.SqlInstance,
+								appConfig.SqlDatabaseName);
+                                                    
 					}
 					// ============================================
 					// Строка подключения в буфер обмена
@@ -352,33 +403,33 @@ namespace RRStoSQL.Services
 							appConfig);
 					}
 
-                    // ============================================
-                    // Установка SQL Managment
-                    // ============================================
+					// ============================================
+					// Установка sql managment
+					// ============================================
 
-                    else if (
-                        step.Name ==
-                        "Установка SQL Management")
-                    {
-                        _ssmsService.EnsureInstalled();
-                    }
-
-
-                    // ============================================
-                    // Удаляем Bullzip
-                    // ============================================
-
-
-                    else if (
+					else if (
 						step.Name ==
-						"Удаляем Bullzip")
-                    {
-                        _bullzipService.Uninstall();
-                    }
-
-                    else
+						"Установка sql management")
 					{
-						await ExecuteStep(step);
+						_ssmsService.EnsureInstalled();
+					}
+
+
+					// ============================================
+					// Удаляем bullzip
+					// ============================================
+
+
+					else if (
+						step.Name ==
+						"Удаляем bullzip")
+					{
+						_bullzipService.Uninstall();
+					}
+
+					else
+					{
+						//await ExecuteStep(step);
 					}
 									
 
@@ -416,12 +467,13 @@ namespace RRStoSQL.Services
 			switch (stepName)
 			{
 				case "Читаем конфиг":
-				case "Установка SQL":
-				//case "Разрешаем mixed authentication":
-				case "Перезапуск службы SQL":
-				case "Создаём RRUser":
+				case "Установка sql":                    
+                case "Сжимаем базу":
+                case "Ищем поврежденные таблицы":
+                case "Перезапуск службы sql":
+				case "Создаём rruser":
 				case "Конвертируем базу":
-				//case "Выдаём права RRUser":
+				
 					return true;
 
 				default:
@@ -432,12 +484,12 @@ namespace RRStoSQL.Services
 		/// Временная заглушка для
 		/// ещё не реализованных шагов.
 		/// </summary>
-		private async Task ExecuteStep(
-			MigrationStep step)
-		{
-			await Task.Delay(1000);
+		//private async Task ExecuteStep(
+		//	MigrationStep step)
+		//{
+		//	await Task.Delay(1000);
 			
-		}
+		//}
 
         /// <summary>
         /// Возвращает список шагов миграции.
@@ -451,18 +503,20 @@ namespace RRStoSQL.Services
             new List<MigrationStep>
             {
         new MigrationStep("Читаем конфиг"),
-		new MigrationStep("Установка SQL"),
-		new MigrationStep("Установка Bullzip msa2sql"),
-		new MigrationStep("Разрешаем Mixed authentication"),
-		new MigrationStep("Перезапуск службы SQL"),
-		new MigrationStep("Создаём RRUser"),
-		new MigrationStep("Патчим Access базу"),
+        new MigrationStep("Сжимаем базу"),
+        new MigrationStep("Ищем поврежденные таблицы"),
+        new MigrationStep("Установка sql"),
+		new MigrationStep("Установка bullzip msa2sql"),
+		new MigrationStep("Разрешаем mixed authentication"),
+		new MigrationStep("Перезапуск службы sql"),
+		new MigrationStep("Создаём rruser"),
+		new MigrationStep("Патчим access базу"),
 		new MigrationStep("Конвертируем базу"),
-		new MigrationStep("Выдаём права RRUser"),
-		new MigrationStep("Назначаем порт 1433 для SQL"),
+		new MigrationStep("Выдаём права rruser"),
+		new MigrationStep("Назначаем порт 1433 для sql"),
 		new MigrationStep("Открываем 1433 в брандмауэре"),
-		new MigrationStep("Меняем ConnectionStrings"),
-		new MigrationStep("Патчим SQL базу"),
+		new MigrationStep("Меняем connectionstrings"),
+		new MigrationStep("Патчим sql базу"),
 		new MigrationStep("Строка подключения в буфер обмена"),
 		new MigrationStep("Запускаем УР"),
 		};
@@ -471,30 +525,58 @@ namespace RRStoSQL.Services
             {
                 steps.Add(
                     new MigrationStep(
-                        "Установка SQL Management"));
+                        "Установка sql management"));
             }
 
             if (options.DeleteBullzip)
             {
                 steps.Add(
                     new MigrationStep(
-                        "Удаляем Bullzip"));
+                        "Удаляем bullzip"));
             }
 
             return steps;
         }
 
-		/// <summary>
-		/// Запускает RemoteReg.exe
-		/// </summary>
-		private void StartRemoteReg(
+        //Заменяет новую базу Access на пустую, но с нужной структурой. 
+        /// <summary>
+        /// Заменяет исходную базу данных
+        /// пустой базой из каталога Misc.
+        /// </summary>
+        /// <param name="appConfig">
+        private void ReplaceWithBlankAccessDatabase(
+			AppConfig appConfig)
+        {
+            string blankDatabase =
+                Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    @"Misc\Data.mdb");
+
+            if (!File.Exists(blankDatabase))
+            {
+                throw new FileNotFoundException(
+                    "Не найден шаблон пустой базы Access.",
+                    blankDatabase);
+            }
+
+            File.Copy(
+                blankDatabase,
+                appConfig.MdbPath,
+                true);
+        }
+        /// <summary>
+        /// Запускает RemoteReg.exe
+        /// </summary>
+        private void StartRemoteReg(
 			AppConfig appConfig)
 		{
-			if (!File.Exists(
-				appConfig.ExePath))
+            string launcherPath = appConfig.ExePath.Replace("RemoteReg.exe", "RemoteReg.Launcher.exe");
+
+            if (!File.Exists(
+                launcherPath))
 			{
 				throw new Exception(
-					"RemoteReg.exe не найден");
+                    "RemoteReg.Launcher.exe не найден");
 			}
 
             //Process.Start(
@@ -504,7 +586,7 @@ namespace RRStoSQL.Services
 			 new Process();
 
             process.StartInfo.FileName =
-                appConfig.ExePath;
+                launcherPath;
 
             process.StartInfo.WorkingDirectory =
                 appConfig.AppFolder;
@@ -541,6 +623,74 @@ namespace RRStoSQL.Services
 
 					return false;
 				}
+
+        /// <summary>
+        /// Выполняет конвертацию Access-базы
+        /// в SQL Server с помощью Bullzip.
+        /// </summary>
+        private void ConvertAccessDatabase(
+            Form owner,
+            AppConfig appConfig)
+        {
+            Process process =
+                _converter.Convert(
+                    appConfig);
+
+            try
+            {
+                using (var logForm =
+                    new ConversionLogForm(
+                        owner,
+                        _converter.GetLogFilePath()))
+                {
+                    DialogResult result =
+                        logForm.ShowDialog(owner);
+
+                    if (result == DialogResult.Abort)
+                    {
+                        if (!process.HasExited)
+                        {
+                            process.Kill();
+                            process.WaitForExit();
+                        }
+
+                        if (logForm.ConversionCanceledByUser)
+                        {
+                            throw new Exception(
+                                "Конвертация была прервана пользователем.");
+                        }
+
+                        throw new Exception(
+                            "Конвертация Bullzip завершилась с ошибкой.");
+                    }
+                }
+
+                if (!process.HasExited)
+                {
+                    process.WaitForExit();
+                }
+
+                if (process.ExitCode != 0)
+                {
+                    throw new Exception(
+                        "Ошибка конвертации Bullzip.\r\n\r\n" +
+                        "Код завершения: " +
+                        process.ExitCode);
+                }
+            }
+            finally
+            {
+                try
+                {
+                    _bullzipService.CopyBullzipLog();
+                }
+                catch
+                {
+                    // Ошибка копирования лога
+                    // не должна прерывать миграцию.
+                }
+            }
+        }
 
     }
 }

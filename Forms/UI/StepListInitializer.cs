@@ -10,22 +10,25 @@ namespace RRStoSQL.Forms.UI
 			listView.Items.Clear();
 
 			AddStep(listView, "Читаем конфиг");
-			AddStep(listView, "Установка SQL");
-			AddStep(listView, "Установка Bullzip msa2sql");			
-			AddStep(listView, "Разрешаем Mixed authentication");
-			AddStep(listView, "Перезапуск службы SQL");
-			AddStep(listView, "Создаём RRUser");
-			AddStep(listView, "Патчим Access базу");			
+            AddStep(listView, "Сжимаем базу");
+            AddStep(listView, "Ищем поврежденные таблицы");
+            
+            AddStep(listView, "Установка sql");
+            AddStep(listView, "Установка bullzip msa2sql");			
+			AddStep(listView, "Разрешаем mixed authentication");
+			AddStep(listView, "Перезапуск службы sql");
+			AddStep(listView, "Создаём rruser");
+			AddStep(listView, "Патчим access базу");			
 			AddStep(listView, "Конвертируем базу");
-			AddStep(listView, "Выдаём права RRUser");
-			AddStep(listView, "Назначаем порт 1433 для SQL");
+			AddStep(listView, "Выдаём права rruser");
+			AddStep(listView, "Назначаем порт 1433 для sql");
 			AddStep(listView, "Открываем 1433 в брандмауэре");
-			AddStep(listView, "Меняем ConnectionStrings");
-			AddStep(listView, "Патчим SQL базу");
+			AddStep(listView, "Меняем connectionstrings");
+			AddStep(listView, "Патчим sql базу");
 			AddStep(listView, "Строка подключения в буфер обмена");
 			AddStep(listView, "Запускаем УР");
-            AddStep(listView, "Установка SQL Management");
-            AddStep(listView, "Удаляем Bullzip");
+            AddStep(listView, "Установка sql management");
+            AddStep(listView, "Удаляем bullzip");
 
         }
 
