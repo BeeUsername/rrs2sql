@@ -87,6 +87,15 @@
     <Compile Include="Services\AccessCorruptedRecordsService.cs" />
     <Compile Include="Services\AccessPatchService.cs" />
     <Compile Include="Services\AccessToSqlConverter.cs" />
+    <Compile Include="Services\AccessToSql\Models\AccessDatabaseInfo.cs" />
+    <Compile Include="Services\AccessToSql\Models\AccessForeignKeyInfo.cs" />
+    <Compile Include="Services\AccessToSql\Models\AccessIndexInfo.cs" />
+    <Compile Include="Services\AccessToSql\AccessDatabaseReader.cs" />
+    <Compile Include="Services\AccessToSql\Models\AccessColumnInfo.cs" />
+    <Compile Include="Services\AccessToSql\Models\AccessTableInfo.cs" />
+    <Compile Include="Services\AccessToSql\SqlBulkCopyService.cs" />
+    <Compile Include="Services\AccessToSql\SqlTableCreator.cs" />
+    <Compile Include="Services\AccessToSql\SqlTypeMapper.cs" />
     <Compile Include="Services\BullzipService.cs" />
     <Compile Include="Services\ConfigFinderService.cs" />
     <Compile Include="Services\ConfigService.cs" />
@@ -95,6 +104,7 @@
     <Compile Include="Services\SqlService.cs" />
     <Compile Include="Services\SqlTemplateDatabaseService.cs" />
     <Compile Include="Services\SsmsService.cs" />
+    <Compile Include="Utils\CommandNames.cs" />
     <EmbeddedResource Include="Forms\ConversionLogForm.resx">
       <DependentUpon>ConversionLogForm.cs</DependentUpon>
     </EmbeddedResource>

@@ -85,20 +85,9 @@ namespace RRStoSQL.Services
 				return;
 			}
 
-            //        //переменная для проверки, является ли база УР новой 
-            //        bool isNewDatabase =
-            //_templateDatabaseService
-            //	.ShouldCreateFromTemplate(
-            //		appConfig.MdbPath);
+            
 
-            //        if (isNewDatabase)
-            //        {
-            //            ReplaceWithBlankAccessDatabase(
-            //                appConfig);
-            ////MessageBox.Show("Проверь базу");
-            //        }
-
-            //Заменяем новую базу новой базой с правильной структурой
+            //Заменяем новую базу базой с правильной структурой
             _accessBaseService.ReplaceIfNewDatabase(
 				appConfig.MdbPath);
 
@@ -161,11 +150,7 @@ namespace RRStoSQL.Services
 						step.Name ==
 						"Ищем поврежденные таблицы")
 					{
-						//Если база новая, то проверку на битые записи пропускаем.
-						//if (!isNewDatabase)
-						//{
-
-
+						
 							var corrupted =
 								_corruptedRecordsService
 									.FindCorruptedRecords(
@@ -188,9 +173,6 @@ namespace RRStoSQL.Services
 										$"{item.TableName} -> {item.FieldName}");
 								}
 
-								//MessageHelper.Show(
-								//	sb.ToString(),
-								//	"Обнаружены поврежденные записи");
 								throw new Exception(
 									sb.ToString());
                         }
@@ -211,7 +193,7 @@ namespace RRStoSQL.Services
 						appConfig.SqlInstance =
 							sql.InstanceName;
 
-						// SQL по умолчанию !!!!!!!!!
+						// SQL по умолчанию !
 						appConfig.SqlInstance =
 							@".\SQLEXPRESS";
 
@@ -565,7 +547,7 @@ namespace RRStoSQL.Services
                 true);
         }
         /// <summary>
-        /// Запускает RemoteReg.exe
+        /// Запускает RemoteReg.Launcher.exe
         /// </summary>
         private void StartRemoteReg(
 			AppConfig appConfig)
