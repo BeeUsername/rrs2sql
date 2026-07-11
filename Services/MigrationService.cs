@@ -678,69 +678,69 @@ namespace RRStoSQL.Services
         /// Выполняет конвертацию Access-базы
         /// в SQL Server с помощью Bullzip.
         /// </summary>
-        private void ConvertAccessDatabase(
-            Form owner,
-            AppConfig appConfig)
-        {
-            Process process =
-                _converter.Convert(
-                    appConfig);
+        //private void ConvertAccessDatabase(
+        //    Form owner,
+        //    AppConfig appConfig)
+        //{
+        //    Process process =
+        //        _converter.Convert(
+        //            appConfig);
 
-            try
-            {
-                using (var logForm =
-                    new ConversionLogForm(
-                        owner,
-                        _converter.GetLogFilePath()))
-                {
-                    DialogResult result =
-                        logForm.ShowDialog(owner);
+        //    try
+        //    {
+        //        using (var logForm =
+        //            new ConversionLogForm(
+        //                owner,
+        //                _converter.GetLogFilePath()))
+        //        {
+        //            DialogResult result =
+        //                logForm.ShowDialog(owner);
 
-                    if (result == DialogResult.Abort)
-                    {
-                        if (!process.HasExited)
-                        {
-                            process.Kill();
-                            process.WaitForExit();
-                        }
+        //            if (result == DialogResult.Abort)
+        //            {
+        //                if (!process.HasExited)
+        //                {
+        //                    process.Kill();
+        //                    process.WaitForExit();
+        //                }
 
-                        if (logForm.ConversionCanceledByUser)
-                        {
-                            throw new Exception(
-                                "Конвертация была прервана пользователем.");
-                        }
+        //                if (logForm.ConversionCanceledByUser)
+        //                {
+        //                    throw new Exception(
+        //                        "Конвертация была прервана пользователем.");
+        //                }
 
-                        throw new Exception(
-                            "Конвертация Bullzip завершилась с ошибкой.");
-                    }
-                }
+        //                throw new Exception(
+        //                    "Конвертация Bullzip завершилась с ошибкой.");
+        //            }
+        //        }
 
-                if (!process.HasExited)
-                {
-                    process.WaitForExit();
-                }
+        //        if (!process.HasExited)
+        //        {
+        //            process.WaitForExit();
+        //        }
 
-                if (process.ExitCode != 0)
-                {
-                    throw new Exception(
-                        "Ошибка конвертации Bullzip.\r\n\r\n" +
-                        "Код завершения: " +
-                        process.ExitCode);
-                }
-            }
-            finally
-            {
-                try
-                {
-                    _bullzipService.CopyBullzipLog();
-                }
-                catch
-                {
-                    // Ошибка копирования лога
-                    // не должна прерывать миграцию.
-                }
-            }
-        }
+        //        if (process.ExitCode != 0)
+        //        {
+        //            throw new Exception(
+        //                "Ошибка конвертации Bullzip.\r\n\r\n" +
+        //                "Код завершения: " +
+        //                process.ExitCode);
+        //        }
+        //    }
+        //    finally
+        //    {
+        //        try
+        //        {
+        //            _bullzipService.CopyBullzipLog();
+        //        }
+        //        catch
+        //        {
+        //            // Ошибка копирования лога
+        //            // не должна прерывать миграцию.
+        //        }
+        //    }
+        //}
 
     }
 }

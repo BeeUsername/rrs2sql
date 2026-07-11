@@ -23,17 +23,32 @@ namespace RRStoSQL.Services.Migration
 
             pipeline.Steps.Add(
                 new EnsureSqlInstalledStep());
-            
+
             pipeline.Steps.Add(
                 new EnsureBullzipInstalledStep());
 
             pipeline.Steps.Add(
-                new RestartSqlServiceStep());
-
-            pipeline.Steps.Add(
                 new EnableMixedAuthenticationStep());
 
+            pipeline.Steps.Add(
+                new RestartSqlServiceStep());
+                             
 
+            
+            pipeline.Steps.Add(
+                new CreateRRUserStep());
+
+            pipeline.Steps.Add(
+                 new PatchAccessDatabaseStep());
+
+            pipeline.Steps.Add(
+             new ConvertAccessDatabaseStep());
+            
+            pipeline.Steps.Add(
+                new GrantDatabaseRightsStep());
+
+            pipeline.Steps.Add(
+                new EnableSqlTcpStep());
 
             return pipeline;
         }
