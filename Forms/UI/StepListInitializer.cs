@@ -10,7 +10,7 @@ namespace RRStoSQL.Forms.UI
 			listView.Items.Clear();
 
 			AddStep(listView, "Читаем конфиг");
-            AddStep(listView, "Сжимаем базу");
+            AddStep(listView, "Компактим базу");
             AddStep(listView, "Ищем поврежденные таблицы");
             
             AddStep(listView, "Установка sql");

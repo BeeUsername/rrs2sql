@@ -14,12 +14,26 @@ namespace RRStoSQL.Services.Migration
 
             pipeline.Steps.Add(
                 new ReadConfigStep());
+            
+            pipeline.Steps.Add(
+                new CompactAccessStep());
 
             pipeline.Steps.Add(
                 new CheckCorruptedRecordsStep());
 
             pipeline.Steps.Add(
-                new CompactAccessStep());
+                new EnsureSqlInstalledStep());
+            
+            pipeline.Steps.Add(
+                new EnsureBullzipInstalledStep());
+
+            pipeline.Steps.Add(
+                new RestartSqlServiceStep());
+
+            pipeline.Steps.Add(
+                new EnableMixedAuthenticationStep());
+
+
 
             return pipeline;
         }

@@ -86,7 +86,6 @@
     <Compile Include="Services\AccessConverterService.cs" />
     <Compile Include="Services\AccessCorruptedRecordsService.cs" />
     <Compile Include="Services\AccessPatchService.cs" />
-    <Compile Include="Services\AccessToSql2\MdbToSqlMigrator.cs" />
     <Compile Include="Services\AccessToSqlConverter.cs" />
     <Compile Include="Services\AccessToSql\Models\AccessDatabaseInfo.cs" />
     <Compile Include="Services\AccessToSql\Models\AccessForeignKeyInfo.cs" />
@@ -107,8 +106,12 @@
     <Compile Include="Services\Migration\MigrationPipeline.cs" />
     <Compile Include="Services\Migration\Steps\CheckCorruptedRecordsStep.cs" />
     <Compile Include="Services\Migration\Steps\CompactAccessStep.cs" />
+    <Compile Include="Services\Migration\Steps\EnableMixedAuthenticationStep.cs" />
+    <Compile Include="Services\Migration\Steps\EnsureBullzipInstalledStep.cs" />
+    <Compile Include="Services\Migration\Steps\EnsureSqlInstalledStep.cs" />
     <Compile Include="Services\Migration\Steps\MigrationPipelineFactory.cs" />
     <Compile Include="Services\Migration\Steps\ReadConfigStep.cs" />
+    <Compile Include="Services\Migration\Steps\RestartSqlServiceStep.cs" />
     <Compile Include="Services\SqlPatchService.cs" />
     <Compile Include="Services\SqlService.cs" />
     <Compile Include="Services\SqlTemplateDatabaseService.cs" />
@@ -165,6 +168,9 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Services\AccessToSql2\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

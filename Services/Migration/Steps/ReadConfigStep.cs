@@ -29,7 +29,7 @@ namespace RRStoSQL.Services.Migration.Steps
 
             context.Config =
                 _configService.Read(
-                    context.Config.ConfigPath);
+                    context.ConfigPath);
 
             //--------------------------------------------------
             // Проверяем существование MDB

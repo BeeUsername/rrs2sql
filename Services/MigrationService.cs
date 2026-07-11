@@ -52,427 +52,464 @@ namespace RRStoSQL.Services
         /// </param>
 
         public async Task RunAsync(
-			Form owner,
-			string configPath,
+            Form owner,
+            string configPath,
             MigrationOptions options,
             Action<string, StepStatus> updateStep)
         {
-			// Получаем список шагов
-			var steps = GetSteps(options);
+            // Получаем список шагов
+            var steps = GetSteps(options);
 
-			// Объект с параметрами текущей миграции
-			AppConfig appConfig = null;
+            // Объект с параметрами текущей миграции
+            AppConfig appConfig = null;
 
-			//_ssmsService.EnsureInstalled();
-			//return;
+            //_ssmsService.EnsureInstalled();
+            //return;
 
-			//Объект с параметрами текущей миграции
-		    appConfig =
-			   _configService.Read(
-				   configPath);
+            //Объект с параметрами текущей миграции
+            appConfig =
+               _configService.Read(
+                   configPath);
 
-			// Проверяем, не запущен ли УР
-			if (IsRemoteRegRunning(
-					appConfig))
-			{
-				MessageBox.Show(
-					owner,
-					"Закройте УР" +
-					"и не открывайте ее до завершения миграции.",
-					"УР запущена",
-					MessageBoxButtons.OK,
-					MessageBoxIcon.Warning);
+            //MessageBox.Show("");
+            // Проверяем, не запущен ли УР
+            if (IsRemoteRegRunning(
+                    appConfig))
+            {
+                MessageBox.Show(
+                    owner,
+                    "Закройте УР" +
+                    "и не открывайте ее до завершения миграции.",
+                    "УР запущена",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
 
-				return;
-			}
+                return;
+            }
 
-            
+
 
             //Заменяем новую базу базой с правильной структурой
             _accessBaseService.ReplaceIfNewDatabase(
-				appConfig.MdbPath);
+                appConfig.MdbPath);
 
             var pipeline =
-				MigrationPipelineFactory.Create();
+                MigrationPipelineFactory.Create();
 
             var context =
-				new MigrationContext
-				{
-					Owner = owner,
-					ConfigPath = configPath
-				};
+                new MigrationContext
+                {
+                    Owner = owner,
+                    ConfigPath = configPath
+                };
 
+            foreach (IMigrationStep step in pipeline.Steps)
+            {
+                updateStep(
+                    step.Name,
+                    StepStatus.Running);
 
-            //Запускаем шаги миграции
-            foreach (var step in steps)
-			{
-				// Устанавливаем статус:
-				// "выполняется"
-				updateStep(
-					step.Name,
-					StepStatus.Running);
+                try
+                {
+                    await step.ExecuteAsync(
+                        context);
 
-				try
-				{
-                    // ============================================
-                    // Читаем конфиг
-                    // ============================================
+                    appConfig =
+                        context.Config;
 
-                    //if (step.Name == "Читаем конфиг")
-                    //{
-                    //	// Читаем настройки приложения
-                    //	appConfig =
-                    //		_configService.Read(
-                    //			configPath);
+                    updateStep(
+                        step.Name,
+                        StepStatus.Success);
+                }
+                catch (Exception ex)
+                {
+                    updateStep(
+                        step.Name,
+                        StepStatus.Error);
 
+                    MessageHelper.Show(
+                        ex.ToString(),
+                        "Ошибка");
 
-                    //	// Проверяем существование MDB
-                    //	if (!File.Exists(
-                    //		appConfig.MdbPath))
-                    //	{
-                    //		throw new Exception(
-                    //			"MDB не найден");
-                    //	}
-                    //}
-
-
-                    if (await pipeline.ExecuteStepAsync(
-					step.Name,
-					context))
-					{
-                        appConfig = context.Config;
-                        continue;
-                    }
-
-                    // ============================================
-                    // Сжимаем базу Access
-                    // ============================================
-
-      //              if (await pipeline.ExecuteStepAsync(
-						//step.Name,
-						//context))
-      //              {
-      //                  appConfig = context.Config;
-      //                  continue;
-      //              }
-
-                    //               else if (
-                    //	step.Name ==
-                    //	"Сжимаем базу")
-                    //{
-                    //	//continue;
-                    //	_accessCompactService.Compact(
-                    //		appConfig.MdbPath);
-
-                    //	//иногда Windows еще несколько десятков миллисекунд держит дескриптор файла. Поэтому перед следующим этапом можно сделать небольшое ожидание:
-                    //	await Task.Delay(300);
-
-                    //}
-
-
-                    // ============================================
-                    // Ищем поврежденные таблицы
-                    // ============================================
-
-                    else if (
-						step.Name ==
-						"Ищем поврежденные таблицы")
-					{
-                        await pipeline
-						.FindStep(step.Name)
-						.ExecuteAsync(context);
-						return;
-                        //var corrupted =
-                        //	_corruptedRecordsService
-                        //		.FindCorruptedRecords(
-                        //			appConfig.MdbPath);
-
-                        //if (corrupted.Count > 0)
-                        //{
-                        //	var sb = new StringBuilder();
-
-                        //	sb.AppendLine(
-                        //		"В базе данных обнаружены поврежденные записи.");
-                        //	sb.AppendLine();
-                        //	sb.AppendLine(
-                        //		"Проверьте следующие таблицы и поля:");
-                        //	sb.AppendLine();
-
-                        //	foreach (var item in corrupted)
-                        //	{
-                        //		sb.AppendLine(
-                        //			$"{item.TableName} -> {item.FieldName}");
-                        //	}
-
-                        //	throw new Exception(
-                        //		sb.ToString());
-                        //                 }
-
-                    }
-
-					// ============================================
-					// Проверка/Установка sql
-					// ============================================
-
-					else if (step.Name == "Установка sql")
-					{
-						//return;
-						var sql =
-							_sqlService
-							.EnsureSqlInstalled();
-
-						appConfig.SqlInstance =
-							sql.InstanceName;
-
-						// SQL по умолчанию !
-						appConfig.SqlInstance =
-							@".\SQLEXPRESS";
-
-						// Формируем уникальное имя SQL базы
-						// на основании WebServiceLogin
-						appConfig.SqlDatabaseName =
-							_sqlService.GetAvailableDatabaseName(
-								appConfig.SqlInstance,
-								appConfig.WebServiceLogin);
-
-					}
-
-					// ============================================
-					// Установка bullzip msa2sql
-					// ============================================
-
-					else if (
-						step.Name ==
-						"Установка bullzip msa2sql")
-					{
-						string exePath =
-							_bullzipService
-								.EnsureInstalled();
-
-					}
-
-
-					// ============================================
-					// Разрешаем mixed authentication
-					// ============================================
-
-					else if (step.Name == "Разрешаем mixed authentication")
-					{
-						_sqlService
-							.EnableMixedAuthentication(
-								appConfig.SqlInstance);
-					}
-
-					// ============================================
-					// Перезапуск службы sql
-					// ============================================
-
-					else if (
-						step.Name ==
-						"Перезапуск службы sql")
-					{
-						_sqlService
-							.RestartSqlService(
-								appConfig.SqlInstance);
-					}
-
-
-					// ============================================
-					// Создаём rruser
-					// ============================================
-
-					else if (
-						step.Name ==
-						"Создаём rruser")
-					{
-						_sqlService
-							.CreateRRUser(
-								appConfig.SqlInstance);
-					}
-
-					// ============================================
-					//  Патчим access базу
-					// ============================================
-
-					else if (
-
-
-						step.Name ==
-						"Патчим access базу")
-					{
-						//if (!isNewDatabase)
-						//{
-							_accessPatchService
-							.ExecutePatches(
-								appConfig.MdbPath);
-						//}
-					}
-
-                    
-                    // ============================================
-                    // Конвертируем базу
-                    // ============================================
-
-                    else if (
-                        step.Name ==
-                        "Конвертируем базу")
+                    if (step.Critical)
                     {
-                        // Конвертируем существующую Access-базу.
-                            ConvertAccessDatabase(
-                                owner,
-                                appConfig);
-                        
+                        return;
                     }
-
-                    // ============================================
-                    // Выдаём права rruser
-                    // ============================================
-
-                    else if (
-						step.Name ==
-						"Выдаём права rruser")
-					{
-						_sqlService
-							.GrantDatabaseRights(
-								appConfig.SqlInstance,
-								appConfig.SqlDatabaseName);
-					}
-					// ============================================
-					// Разрешаем TCP 1433 SQL. Назначаем порт 1433 для sql
-					// ============================================
-
-					else if (
-						step.Name ==
-						"Назначаем порт 1433 для sql")
-					{
-						_sqlService.EnableTcp(
-							appConfig.SqlInstance);
-
-						// настройки TCP применяются
-						// только после рестарта службы
-						_sqlService.RestartSqlService(
-							appConfig.SqlInstance);
-					}
-
-					// ============================================
-					// Открываем порт 1433 в брандмауэре Windows
-					// ============================================
-
-					else if (
-						step.Name ==
-						"Открываем 1433 в брандмауэре")
-					{
-						_sqlService
-							.OpenFirewallPort();
-					}
+                }
+            }
 
 
-					// ============================================
-					// Меняем connectionstrings
-					// ============================================
 
-					else if (
-						step.Name ==
-						"Меняем connectionstrings")
-					{
-						_configService.SwitchToSql(
-							configPath,
-							appConfig);
-					}
-					// ============================================
-					// Патчим sql базу
-					// ============================================
+            ////Запускаем шаги миграции
+            //foreach (var step in steps)
+            //{
+            //	// Устанавливаем статус:
+            //	// "выполняется"
+            //	updateStep(
+            //		step.Name,
+            //		StepStatus.Running);
 
-					else if (step.Name == "Патчим sql базу")
-					{
-                        
-                            _patchService.ExecutePatches(
-								appConfig.SqlInstance,
-								appConfig.SqlDatabaseName);
-                                                    
-					}
-					// ============================================
-					// Строка подключения в буфер обмена
-					// ============================================
+            //	try
+            //	{
+            //		// ============================================
+            //		// Читаем конфиг
+            //		// ============================================
 
-					else if (
-						step.Name ==
-						"Строка подключения в буфер обмена")
-					{
-						_configService
-							.CopyConnectionString(
-								appConfig);
-					}
-
-					// ============================================
-					// Запускаем УР
-					// ============================================
-
-					else if (
-						step.Name ==
-						"Запускаем УР")
-					{
-						StartRemoteReg(
-							appConfig);
-					}
-
-					// ============================================
-					// Установка sql managment
-					// ============================================
-
-					else if (
-						step.Name ==
-						"Установка sql management")
-					{
-						_ssmsService.EnsureInstalled();
-					}
+            //		//if (step.Name == "Читаем конфиг")
+            //		//{
+            //		//	// Читаем настройки приложения
+            //		//	appConfig =
+            //		//		_configService.Read(
+            //		//			configPath);
 
 
-					// ============================================
-					// Удаляем bullzip
-					// ============================================
+            //		//	// Проверяем существование MDB
+            //		//	if (!File.Exists(
+            //		//		appConfig.MdbPath))
+            //		//	{
+            //		//		throw new Exception(
+            //		//			"MDB не найден");
+            //		//	}
+            //		//}
 
 
-					else if (
-						step.Name ==
-						"Удаляем bullzip")
-					{
-						_bullzipService.Uninstall();
-					}
+            //		if (await pipeline.ExecuteStepAsync(
+            //  step.Name,
+            //  context))
+            //		{
+            //			appConfig = context.Config;
+            //			continue;
+            //		}
 
-					else
-					{
-						//await ExecuteStep(step);
-					}
-									
+            //		// ============================================
+            //		// Сжимаем базу Access
+            //		// ============================================
 
-					// Шаг успешно завершён
-					updateStep(
-						step.Name,
-						StepStatus.Success);
-				}
-				catch (Exception ex)
-				{
-					updateStep(
-						step.Name,
-						StepStatus.Error);
+            //		//              if (await pipeline.ExecuteStepAsync(
+            //		//step.Name,
+            //		//context))
+            //		//              {
+            //		//                  appConfig = context.Config;
+            //		//                  continue;
+            //		//              }
 
-					MessageHelper.Show(
-						ex.ToString(),
-						"Ошибка");
+            //		//               else if (
+            //		//	step.Name ==
+            //		//	"Сжимаем базу")
+            //		//{
+            //		//	//continue;
+            //		//	_accessCompactService.Compact(
+            //		//		appConfig.MdbPath);
 
-					if (IsCriticalStep(step.Name))
-					{
-						return;
-					}
+            //		//	//иногда Windows еще несколько десятков миллисекунд держит дескриптор файла. Поэтому перед следующим этапом можно сделать небольшое ожидание:
+            //		//	await Task.Delay(300);
 
-					// идём к следующему шагу
-					continue;
-				}
-				
-			}
-		}
+            //		//}
 
+
+            //		// ============================================
+            //		// Ищем поврежденные таблицы
+            //		// ============================================
+
+            //		else if (
+            //   step.Name ==
+            //   "Ищем поврежденные таблицы")
+            //		{
+            //			await pipeline
+            //   .FindStep(step.Name)
+            //   .ExecuteAsync(context);
+            //			return;
+            //			//var corrupted =
+            //			//	_corruptedRecordsService
+            //			//		.FindCorruptedRecords(
+            //			//			appConfig.MdbPath);
+
+            //			//if (corrupted.Count > 0)
+            //			//{
+            //			//	var sb = new StringBuilder();
+
+            //			//	sb.AppendLine(
+            //			//		"В базе данных обнаружены поврежденные записи.");
+            //			//	sb.AppendLine();
+            //			//	sb.AppendLine(
+            //			//		"Проверьте следующие таблицы и поля:");
+            //			//	sb.AppendLine();
+
+            //			//	foreach (var item in corrupted)
+            //			//	{
+            //			//		sb.AppendLine(
+            //			//			$"{item.TableName} -> {item.FieldName}");
+            //			//	}
+
+            //			//	throw new Exception(
+            //			//		sb.ToString());
+            //			//                 }
+
+            //		}
+
+            //		// ============================================
+            //		// Проверка/Установка sql
+            //		// ============================================
+
+            //		else if (step.Name == "Установка sql")
+            //		{
+            //			//return;
+            //			var sql =
+            //				_sqlService
+            //				.EnsureSqlInstalled();
+
+            //			appConfig.SqlInstance =
+            //				sql.InstanceName;
+
+            //			// SQL по умолчанию !
+            //			appConfig.SqlInstance =
+            //				@".\SQLEXPRESS";
+
+            //			// Формируем уникальное имя SQL базы
+            //			// на основании WebServiceLogin
+            //			appConfig.SqlDatabaseName =
+            //				_sqlService.GetAvailableDatabaseName(
+            //					appConfig.SqlInstance,
+            //					appConfig.WebServiceLogin);
+
+            //		}
+
+            //		// ============================================
+            //		// Установка bullzip msa2sql
+            //		// ============================================
+
+            //		else if (
+            //			step.Name ==
+            //			"Установка bullzip msa2sql")
+            //		{
+            //			string exePath =
+            //				_bullzipService
+            //					.EnsureInstalled();
+
+            //		}
+
+
+            //		// ============================================
+            //		// Разрешаем mixed authentication
+            //		// ============================================
+
+            //		else if (step.Name == "Разрешаем mixed authentication")
+            //		{
+            //			_sqlService
+            //				.EnableMixedAuthentication(
+            //					appConfig.SqlInstance);
+            //		}
+
+            //		// ============================================
+            //		// Перезапуск службы sql
+            //		// ============================================
+
+            //		else if (
+            //			step.Name ==
+            //			"Перезапуск службы sql")
+            //		{
+            //			_sqlService
+            //				.RestartSqlService(
+            //					appConfig.SqlInstance);
+            //		}
+
+
+            //		// ============================================
+            //		// Создаём rruser
+            //		// ============================================
+
+            //		else if (
+            //			step.Name ==
+            //			"Создаём rruser")
+            //		{
+            //			_sqlService
+            //				.CreateRRUser(
+            //					appConfig.SqlInstance);
+            //		}
+
+            //		// ============================================
+            //		//  Патчим access базу
+            //		// ============================================
+
+            //		else if (
+
+
+            //			step.Name ==
+            //			"Патчим access базу")
+            //		{
+            //			//if (!isNewDatabase)
+            //			//{
+            //			_accessPatchService
+            //			.ExecutePatches(
+            //				appConfig.MdbPath);
+            //			//}
+            //		}
+
+
+            //		// ============================================
+            //		// Конвертируем базу
+            //		// ============================================
+
+            //		else if (
+            //			step.Name ==
+            //			"Конвертируем базу")
+            //		{
+            //			// Конвертируем существующую Access-базу.
+            //			ConvertAccessDatabase(
+            //				owner,
+            //				appConfig);
+
+            //		}
+
+            //		// ============================================
+            //		// Выдаём права rruser
+            //		// ============================================
+
+            //		else if (
+            //   step.Name ==
+            //   "Выдаём права rruser")
+            //		{
+            //			_sqlService
+            //				.GrantDatabaseRights(
+            //					appConfig.SqlInstance,
+            //					appConfig.SqlDatabaseName);
+            //		}
+            //		// ============================================
+            //		// Разрешаем TCP 1433 SQL. Назначаем порт 1433 для sql
+            //		// ============================================
+
+            //		else if (
+            //			step.Name ==
+            //			"Назначаем порт 1433 для sql")
+            //		{
+            //			_sqlService.EnableTcp(
+            //				appConfig.SqlInstance);
+
+            //			// настройки TCP применяются
+            //			// только после рестарта службы
+            //			_sqlService.RestartSqlService(
+            //				appConfig.SqlInstance);
+            //		}
+
+            //		// ============================================
+            //		// Открываем порт 1433 в брандмауэре Windows
+            //		// ============================================
+
+            //		else if (
+            //			step.Name ==
+            //			"Открываем 1433 в брандмауэре")
+            //		{
+            //			_sqlService
+            //				.OpenFirewallPort();
+            //		}
+
+
+            //		// ============================================
+            //		// Меняем connectionstrings
+            //		// ============================================
+
+            //		else if (
+            //			step.Name ==
+            //			"Меняем connectionstrings")
+            //		{
+            //			_configService.SwitchToSql(
+            //				configPath,
+            //				appConfig);
+            //		}
+            //		// ============================================
+            //		// Патчим sql базу
+            //		// ============================================
+
+            //		else if (step.Name == "Патчим sql базу")
+            //		{
+
+            //			_patchService.ExecutePatches(
+            //	   appConfig.SqlInstance,
+            //	   appConfig.SqlDatabaseName);
+
+            //		}
+            //		// ============================================
+            //		// Строка подключения в буфер обмена
+            //		// ============================================
+
+            //		else if (
+            //			step.Name ==
+            //			"Строка подключения в буфер обмена")
+            //		{
+            //			_configService
+            //				.CopyConnectionString(
+            //					appConfig);
+            //		}
+
+            //		// ============================================
+            //		// Запускаем УР
+            //		// ============================================
+
+            //		else if (
+            //			step.Name ==
+            //			"Запускаем УР")
+            //		{
+            //			StartRemoteReg(
+            //				appConfig);
+            //		}
+
+            //		// ============================================
+            //		// Установка sql managment
+            //		// ============================================
+
+            //		else if (
+            //			step.Name ==
+            //			"Установка sql management")
+            //		{
+            //			_ssmsService.EnsureInstalled();
+            //		}
+
+
+            //		// ============================================
+            //		// Удаляем bullzip
+            //		// ============================================
+
+
+            //		else if (
+            //			step.Name ==
+            //			"Удаляем bullzip")
+            //		{
+            //			_bullzipService.Uninstall();
+            //		}
+
+            //		else
+            //		{
+            //			//await ExecuteStep(step);
+            //		}
+
+
+            //		// Шаг успешно завершён
+            //		updateStep(
+            //			step.Name,
+            //			StepStatus.Success);
+            //	}
+            //	catch (Exception ex)
+            //	{
+            //		updateStep(
+            //			step.Name,
+            //			StepStatus.Error);
+
+            //		MessageHelper.Show(
+            //			ex.ToString(),
+            //			"Ошибка");
+
+            //		if (IsCriticalStep(step.Name))
+            //		{
+            //			return;
+            //		}
+
+            //		// идём к следующему шагу
+            //		continue;
+            //	}
+
+            //}
+        }
+        
         //список этапов ошибка в которых приводит к остановке миграции
         private bool IsCriticalStep(
 			string stepName)
