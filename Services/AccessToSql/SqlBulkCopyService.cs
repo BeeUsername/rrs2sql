@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 using RRStoSQL.Services.AccessToSql.Models;
@@ -7,32 +6,32 @@ using RRStoSQL.Services.AccessToSql.Models;
 namespace RRStoSQL.Services.AccessToSql
 {
     /// <summary>
-    /// Выполняет перенос данных
-    /// из Access в SQL Server
-    /// посредством SqlBulkCopy.
+    /// Переносит данные из Access
+    /// в SQL Server.
     /// </summary>
     public class SqlBulkCopyService
     {
         /// <summary>
-        /// Событие вызывается
-        /// после копирования очередной партии строк.
-        /// </summary>
-        public event Action<string, long> RowsCopied;
-
-        /// <summary>
-        /// Копирует список таблиц.
+        /// Копирует все таблицы.
         /// </summary>
         public void CopyTables(
-            OleDbConnection accessConnection,
+            string accessConnectionString,
             SqlConnection sqlConnection,
-            List<AccessTableInfo> tables)
+            AccessDatabaseInfo database)
         {
-            foreach (AccessTableInfo table in tables)
+            using (OleDbConnection accessConnection =
+                new OleDbConnection(
+                    accessConnectionString))
             {
-                CopyTable(
-                    accessConnection,
-                    sqlConnection,
-                    table.Name);
+                accessConnection.Open();
+
+                foreach (AccessTableInfo table in database.Tables)
+                {
+                    CopyTable(
+                        accessConnection,
+                        sqlConnection,
+                        table);
+                }
             }
         }
 
@@ -42,67 +41,44 @@ namespace RRStoSQL.Services.AccessToSql
         private void CopyTable(
             OleDbConnection accessConnection,
             SqlConnection sqlConnection,
-            string tableName)
+            AccessTableInfo table)
         {
-            using (var command =
+            string sql =
+                $"SELECT * FROM [{table.Name}]";
+
+            using (OleDbCommand command =
                 new OleDbCommand(
-                    $"SELECT * FROM [{tableName}]",
+                    sql,
                     accessConnection))
             {
-                using (var reader =
+                using (OleDbDataReader reader =
                     command.ExecuteReader())
                 {
-                    using (var bulk =
-                        CreateBulkCopy(
-                            sqlConnection,
-                            tableName))
+                    using (SqlBulkCopy bulk =
+                        new SqlBulkCopy(sqlConnection))
                     {
-                        bulk.SqlRowsCopied +=
-                            (sender, e) =>
-                            {
-                                RowsCopied?.Invoke(
-                                    tableName,
-                                    e.RowsCopied);
-                            };
+                        bulk.DestinationTableName =
+                            $"[{table.Name}]";
 
-                        for (int i = 0;
-                             i < reader.FieldCount;
-                             i++)
+                        bulk.BatchSize = 5000;
+
+                        bulk.BulkCopyTimeout = 0;
+
+                        //----------------------------------
+                        // сопоставляем поля
+                        //----------------------------------
+
+                        foreach (AccessColumnInfo column in table.Columns)
                         {
-                            string column =
-                                reader.GetName(i);
-
                             bulk.ColumnMappings.Add(
-                                column,
-                                column);
+                                column.Name,
+                                column.Name);
                         }
 
                         bulk.WriteToServer(reader);
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Создает SqlBulkCopy.
-        /// </summary>
-        private SqlBulkCopy CreateBulkCopy(
-            SqlConnection connection,
-            string tableName)
-        {
-            SqlBulkCopy bulk =
-                new SqlBulkCopy(connection);
-
-            bulk.DestinationTableName =
-                $"[{tableName}]";
-
-            bulk.BatchSize = 5000;
-
-            bulk.NotifyAfter = 5000;
-
-            bulk.BulkCopyTimeout = 0;
-
-            return bulk;
         }
     }
 }

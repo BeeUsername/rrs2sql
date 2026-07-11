@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace RRStoSQL.Services.AccessToSql.Models
 {
     /// <summary>
     /// Полное описание таблицы Access.
-    /// Используется для построения структуры SQL Server.
     /// </summary>
     public class AccessTableInfo
     {
@@ -20,14 +20,21 @@ namespace RRStoSQL.Services.AccessToSql.Models
             = new List<AccessColumnInfo>();
 
         /// <summary>
-        /// Первичный ключ.
-        /// Обычно один, но может быть составным.
+        /// Быстрый поиск колонки по имени.
+        /// Используется при чтении PK/FK/индексов.
+        /// </summary>
+        internal Dictionary<string, AccessColumnInfo> ColumnMap { get; }
+            = new Dictionary<string, AccessColumnInfo>(
+                StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Поля первичного ключа.
         /// </summary>
         public List<string> PrimaryKeyColumns { get; }
             = new List<string>();
 
         /// <summary>
-        /// Индексы таблицы.
+        /// Индексы.
         /// </summary>
         public List<AccessIndexInfo> Indexes { get; }
             = new List<AccessIndexInfo>();

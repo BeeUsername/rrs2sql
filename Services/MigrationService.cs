@@ -1,6 +1,7 @@
 ﻿using RRStoSQL.Forms;
 using RRStoSQL.Helpers;
 using RRStoSQL.Models;
+using RRStoSQL.Services.Migration;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -91,8 +92,18 @@ namespace RRStoSQL.Services
             _accessBaseService.ReplaceIfNewDatabase(
 				appConfig.MdbPath);
 
-            //Запускаем шаги миграции
+            var pipeline =
+				MigrationPipelineFactory.Create();
 
+            var context =
+				new MigrationContext
+				{
+					Owner = owner,
+					ConfigPath = configPath
+				};
+
+
+            //Запускаем шаги миграции
             foreach (var step in steps)
 			{
 				// Устанавливаем статус:
@@ -103,81 +114,101 @@ namespace RRStoSQL.Services
 
 				try
 				{
-					// ============================================
-					// Читаем конфиг
-					// ============================================
+                    // ============================================
+                    // Читаем конфиг
+                    // ============================================
 
-					if (step.Name == "Читаем конфиг")
+                    //if (step.Name == "Читаем конфиг")
+                    //{
+                    //	// Читаем настройки приложения
+                    //	appConfig =
+                    //		_configService.Read(
+                    //			configPath);
+
+
+                    //	// Проверяем существование MDB
+                    //	if (!File.Exists(
+                    //		appConfig.MdbPath))
+                    //	{
+                    //		throw new Exception(
+                    //			"MDB не найден");
+                    //	}
+                    //}
+
+
+                    if (await pipeline.ExecuteStepAsync(
+					step.Name,
+					context))
 					{
-						// Читаем настройки приложения
-						appConfig =
-							_configService.Read(
-								configPath);
+                        appConfig = context.Config;
+                        continue;
+                    }
 
-						
-						// Проверяем существование MDB
-						if (!File.Exists(
-							appConfig.MdbPath))
-						{
-							throw new Exception(
-								"MDB не найден");
-						}
-					}
+                    // ============================================
+                    // Сжимаем базу Access
+                    // ============================================
 
-					// ============================================
-					// Сжимаем базу Access
-					// ============================================
+      //              if (await pipeline.ExecuteStepAsync(
+						//step.Name,
+						//context))
+      //              {
+      //                  appConfig = context.Config;
+      //                  continue;
+      //              }
 
-					else if (
-						step.Name ==
-						"Сжимаем базу")
-					{
-						//continue;
-						_accessCompactService.Compact(
-							appConfig.MdbPath);
+                    //               else if (
+                    //	step.Name ==
+                    //	"Сжимаем базу")
+                    //{
+                    //	//continue;
+                    //	_accessCompactService.Compact(
+                    //		appConfig.MdbPath);
 
-						//иногда Windows еще несколько десятков миллисекунд держит дескриптор файла. Поэтому перед следующим этапом можно сделать небольшое ожидание:
-						await Task.Delay(300);
+                    //	//иногда Windows еще несколько десятков миллисекунд держит дескриптор файла. Поэтому перед следующим этапом можно сделать небольшое ожидание:
+                    //	await Task.Delay(300);
 
-					}
+                    //}
 
 
-					// ============================================
-					// Ищем поврежденные таблицы
-					// ============================================
+                    // ============================================
+                    // Ищем поврежденные таблицы
+                    // ============================================
 
-					else if (
+                    else if (
 						step.Name ==
 						"Ищем поврежденные таблицы")
 					{
-						
-							var corrupted =
-								_corruptedRecordsService
-									.FindCorruptedRecords(
-										appConfig.MdbPath);
+                        await pipeline
+						.FindStep(step.Name)
+						.ExecuteAsync(context);
+						return;
+                        //var corrupted =
+                        //	_corruptedRecordsService
+                        //		.FindCorruptedRecords(
+                        //			appConfig.MdbPath);
 
-							if (corrupted.Count > 0)
-							{
-								var sb = new StringBuilder();
+                        //if (corrupted.Count > 0)
+                        //{
+                        //	var sb = new StringBuilder();
 
-								sb.AppendLine(
-									"В базе данных обнаружены поврежденные записи.");
-								sb.AppendLine();
-								sb.AppendLine(
-									"Проверьте следующие таблицы и поля:");
-								sb.AppendLine();
+                        //	sb.AppendLine(
+                        //		"В базе данных обнаружены поврежденные записи.");
+                        //	sb.AppendLine();
+                        //	sb.AppendLine(
+                        //		"Проверьте следующие таблицы и поля:");
+                        //	sb.AppendLine();
 
-								foreach (var item in corrupted)
-								{
-									sb.AppendLine(
-										$"{item.TableName} -> {item.FieldName}");
-								}
+                        //	foreach (var item in corrupted)
+                        //	{
+                        //		sb.AppendLine(
+                        //			$"{item.TableName} -> {item.FieldName}");
+                        //	}
 
-								throw new Exception(
-									sb.ToString());
-                        }
-													
-					}
+                        //	throw new Exception(
+                        //		sb.ToString());
+                        //                 }
+
+                    }
 
 					// ============================================
 					// Проверка/Установка sql

@@ -6,6 +6,9 @@ namespace RRStoSQL.Services
     /// <summary>
     /// Выполняет операции с базой данных Microsoft Access.
     /// </summary>
+    
+    //сделать методы классы статическими!!
+    //сделать объект singletone
     public class AccessBaseService
     {
         /// <summary>

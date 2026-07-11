@@ -32,6 +32,7 @@ namespace RRStoSQL.Services.AccessToSql
                 ReadAllColumns(connection, database);
 
                 ReadPrimaryKeys(connection, database);
+
                 ReadIndexes(connection, database);
                 ReadForeignKeys(connection, database);
             }
@@ -40,7 +41,7 @@ namespace RRStoSQL.Services.AccessToSql
         }
 
         /// <summary>
-        /// Читает пользовательские таблицы.
+        /// Читает список пользовательских таблиц.
         /// </summary>
         private void ReadTables(
             OleDbConnection connection,
@@ -105,8 +106,14 @@ namespace RRStoSQL.Services.AccessToSql
                     continue;
                 }
 
-                table.Columns.Add(
-                    ReadColumn(row));
+                AccessColumnInfo column =
+                    ReadColumn(row);
+
+                table.Columns.Add(column);
+
+                table.ColumnMap.Add(
+                    column.Name,
+                    column);
             }
         }
 
@@ -143,20 +150,51 @@ namespace RRStoSQL.Services.AccessToSql
                             StringComparison.OrdinalIgnoreCase);
             }
 
-            // Позже определим AutoNumber.
+            // AutoNumber определим позже.
             column.IsIdentity = false;
 
             return column;
         }
 
         /// <summary>
-        /// Читает первичные ключи.
+        /// Читает первичные ключи всех таблиц.
         /// </summary>
         private void ReadPrimaryKeys(
             OleDbConnection connection,
             AccessDatabaseInfo database)
         {
-            // Следующий этап.
+            DataTable schema =
+                connection.GetOleDbSchemaTable(
+                    OleDbSchemaGuid.Primary_Keys,
+                    null);
+
+            if (schema == null)
+            {
+                return;
+            }
+
+            foreach (DataRow row in schema.Rows)
+            {
+                string tableName =
+                    row["TABLE_NAME"].ToString();
+
+                if (!database.TableMap.TryGetValue(
+                        tableName,
+                        out AccessTableInfo table))
+                {
+                    continue;
+                }
+
+                string columnName =
+                    row["COLUMN_NAME"].ToString();
+
+                if (!table.PrimaryKeyColumns.Contains(
+                        columnName))
+                {
+                    table.PrimaryKeyColumns.Add(
+                        columnName);
+                }
+            }
         }
 
         /// <summary>
@@ -166,7 +204,7 @@ namespace RRStoSQL.Services.AccessToSql
             OleDbConnection connection,
             AccessDatabaseInfo database)
         {
-            // Следующий этап.
+            // Реализуем следующим этапом.
         }
 
         /// <summary>
@@ -176,7 +214,7 @@ namespace RRStoSQL.Services.AccessToSql
             OleDbConnection connection,
             AccessDatabaseInfo database)
         {
-            // Следующий этап.
+            // Реализуем следующим этапом.
         }
 
         /// <summary>

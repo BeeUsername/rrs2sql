@@ -86,6 +86,7 @@
     <Compile Include="Services\AccessConverterService.cs" />
     <Compile Include="Services\AccessCorruptedRecordsService.cs" />
     <Compile Include="Services\AccessPatchService.cs" />
+    <Compile Include="Services\AccessToSql2\MdbToSqlMigrator.cs" />
     <Compile Include="Services\AccessToSqlConverter.cs" />
     <Compile Include="Services\AccessToSql\Models\AccessDatabaseInfo.cs" />
     <Compile Include="Services\AccessToSql\Models\AccessForeignKeyInfo.cs" />
@@ -93,6 +94,7 @@
     <Compile Include="Services\AccessToSql\AccessDatabaseReader.cs" />
     <Compile Include="Services\AccessToSql\Models\AccessColumnInfo.cs" />
     <Compile Include="Services\AccessToSql\Models\AccessTableInfo.cs" />
+    <Compile Include="Services\AccessToSql\MyAccessMigrationService.cs" />
     <Compile Include="Services\AccessToSql\SqlBulkCopyService.cs" />
     <Compile Include="Services\AccessToSql\SqlTableCreator.cs" />
     <Compile Include="Services\AccessToSql\SqlTypeMapper.cs" />
@@ -100,6 +102,13 @@
     <Compile Include="Services\ConfigFinderService.cs" />
     <Compile Include="Services\ConfigService.cs" />
     <Compile Include="Services\MigrationService.cs" />
+    <Compile Include="Services\Migration\IMigrationStep.cs" />
+    <Compile Include="Services\Migration\MigrationContext.cs" />
+    <Compile Include="Services\Migration\MigrationPipeline.cs" />
+    <Compile Include="Services\Migration\Steps\CheckCorruptedRecordsStep.cs" />
+    <Compile Include="Services\Migration\Steps\CompactAccessStep.cs" />
+    <Compile Include="Services\Migration\Steps\MigrationPipelineFactory.cs" />
+    <Compile Include="Services\Migration\Steps\ReadConfigStep.cs" />
     <Compile Include="Services\SqlPatchService.cs" />
     <Compile Include="Services\SqlService.cs" />
     <Compile Include="Services\SqlTemplateDatabaseService.cs" />

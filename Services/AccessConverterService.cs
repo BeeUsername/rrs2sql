@@ -132,18 +132,13 @@ namespace RRStoSQL.Services
 		/// </summary>
 		private Process RunBullzip()
 		{
-			//string exeFile =
-			//	Path.Combine(
-			//		AppDomain.CurrentDomain.BaseDirectory,
-			//		"Bullzip",
-			//		//"msa2sql.exe");
-			//		"Bullzip.exe");
-
-			string exeFile =
-				Path.Combine(
-					Environment.GetFolderPath(
-						Environment.SpecialFolder.ProgramFilesX86),
-					@"Bullzip\MS Access to MSSQL\msa2sql.exe");
+			
+			string exeFile = Path.Combine(
+				Environment.GetFolderPath(
+					Environment.SpecialFolder.ProgramFilesX86
+				),
+				@"Bullzip\MS Access to MSSQL\msa2sql.exe"
+			);
 
 			string settingsFile =
 				Path.Combine(
@@ -151,11 +146,9 @@ namespace RRStoSQL.Services
 					"Bullzip",
 					"settings.ini");
 
-			Process process =
-				new Process();
+			Process process = new Process();
 
-			process.StartInfo.FileName =
-				exeFile;
+			process.StartInfo.FileName = exeFile;
 
 			process.StartInfo.Arguments =
 				$"SETTINGS=\"{settingsFile}\" " +
@@ -173,8 +166,8 @@ namespace RRStoSQL.Services
 			process.StartInfo.CreateNoWindow = false; // Должно быть false при UseShellExecute = true
 			
 
-			process.StartInfo.CreateNoWindow =
-				false;
+			//process.StartInfo.CreateNoWindow =
+			//	false;
 
 			process.Start();
 
