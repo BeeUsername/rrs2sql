@@ -50,6 +50,28 @@ namespace RRStoSQL.Services.Migration
             pipeline.Steps.Add(
                 new EnableSqlTcpStep());
 
+            pipeline.Steps.Add(
+                   new OpenFirewallPortStep());
+
+            pipeline.Steps.Add(
+                 new SwitchConnectionStringsStep());
+
+            pipeline.Steps.Add(
+                  new PatchSqlDatabaseStep());
+
+            pipeline.Steps.Add(
+                 new CopyConnectionStringStep());
+
+            pipeline.Steps.Add(
+                 new StartRemoteRegStep());
+                        
+
+            pipeline.Steps.Add(
+                 new EnsureSsmsInstalledStep());
+
+            pipeline.Steps.Add(
+                 new UninstallBullzipStep());
+
             return pipeline;
         }
 

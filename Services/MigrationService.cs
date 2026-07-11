@@ -617,32 +617,32 @@ namespace RRStoSQL.Services
         /// <summary>
         /// Запускает RemoteReg.Launcher.exe
         /// </summary>
-        private void StartRemoteReg(
-			AppConfig appConfig)
-		{
-            string launcherPath = appConfig.ExePath.Replace("RemoteReg.exe", "RemoteReg.Launcher.exe");
+  //      private void StartRemoteReg(
+		//	AppConfig appConfig)
+		//{
+  //          string launcherPath = appConfig.ExePath.Replace("RemoteReg.exe", "RemoteReg.Launcher.exe");
 
-            if (!File.Exists(
-                launcherPath))
-			{
-				throw new Exception(
-                    "RemoteReg.Launcher.exe не найден");
-			}
+  //          if (!File.Exists(
+  //              launcherPath))
+		//	{
+		//		throw new Exception(
+  //                  "RemoteReg.Launcher.exe не найден");
+		//	}
 
-            //Process.Start(
-            //	appConfig.ExePath);
+  //          //Process.Start(
+  //          //	appConfig.ExePath);
 
-            var process =
-			 new Process();
+  //          var process =
+		//	 new Process();
 
-            process.StartInfo.FileName =
-                launcherPath;
+  //          process.StartInfo.FileName =
+  //              launcherPath;
 
-            process.StartInfo.WorkingDirectory =
-                appConfig.AppFolder;
+  //          process.StartInfo.WorkingDirectory =
+  //              appConfig.AppFolder;
 
-            process.Start();
-        }
+  //          process.Start();
+  //      }
 
         //Проверка запущен ли RemoteReg.exe, вызывается перед конвертацией базы
         private bool IsRemoteRegRunning(
