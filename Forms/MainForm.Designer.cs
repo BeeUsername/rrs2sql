@@ -54,7 +54,7 @@
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox1.Location = new System.Drawing.Point(0, 0);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(280, 97);
+            this.groupBox1.Size = new System.Drawing.Size(279, 97);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Конфиги:";
@@ -66,7 +66,7 @@
             this.listBoxConfigs.HorizontalScrollbar = true;
             this.listBoxConfigs.Location = new System.Drawing.Point(3, 16);
             this.listBoxConfigs.Name = "listBoxConfigs";
-            this.listBoxConfigs.Size = new System.Drawing.Size(274, 78);
+            this.listBoxConfigs.Size = new System.Drawing.Size(273, 78);
             this.listBoxConfigs.TabIndex = 0;
             // 
             // panelButtons
@@ -74,7 +74,7 @@
             this.panelButtons.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.panelButtons.Controls.Add(this.btnAddConfig);
             this.panelButtons.Controls.Add(this.btnConvert);
-            this.panelButtons.Location = new System.Drawing.Point(0, 123);
+            this.panelButtons.Location = new System.Drawing.Point(-1, 123);
             this.panelButtons.Name = "panelButtons";
             this.panelButtons.Size = new System.Drawing.Size(279, 46);
             this.panelButtons.TabIndex = 1;
@@ -181,7 +181,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(280, 526);
+            this.ClientSize = new System.Drawing.Size(279, 524);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.groupBox2);
