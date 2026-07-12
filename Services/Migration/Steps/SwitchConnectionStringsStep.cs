@@ -13,8 +13,10 @@ namespace RRStoSQL.Services.Migration.Steps
             _configService =
                 new ConfigService();
 
+        //public string Name =>
+        //    "Меняем connectionstrings";
         public string Name =>
-            "Меняем connectionstrings";
+            "Правим конфиг";
 
         public bool Critical =>
             true;

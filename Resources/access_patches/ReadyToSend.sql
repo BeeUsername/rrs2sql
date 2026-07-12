@@ -1,0 +1,2 @@
+UPDATE [ORDER]
+SET ReadyToSend=0

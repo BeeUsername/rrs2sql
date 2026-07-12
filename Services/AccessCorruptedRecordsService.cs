@@ -1,4 +1,5 @@
-﻿using RRStoSQL.Models;
+﻿using RRStoSQL.Helpers;
+using RRStoSQL.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.OleDb;
@@ -225,96 +226,13 @@ namespace RRStoSQL.Services
             }
         }
 
-        /// <summary>
-        /// Проверяет одну таблицу
-        /// на наличие поврежденных записей.
-        /// </summary>
-        //private void FindTableCorruptedRecords(
-        //    OleDbConnection connection,
-        //    TableCheckInfo table,
-        //    List<CorruptedFieldInfo> result)
-        //{
-        //    string sql =
-        //        $"SELECT TOP 5 * " +
-        //        $"FROM [{table.TableName}] " +
-        //        $"ORDER BY [{table.OrderField}]";
-
-        //    using (var command =
-        //        new OleDbCommand(
-        //            sql,
-        //            connection))
-        //    {
-        //        using (var reader =
-        //            command.ExecuteReader())
-        //        {
-        //            while (reader.Read())
-        //            {
-        //                for (int i = 0;
-        //                     i < reader.FieldCount;
-        //                     i++)
-        //                {
-        //                    object value =
-        //                        reader.GetValue(i);
-
-        //                    if (value == DBNull.Value)
-        //                    {
-        //                        continue;
-        //                    }
-
-        //                    string text =
-        //                        value.ToString();
-
-        //                    if (!text.Contains("#####"))
-        //                    {
-        //                        continue;
-        //                    }
-
-        //                    string fieldName =
-        //                        reader.GetName(i);
-
-        //                    result.Add(
-        //                        new CorruptedFieldInfo
-        //                        {
-        //                            TableName =
-        //                                table.TableName,
-
-        //                            FieldName =
-        //                                fieldName,
-
-        //                            Value =
-        //                                text
-        //                        });
-
-        //                    _hasCorruptedRecords = true;
-
-        //                    string key =
-        //                        $"{table.TableName}|{fieldName}";
-
-        //                    if (_loggedFields.Add(key))
-        //                    {
-        //                        Log(
-        //                            $"{table.TableName} -> {fieldName}");
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-        /// <summary>
-        /// Возвращает список таблиц,
-        /// которые необходимо проверить.
-        /// </summary>
+        
         private List<TableCheckInfo> GetTablesForCheck()
         {
             var tables =
                 new List<TableCheckInfo>
                 {
-                    //new TableCheckInfo
-                    //{
-                    //    TableName = "OrderTarget",
-                    //    OrderField = "OrderId"
-                    //},
-
+                    
                     new TableCheckInfo
                     {
                         TableName = "Order",
@@ -322,10 +240,13 @@ namespace RRStoSQL.Services
                     }
                 };
 
+            //string cfg =
+            //    Path.Combine(
+            //        AppDomain.CurrentDomain.BaseDirectory,
+            //        @"Misc\CorruptedTables.cfg");
+
             string cfg =
-                Path.Combine(
-                    AppDomain.CurrentDomain.BaseDirectory,
-                    @"Misc\CorruptedTables.cfg");
+                Path.Combine(ResourcePaths.Misc, "CorruptedTables.cfg");
 
             if (!File.Exists(cfg))
             {

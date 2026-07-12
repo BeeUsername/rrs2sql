@@ -1,0 +1,2 @@
+DELETE FROM [ImportVersions];
+GO

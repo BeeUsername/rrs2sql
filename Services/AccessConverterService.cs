@@ -1,10 +1,11 @@
-﻿using System;
+﻿using RRStoSQL.Helpers;
+using RRStoSQL.Models;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using RRStoSQL.Models;
 
 namespace RRStoSQL.Services
 {
@@ -29,14 +30,20 @@ namespace RRStoSQL.Services
 		private void UpdateSettingsFile(
 			AppConfig appConfig)
 		{
-			string settingsFile =
+            //string settingsFile =
+            //	Path.Combine(
+            //		AppDomain.CurrentDomain
+            //			.BaseDirectory,
+            //		"Bullzip",
+            //		"settings.ini");
+
+            string settingsFile =
 				Path.Combine(
-					AppDomain.CurrentDomain
-						.BaseDirectory,
-					"Bullzip",
+					ResourcePaths.Bullzip,
 					"settings.ini");
 
-			if (!File.Exists(
+
+            if (!File.Exists(
 				settingsFile))
 			{
 				throw new Exception(
@@ -140,13 +147,18 @@ namespace RRStoSQL.Services
 				@"Bullzip\MS Access to MSSQL\msa2sql.exe"
 			);
 
-			string settingsFile =
-				Path.Combine(
-					AppDomain.CurrentDomain.BaseDirectory,
-					"Bullzip",
-					"settings.ini");
+			//string settingsFile =
+			//	Path.Combine(
+			//		AppDomain.CurrentDomain.BaseDirectory,
+			//		"Bullzip",
+			//		"settings.ini");
 
-			Process process = new Process();
+            string settingsFile =
+                Path.Combine(
+                    ResourcePaths.Bullzip,
+                    "settings.ini");
+
+            Process process = new Process();
 
 			process.StartInfo.FileName = exeFile;
 

@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using RRStoSQL.Helpers;
+using RRStoSQL.Models;
+using System;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
@@ -6,8 +9,6 @@ using System.Linq;
 using System.ServiceProcess;
 using System.Threading;
 using System.Windows.Forms;
-using Microsoft.Win32;
-using RRStoSQL.Models;
 
 
 
@@ -111,39 +112,7 @@ namespace RRStoSQL.Services
                 }
             }
         }
-        //public void RestartSqlService(
-        //	string sqlInstance)
-        //{
-        //	// .\SQLEXPRESS → SQLEXPRESS
-        //	string serviceName =
-        //		"MSSQL$" +
-        //		sqlInstance.Replace(
-        //			@".\",
-        //			"");
-
-        //	using (var service =
-        //		new ServiceController(
-        //			serviceName))
-        //	{
-        //		if (
-        //			service.Status ==
-        //			ServiceControllerStatus.Running)
-        //		{
-        //			service.Stop();
-
-        //			service.WaitForStatus(
-        //				ServiceControllerStatus.Stopped,
-        //				TimeSpan.FromMinutes(1));
-        //		}
-
-        //		service.Start();
-
-        //		service.WaitForStatus(
-        //			ServiceControllerStatus.Running,
-        //			TimeSpan.FromMinutes(1));
-        //	}
-        //}
-
+        
         /// <summary>
         /// Создаёт логин RRUser и пользователя
         /// </summary>
@@ -417,22 +386,32 @@ namespace RRStoSQL.Services
 		{
             
             // Каталог локального кэша SQL дистрибутива
+            //string sqlDistribFolder =
+            //    Path.Combine(
+            //        AppDomain.CurrentDomain.BaseDirectory,
+            //        "sql_distrib");
+
             string sqlDistribFolder =
-                Path.Combine(
-                    AppDomain.CurrentDomain.BaseDirectory,
-                    "sql_distrib");
+                Path.Combine(ResourcePaths.WebInstallers, "sql_distrib");
 
             // Создаем каталог если его нет
             Directory.CreateDirectory(
                 sqlDistribFolder);
 
-            
-            string sqlInstaller =
-				Path.Combine(
-					sqlDistribFolder,
+
+            //        string sqlInstaller =
+            //Path.Combine(
+            //	sqlDistribFolder,
+            //                "SQLEXPR_x64_RUS.exe");
+
+            string sqlInstaller = 
+                Path.Combine(
+                    ResourcePaths.WebInstallers,
+                    "sql_distrib",
                     "SQLEXPR_x64_RUS.exe");
 
-			if (!File.Exists(sqlInstaller))
+
+            if (!File.Exists(sqlInstaller))
 			{
 				DownloadSqlMedia(
 					sqlDistribFolder);
@@ -555,11 +534,14 @@ namespace RRStoSQL.Services
 			string sqlDistribFolder)
         {
             // web installer рядом с RRStoSQL.exe
+            //string installerPath =
+            //    Path.Combine(
+            //        AppDomain.CurrentDomain.BaseDirectory,
+            //        "web_installers",
+            //        "SQL2022-SSEI-Expr.exe");
+
             string installerPath =
-                Path.Combine(
-                    AppDomain.CurrentDomain.BaseDirectory,
-                    "web_installers",
-                    "SQL2022-SSEI-Expr.exe");
+                Path.Combine(ResourcePaths.WebInstallers, "SQL2022-SSEI-Expr.exe");
 
             if (!File.Exists(installerPath))
             {

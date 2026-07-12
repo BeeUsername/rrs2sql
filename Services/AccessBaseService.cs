@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RRStoSQL.Helpers;
+using System;
 using System.IO;
 
 namespace RRStoSQL.Services
@@ -80,10 +81,13 @@ namespace RRStoSQL.Services
         private void ReplaceWithBlankDatabase(
             string mdbPath)
         {
+            //string blankDatabase =
+            //    Path.Combine(
+            //        AppDomain.CurrentDomain.BaseDirectory,
+            //        @"Misc\Data.mdb");
+
             string blankDatabase =
-                Path.Combine(
-                    AppDomain.CurrentDomain.BaseDirectory,
-                    @"Misc\Data.mdb");
+                Path.Combine(ResourcePaths.Misc, "Data.mdb");
 
             if (!File.Exists(blankDatabase))
             {

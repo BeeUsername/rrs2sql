@@ -1,0 +1,1 @@
+alter table PaymentTransaction alter column PaymentDate datetime

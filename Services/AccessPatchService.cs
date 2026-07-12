@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RRStoSQL.Helpers;
+using System;
 using System.Data.OleDb;
 using System.IO;
 using System.Linq;
@@ -26,11 +27,13 @@ namespace RRStoSQL.Services
         /// </param>
         public void ExecutePatches(string mdbPath)
         {
-            // Каталог с sql-патчами
-            string patchesFolder =
-                Path.Combine(
-                    AppDomain.CurrentDomain.BaseDirectory,
-                    "access_patches");
+            // Каталог с акцесс  патчами
+            //string patchesFolder =
+            //    Path.Combine(
+            //        AppDomain.CurrentDomain.BaseDirectory,
+            //        "access_patches");
+
+            string patchesFolder = ResourcePaths.AccessPatches;
 
             // Если папки нет — патчить нечего
             if (!Directory.Exists(

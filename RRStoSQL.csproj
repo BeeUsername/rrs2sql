@@ -71,6 +71,7 @@
     <Compile Include="Forms\UI\StepListInitializer.cs" />
     <Compile Include="Forms\UI\StepStatusManager.cs" />
     <Compile Include="Helpers\MessageHelper.cs" />
+    <Compile Include="Helpers\ResourcePaths.cs" />
     <Compile Include="Models\AppConfig.cs" />
     <Compile Include="Models\ConfigItem.cs.cs" />
     <Compile Include="Models\CorruptedFieldInfo.cs" />
@@ -131,7 +132,6 @@
     <Compile Include="Services\SqlService.cs" />
     <Compile Include="Services\SqlTemplateDatabaseService.cs" />
     <Compile Include="Services\SsmsService.cs" />
-    <Compile Include="Utils\CommandNames.cs" />
     <EmbeddedResource Include="Forms\ConversionLogForm.resx">
       <DependentUpon>ConversionLogForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -184,8 +184,26 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="Services\AccessToSql2\" />
+    <Content Include="Resources\access_patches\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\bullzip\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\misc\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\sql_distrib\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\sql_patches\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\web_installers\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

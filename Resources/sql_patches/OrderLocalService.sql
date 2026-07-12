@@ -1,0 +1,2 @@
+ALTER TABLE OrderLocalService
+ALTER COLUMN Sended BIT NULL

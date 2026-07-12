@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RRStoSQL.Helpers;
+using System;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
@@ -31,27 +32,13 @@ namespace RRStoSQL.Services
             //путь до каталога с патчами
             string patchesFolder;
 
-            // База новая выполняем все скрипты из папки sql_new_base_patches, в провтином из sql_patches
-            //if (!isNewDatabase)
-            //{
-
-            //    patchesFolder =
+            
+            //patchesFolder =
             //    Path.Combine(
             //        AppDomain.CurrentDomain.BaseDirectory,
             //        "sql_patches");
 
-            //}
-            //else {
-            //    patchesFolder =
-            //    Path.Combine(
-            //        AppDomain.CurrentDomain.BaseDirectory,
-            //        "sql_new_base_patches");
-            //}
-
-            patchesFolder =
-                Path.Combine(
-                    AppDomain.CurrentDomain.BaseDirectory,
-                    "sql_patches");
+            patchesFolder = ResourcePaths.SqlPatches;
 
 
             // Если каталога нет —

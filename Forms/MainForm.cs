@@ -1,12 +1,12 @@
 ﻿
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+//using System.Collections.Generic;
+//using System.ComponentModel;
+//using System.Data;
+//using System.Drawing;
+//using System.Linq;
+//using System.Text;
+//using System.Threading.Tasks;
 using System.Windows.Forms;
 using MigrateFromAccess.Models;
 using MigrateFromAccess.Services;
@@ -22,32 +22,7 @@ namespace RRStoSQL
     /// </summary>
     public partial class MainForm : Form
     {
-        ///// <summary>
-        ///// Сервис поиска RemoteReg.exe.config
-        ///// в стандартных каталогах.
-        ///// </summary>
-        //private readonly ConfigFinderService _finderService =
-        //    new ConfigFinderService();
-
-        ///// <summary>
-        ///// Инициализирует список шагов миграции.
-        ///// </summary>
-        //private readonly StepListInitializer
-        //    _stepInitializer =
-        //        new StepListInitializer();
-
-        ///// <summary>
-        ///// Управляет отображением состояний шагов:
-        ///// выполняется, успешно, ошибка.
-        ///// </summary>
-        //private StepStatusManager _stepManager;
-
-        ///// <summary>
-        ///// Основной сервис миграции.
-        ///// </summary>
-        //private readonly MigrationService _migrationService =
-        //    new MigrationService();
-
+       
         /// <summary>
         /// Сервис поиска RemoteReg.exe.config
         /// в стандартных каталогах.
@@ -73,12 +48,7 @@ namespace RRStoSQL
 
         public MainForm()
         {
-            //// Сначала ВСЕГДА инициализируем компоненты
-            //InitializeComponent();
-
-            //// Если мы в режиме дизайна - выходим, не выполняя остальной код
-            //if (DesignMode)
-            //    return;
+          
 
             // 1. Сначала ВСЕГДА инициализируем компоненты
             InitializeComponent();

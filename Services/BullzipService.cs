@@ -1,9 +1,10 @@
 ﻿
+using Microsoft.Win32;
+using RRStoSQL.Helpers;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
-using Microsoft.Win32;
 using static System.Resources.ResXFileRef;
 
 namespace RRStoSQL.Services
@@ -39,10 +40,15 @@ namespace RRStoSQL.Services
             }
 
             // Установщик лежит рядом с RRStoSQL.exe
+            //string installerPath =
+            //    Path.Combine(
+            //        AppDomain.CurrentDomain.BaseDirectory,
+            //        "Bullzip",
+            //        "msa2sql_5_5_0_281.exe");
+
             string installerPath =
                 Path.Combine(
-                    AppDomain.CurrentDomain.BaseDirectory,
-                    "Bullzip",
+                    ResourcePaths.Bullzip,
                     "msa2sql_5_5_0_281.exe");
 
             // Проверяем наличие установщика

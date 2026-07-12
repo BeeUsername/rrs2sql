@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using RRStoSQL.Helpers;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -86,10 +87,15 @@ namespace RRStoSQL.Services
             }
 
             // Веб-инсталлер лежит рядом с нашей утилитой
+            //string installerPath =
+            //    Path.Combine(
+            //        AppDomain.CurrentDomain.BaseDirectory,
+            //        "web_installers",
+            //        "vs_SSMS.exe");
+            
             string installerPath =
                 Path.Combine(
-                    AppDomain.CurrentDomain.BaseDirectory,
-                    "web_installers",
+                    ResourcePaths.WebInstallers,
                     "vs_SSMS.exe");
 
             if (!File.Exists(installerPath))

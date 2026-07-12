@@ -14,12 +14,15 @@ namespace RRStoSQL.Services.Migration
 
             pipeline.Steps.Add(
                 new ReadConfigStep());
-            
+
+            pipeline.Steps.Add(
+                new CheckCorruptedRecordsStep());
+
             pipeline.Steps.Add(
                 new CompactAccessStep());
 
             pipeline.Steps.Add(
-                new CheckCorruptedRecordsStep());
+                 new PatchAccessDatabaseStep());
 
             pipeline.Steps.Add(
                 new EnsureSqlInstalledStep());
@@ -31,15 +34,12 @@ namespace RRStoSQL.Services.Migration
                 new EnableMixedAuthenticationStep());
 
             pipeline.Steps.Add(
-                new RestartSqlServiceStep());
-                             
-
-            
+                new RestartSqlServiceStep());                            
+                        
             pipeline.Steps.Add(
                 new CreateRRUserStep());
 
-            pipeline.Steps.Add(
-                 new PatchAccessDatabaseStep());
+            
 
             pipeline.Steps.Add(
              new ConvertAccessDatabaseStep());
@@ -54,17 +54,16 @@ namespace RRStoSQL.Services.Migration
                    new OpenFirewallPortStep());
 
             pipeline.Steps.Add(
-                 new SwitchConnectionStringsStep());
-
-            pipeline.Steps.Add(
                   new PatchSqlDatabaseStep());
 
+            pipeline.Steps.Add(
+                 new SwitchConnectionStringsStep());
+                       
             pipeline.Steps.Add(
                  new CopyConnectionStringStep());
 
             pipeline.Steps.Add(
-                 new StartRemoteRegStep());
-                        
+                 new StartRemoteRegStep());                        
 
             pipeline.Steps.Add(
                  new EnsureSsmsInstalledStep());
