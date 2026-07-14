@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.ServiceProcess;
-using System.Threading;
+//using System.Threading;
 using System.Windows.Forms;
 
 
@@ -782,8 +782,20 @@ public void OpenFirewallPort()
 			string sqlInstance,
 			string webServiceLogin)
         {
+
+            //УР новая и webServiceLogin еще нет в конфиге назовем базу RRS_Db
+            string login =
+				string.IsNullOrWhiteSpace(webServiceLogin)
+					? "Db"
+					: webServiceLogin.Trim();
+
             string baseName =
-                $"RRS_{webServiceLogin}";
+                $"RRS_{login}";
+
+
+            //string baseName =
+            //    $"RRS_{webServiceLogin}";
+
 
             string databaseName =
                 baseName;

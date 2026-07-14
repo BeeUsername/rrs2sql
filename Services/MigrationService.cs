@@ -70,7 +70,7 @@ namespace RRStoSQL.Services
                 return;
             }
 
-            //Заменяем новую базу базой с правильной структурой
+            //Заменяем новую базу базой с правильной структурой и версией БД из папки \misc\Data.mdb
             _accessBaseService.ReplaceIfNewDatabase(
                 appConfig.MdbPath);
 
@@ -83,9 +83,15 @@ namespace RRStoSQL.Services
                     Owner = owner,
                     ConfigPath = configPath
                 };
-
+            //перебираем все шаги в пайлайне и выполняем их по очереди, если они должны быть выполнены согласно опциям миграции
             foreach (IMigrationStep step in pipeline.Steps)
             {
+
+                if (!ShouldRunStep(step, options))
+                {
+                    continue;
+                }
+
                 updateStep(
                     step.Name,
                     StepStatus.Running);
@@ -120,7 +126,23 @@ namespace RRStoSQL.Services
             }
 
         }
-        
+
+        private bool ShouldRunStep(
+            IMigrationStep step,
+            MigrationOptions options)
+        {
+            switch (step.Name)
+            {
+                case "Установка sql management":
+                    return options.InstallSsms;
+
+                case "Удаляем bullzip":
+                    return options.DeleteBullzip;
+
+                default:
+                    return true;
+            }
+        }
         private bool IsRemoteRegRunning(
 			AppConfig appConfig)
 				{

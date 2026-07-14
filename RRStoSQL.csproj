@@ -120,6 +120,7 @@
     <Compile Include="Services\Migration\Steps\EnsureSsmsInstalledStep.cs" />
     <Compile Include="Services\Migration\Steps\GrantDatabaseRightsStep.cs" />
     <Compile Include="Services\Migration\Steps\MigrationPipelineFactory.cs" />
+    <Compile Include="Services\Migration\Steps\MigrationStepBase.cs" />
     <Compile Include="Services\Migration\Steps\OpenFirewallPortStep.cs" />
     <Compile Include="Services\Migration\Steps\PatchAccessDatabaseStep.cs" />
     <Compile Include="Services\Migration\Steps\PatchSqlDatabaseStep.cs" />
@@ -192,7 +193,10 @@
     <Content Include="Resources\bullzip\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\misc\**\*">
+    <Content Include="Resources\misc\CorruptedTables.cfg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\misc\Data.mdb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\sql_distrib\**\*">

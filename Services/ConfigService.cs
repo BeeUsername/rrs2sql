@@ -79,7 +79,7 @@ namespace RRStoSQL.Services
                     "Строка подключения MDB не найдена");
             }
 
-            // Читаем нестандартную секцию ProgramSettings
+            // Читаем секцию ProgramSettings
             XDocument doc =
                 XDocument.Load(
                     configPath);

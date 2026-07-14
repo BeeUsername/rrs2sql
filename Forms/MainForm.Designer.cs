@@ -128,6 +128,7 @@
             // 
             this.columnHeader2.DisplayIndex = 1;
             this.columnHeader2.Text = "Статус";
+            this.columnHeader2.Width = 62;
             // 
             // columnHeader1
             // 
@@ -166,7 +167,7 @@
             this.panel1.Controls.Add(this.chkInstallSSMS);
             this.panel1.Location = new System.Drawing.Point(3, 96);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(270, 24);
+            this.panel1.Size = new System.Drawing.Size(271, 24);
             this.panel1.TabIndex = 5;
             // 
             // panel2
