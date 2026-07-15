@@ -121,6 +121,7 @@
     <Compile Include="Services\Migration\Steps\GrantDatabaseRightsStep.cs" />
     <Compile Include="Services\Migration\Steps\MigrationPipelineFactory.cs" />
     <Compile Include="Services\Migration\Steps\MigrationStepBase.cs" />
+    <Compile Include="Services\Migration\Engines\NativeMigrationEngine.cs" />
     <Compile Include="Services\Migration\Steps\OpenFirewallPortStep.cs" />
     <Compile Include="Services\Migration\Steps\PatchAccessDatabaseStep.cs" />
     <Compile Include="Services\Migration\Steps\PatchSqlDatabaseStep.cs" />
