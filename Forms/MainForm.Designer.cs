@@ -39,7 +39,6 @@
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chkInstallSSMS = new System.Windows.Forms.CheckBox();
-            this.chkDeleteBullzip = new System.Windows.Forms.CheckBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
             this.groupBox1.SuspendLayout();
@@ -141,29 +140,16 @@
             this.chkInstallSSMS.AutoSize = true;
             this.chkInstallSSMS.Checked = true;
             this.chkInstallSSMS.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkInstallSSMS.Location = new System.Drawing.Point(6, 3);
+            this.chkInstallSSMS.Location = new System.Drawing.Point(4, 3);
             this.chkInstallSSMS.Name = "chkInstallSSMS";
             this.chkInstallSSMS.Size = new System.Drawing.Size(119, 17);
             this.chkInstallSSMS.TabIndex = 3;
             this.chkInstallSSMS.Text = "Установить SSMS";
             this.chkInstallSSMS.UseVisualStyleBackColor = true;
             // 
-            // chkDeleteBullzip
-            // 
-            this.chkDeleteBullzip.AutoSize = true;
-            this.chkDeleteBullzip.Checked = true;
-            this.chkDeleteBullzip.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkDeleteBullzip.Location = new System.Drawing.Point(135, 3);
-            this.chkDeleteBullzip.Name = "chkDeleteBullzip";
-            this.chkDeleteBullzip.Size = new System.Drawing.Size(135, 17);
-            this.chkDeleteBullzip.TabIndex = 4;
-            this.chkDeleteBullzip.Text = "Удалить Bullzip после";
-            this.chkDeleteBullzip.UseVisualStyleBackColor = true;
-            // 
             // panel1
             // 
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel1.Controls.Add(this.chkDeleteBullzip);
             this.panel1.Controls.Add(this.chkInstallSSMS);
             this.panel1.Location = new System.Drawing.Point(3, 96);
             this.panel1.Name = "panel1";
@@ -214,7 +200,6 @@
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.CheckBox chkInstallSSMS;
-        private System.Windows.Forms.CheckBox chkDeleteBullzip;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
     }

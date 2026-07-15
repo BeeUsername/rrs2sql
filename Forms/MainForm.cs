@@ -169,8 +169,8 @@ namespace RRStoSQL
                     InstallSsms =
                         chkInstallSSMS.Checked,
 
-                    DeleteBullzip =
-                        chkDeleteBullzip.Checked
+                    //DeleteBullzip =
+                    //    chkDeleteBulzip.Checked
                 };
 
             try

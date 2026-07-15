@@ -79,7 +79,29 @@ namespace RRStoSQL.Services.Migration.Engines
                 databaseName);
 
 
-            MigrateAll();
+            //MigrateAll();
+            //ExecuteMigration();
+
+            try
+            {
+                Log("=== Начало миграции ===");
+
+                ExecuteMigration();
+
+                Log("=== Миграция успешно завершена ===");
+            }
+            catch (Exception ex)
+            {
+                Log("");
+                Log("=== ОШИБКА ===");
+                Log(ex.ToString());
+
+                throw;
+            }
+            finally
+            {
+                Log("=== Завершение работы ===");
+            }
         }
 
         // ---------- Логирование ----------
@@ -99,7 +121,7 @@ namespace RRStoSQL.Services.Migration.Engines
 
         // ---------- Главный метод миграции ----------
 
-        void MigrateAll()
+        void ExecuteMigration()
         {
             Log($"=== Начало миграции: {_mdbPath} -> {_sqlConnStr} ===");
 
