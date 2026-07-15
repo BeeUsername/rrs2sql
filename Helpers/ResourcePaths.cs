@@ -10,8 +10,8 @@ namespace RRStoSQL.Helpers
                 AppDomain.CurrentDomain.BaseDirectory,
                 "Resources");
 
-        public static string Bullzip =>
-            Path.Combine(Root, "bullzip");
+        //public static string Bullzip =>
+        //    Path.Combine(Root, "bullzip");
 
         public static string SqlDistrib =>
             Path.Combine(Root, "sql_distrib");

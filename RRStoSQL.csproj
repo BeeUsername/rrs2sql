@@ -81,7 +81,7 @@
     <Compile Include="Services\AccessCompactService.cs" />
     <Compile Include="Services\AccessCorruptedRecordsService.cs" />
     <Compile Include="Services\AccessPatchService.cs" />
-    <Compile Include="Services\AccessToSqlConverter.cs" />
+    <Compile Include="Services\AccessToSqlConverter_deteted.cs" />
     <Compile Include="Services\ConfigFinderService.cs" />
     <Compile Include="Services\ConfigService.cs" />
     <Compile Include="Services\MigrationService.cs" />
@@ -96,6 +96,7 @@
     <Compile Include="Services\Migration\Steps\CreateRRUserStep.cs" />
     <Compile Include="Services\Migration\Steps\EnableMixedAuthenticationStep.cs" />
     <Compile Include="Services\Migration\Steps\EnableSqlTcpStep.cs" />
+    <Compile Include="Services\Migration\Steps\EnsureSqlInstalledStep.cs" />
     <Compile Include="Services\Migration\Steps\EnsureSsmsInstalledStep.cs" />
     <Compile Include="Services\Migration\Steps\GrantDatabaseRightsStep.cs" />
     <Compile Include="Services\Migration\Steps\MigrationPipelineFactory.cs" />

@@ -23,9 +23,7 @@ namespace RRStoSQL.Services
 		private readonly ConfigService _configService = new ConfigService();
 		
         private readonly AccessBaseService _accessBaseService = new AccessBaseService();
-
         
-
         /// <summary>
         /// Запускает миграцию.
         /// </summary>
@@ -74,6 +72,7 @@ namespace RRStoSQL.Services
             _accessBaseService.ReplaceIfNewDatabase(
                 appConfig.MdbPath);
 
+            //Создаем пайплайн миграции
             var pipeline =
                 MigrationPipelineFactory.Create();
 

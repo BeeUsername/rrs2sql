@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 
 namespace RRStoSQL.Services
 {
-	public class AccessToSqlConverter
+	public class AccessToSqlConverter_deteted
 	{
 
 		/// <summary>

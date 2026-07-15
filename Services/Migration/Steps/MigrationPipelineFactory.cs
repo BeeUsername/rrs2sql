@@ -24,8 +24,8 @@ namespace RRStoSQL.Services.Migration
             pipeline.Steps.Add(
                  new PatchAccessDatabaseStep());
 
-            //pipeline.Steps.Add(
-            //    new EnsureSqlInstalledStep());
+            pipeline.Steps.Add(
+                new EnsureSqlInstalledStep());
 
             //pipeline.Steps.Add(
             //    new EnsureBullzipInstalledStep());

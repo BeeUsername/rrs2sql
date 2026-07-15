@@ -118,7 +118,7 @@
             this.listViewSteps.HideSelection = false;
             this.listViewSteps.Location = new System.Drawing.Point(0, 0);
             this.listViewSteps.Name = "listViewSteps";
-            this.listViewSteps.Size = new System.Drawing.Size(273, 317);
+            this.listViewSteps.Size = new System.Drawing.Size(273, 319);
             this.listViewSteps.TabIndex = 0;
             this.listViewSteps.UseCompatibleStateImageBehavior = false;
             this.listViewSteps.View = System.Windows.Forms.View.Details;
@@ -140,11 +140,11 @@
             this.chkInstallSSMS.AutoSize = true;
             this.chkInstallSSMS.Checked = true;
             this.chkInstallSSMS.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkInstallSSMS.Location = new System.Drawing.Point(4, 3);
+            this.chkInstallSSMS.Location = new System.Drawing.Point(33, 3);
             this.chkInstallSSMS.Name = "chkInstallSSMS";
-            this.chkInstallSSMS.Size = new System.Drawing.Size(119, 17);
+            this.chkInstallSSMS.Size = new System.Drawing.Size(203, 17);
             this.chkInstallSSMS.TabIndex = 3;
-            this.chkInstallSSMS.Text = "Установить SSMS";
+            this.chkInstallSSMS.Text = "Установить SQL Server Managment";
             this.chkInstallSSMS.UseVisualStyleBackColor = true;
             // 
             // panel1
@@ -161,14 +161,14 @@
             this.panel2.Controls.Add(this.listViewSteps);
             this.panel2.Location = new System.Drawing.Point(3, 169);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(273, 317);
+            this.panel2.Size = new System.Drawing.Size(273, 319);
             this.panel2.TabIndex = 6;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(279, 489);
+            this.ClientSize = new System.Drawing.Size(279, 491);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.groupBox2);
