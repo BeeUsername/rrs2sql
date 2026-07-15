@@ -1,6 +1,6 @@
 @echo off
 
-set VERSION=1.01
+set VERSION=1.03
 
 echo.
 echo Creating release %VERSION%...

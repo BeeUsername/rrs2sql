@@ -119,7 +119,7 @@
             this.listViewSteps.HideSelection = false;
             this.listViewSteps.Location = new System.Drawing.Point(0, 0);
             this.listViewSteps.Name = "listViewSteps";
-            this.listViewSteps.Size = new System.Drawing.Size(273, 352);
+            this.listViewSteps.Size = new System.Drawing.Size(273, 317);
             this.listViewSteps.TabIndex = 0;
             this.listViewSteps.UseCompatibleStateImageBehavior = false;
             this.listViewSteps.View = System.Windows.Forms.View.Details;
@@ -175,14 +175,14 @@
             this.panel2.Controls.Add(this.listViewSteps);
             this.panel2.Location = new System.Drawing.Point(3, 169);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(273, 352);
+            this.panel2.Size = new System.Drawing.Size(273, 317);
             this.panel2.TabIndex = 6;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(279, 524);
+            this.ClientSize = new System.Drawing.Size(279, 489);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.groupBox2);

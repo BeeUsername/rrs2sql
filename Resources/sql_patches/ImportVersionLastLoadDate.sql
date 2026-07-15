@@ -1,0 +1,1 @@
+alter table ImportVersions alter column LastLoadDate datetime

@@ -15,7 +15,7 @@ namespace RRStoSQL.Forms.UI
             AddStep(listView, "Патчим access базу");
 
             AddStep(listView, "Установка sql");
-            AddStep(listView, "Установка bullzip msa2sql");			
+            //AddStep(listView, "Установка bullzip msa2sql");			
 			AddStep(listView, "Разрешаем mixed authentication");
 			AddStep(listView, "Перезапуск службы sql");
 			AddStep(listView, "Создаём rruser");
@@ -30,7 +30,7 @@ namespace RRStoSQL.Forms.UI
             AddStep(listView, "Строка подключения в буфер обмена");
 			AddStep(listView, "Запускаем УР");
             AddStep(listView, "Установка sql management");
-            AddStep(listView, "Удаляем bullzip");
+            //AddStep(listView, "Удаляем bullzip");
 
         }
 

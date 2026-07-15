@@ -27,8 +27,8 @@ namespace RRStoSQL.Services.Migration
             pipeline.Steps.Add(
                 new EnsureSqlInstalledStep());
 
-            pipeline.Steps.Add(
-                new EnsureBullzipInstalledStep());
+            //pipeline.Steps.Add(
+            //    new EnsureBullzipInstalledStep());
 
             pipeline.Steps.Add(
                 new EnableMixedAuthenticationStep());
@@ -68,8 +68,8 @@ namespace RRStoSQL.Services.Migration
             pipeline.Steps.Add(
                  new EnsureSsmsInstalledStep());
 
-            pipeline.Steps.Add(
-                 new UninstallBullzipStep());
+            //pipeline.Steps.Add(
+            //     new UninstallBullzipStep());
 
             return pipeline;
         }
