@@ -8,7 +8,7 @@ namespace RRStoSQL.Services.Migration
     /// </summary>
     public class MigrationContext
     {
-        public Form Owner { get; set; }
+        public Form Owner { get; set; } //использовался для доп.формы отображения статуса миграции, но сейчас не используется.
 
         public AppConfig Config { get; set; }
 

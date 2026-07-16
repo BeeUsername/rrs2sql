@@ -41,7 +41,7 @@ namespace RRStoSQL.Services
                     ConfigurationUserLevel.None);
 
             // В конфиге может быть несколько строк
-            // подключения (например aspnetdb).
+            // подключения (например закомментированный sql).
             // Ищем именно Access MDB.
             var connection =
                 config.ConnectionStrings

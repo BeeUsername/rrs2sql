@@ -15,40 +15,22 @@ namespace RRStoSQL.Services.Migration.Steps
         public bool Critical =>
             true;
 
-        public Task ExecuteAsync(
-            MigrationContext context)
-        {
-            _engine.Run(
-                context);
+        //public Task ExecuteAsync(
+        //    MigrationContext context)
+        //{
+        //    _engine.Run(
+        //        context);
 
-            return Task.CompletedTask;
+        //    return Task.CompletedTask;
+        //}
+        public async Task ExecuteAsync(MigrationContext context)
+        {
+            await Task.Run(() =>
+            {
+                _engine.Run(context);
+            });
         }
     }
 }
 
 
-//using System.Threading.Tasks;
-
-//namespace RRStoSQL.Services.Migration.Steps
-//{
-//    public class ConvertAccessDatabaseStep
-//        : IMigrationStep
-//    {
-//        public string Name =>
-//            "Конвертируем базу";
-
-//        public bool Critical =>
-//            true;
-
-//        public Task ExecuteAsync(
-//            MigrationContext context)
-//        {
-//            var engine =
-//                new AccessMigrationEngine();
-
-//            engine.Run(context);
-
-//            return Task.CompletedTask;
-//        }
-//    }
-//}
