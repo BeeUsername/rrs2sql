@@ -7,6 +7,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.ServiceProcess;
+using System.Threading;
+
 //using System.Threading;
 using System.Windows.Forms;
 
@@ -847,5 +849,384 @@ public void OpenFirewallPort()
                 }
             }
         }
+
+        // ============================================
+        // Возвращает папку DATA экземпляра SQL Server.
+        // Например:
+        //
+        // C:\Program Files\Microsoft SQL Server\
+        // MSSQL16.SQLEXPRESS\MSSQL\DATA
+        // ============================================
+        public string GetDefaultDataFolder(
+            string sqlInstance)
+        {
+            string connectionString =
+                $"Server={sqlInstance};" +
+                $"Database=master;" +
+                $"Trusted_Connection=True;";
+
+            using (var connection =
+                new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                // ============================================
+                // SQL Server 2017+
+                // ============================================
+
+                try
+                {
+                    using (var command =
+                        new SqlCommand(
+                            @"SELECT CAST(
+                        SERVERPROPERTY('InstanceDefaultDataPath')
+                        AS nvarchar(4000))",
+                            connection))
+                    {
+                        var result =
+                            command.ExecuteScalar();
+
+                        if (result != null &&
+                            result != DBNull.Value)
+                        {
+                            string path =
+                                result.ToString();
+
+                            if (!string.IsNullOrWhiteSpace(path) &&
+                                Directory.Exists(path))
+                            {
+                                return path;
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    // попробуем старый способ
+                }
+
+                // ============================================
+                // Старые версии SQL Server
+                // ============================================
+
+                using (var command =
+                    new SqlCommand(
+                        @"SELECT physical_name
+                  FROM master.sys.database_files
+                  WHERE file_id = 1",
+                        connection))
+                {
+                    var result =
+                        command.ExecuteScalar();
+
+                    if (result == null ||
+                        result == DBNull.Value)
+                    {
+                        throw new Exception(
+                            "Не удалось определить каталог DATA SQL Server.");
+                    }
+
+                    return Path.GetDirectoryName(
+                        result.ToString());
+                }
+            }
+        }
+
+        private void DetachDatabase(
+			string sqlInstance,
+			string databaseName)
+        {
+            string connectionString =
+                $"Server={sqlInstance};" +
+                $"Database=master;" +
+                $"Trusted_Connection=True;";
+
+            using (var connection =
+                new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                string sql =
+        $@"
+ALTER DATABASE [{databaseName}]
+SET SINGLE_USER
+WITH ROLLBACK IMMEDIATE;
+
+EXEC sp_detach_db
+    @dbname = N'{databaseName}';
+";
+
+                using (var command =
+                    new SqlCommand(
+                        sql,
+                        connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        private void AttachDatabase(
+            string sqlInstance,
+			string databaseName,
+			string mdfPath,
+			string ldfPath)
+        {
+            string connectionString =
+                $"Server={sqlInstance};" +
+                $"Database=master;" +
+                $"Trusted_Connection=True;";
+
+            using (var connection =
+                new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                string sql =
+        $@"
+CREATE DATABASE [{databaseName}]
+ON
+(
+    FILENAME = N'{mdfPath}'
+),
+(
+    FILENAME = N'{ldfPath}'
+)
+FOR ATTACH;
+";
+
+                using (var command =
+                    new SqlCommand(
+                        sql,
+                        connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public void DropDatabaseIfExists(
+    string sqlInstance,
+    string databaseName)
+        {
+            if (!DatabaseExists(
+                    sqlInstance,
+                    databaseName))
+            {
+                return;
+            }
+
+            DetachDatabase(
+                sqlInstance,
+                databaseName);
+        }
+
+
+        public void CreateDatabaseFromTemplate(
+			string sqlInstance,
+			string databaseName,
+			string templateFolder)
+        {
+            string dataFolder =
+                GetDefaultDataFolder(
+                    sqlInstance);
+
+            string sourceMdf =
+                Path.Combine(
+                    templateFolder,
+                    "citisoftDbSlis.mdf");
+
+            string sourceLdf =
+                Path.Combine(
+                    templateFolder,
+                    "citisoftDbSlis_log.ldf");
+
+            if (!File.Exists(sourceMdf))
+                throw new FileNotFoundException(sourceMdf);
+
+            if (!File.Exists(sourceLdf))
+                throw new FileNotFoundException(sourceLdf);
+
+            string targetMdf =
+                Path.Combine(
+                    dataFolder,
+                    databaseName + ".mdf");
+
+            string targetLdf =
+                Path.Combine(
+                    dataFolder,
+                    databaseName + "_log.ldf");
+
+            if (DatabaseExists(
+                    sqlInstance,
+                    databaseName))
+            {
+                DetachDatabase(
+                    sqlInstance,
+                    databaseName);
+            }
+
+            if (File.Exists(targetMdf))
+                File.Delete(targetMdf);
+
+            if (File.Exists(targetLdf))
+                File.Delete(targetLdf);
+
+            File.Copy(
+                sourceMdf,
+                targetMdf);
+
+            File.Copy(
+                sourceLdf,
+                targetLdf);
+
+            AttachDatabase(
+                sqlInstance,
+                databaseName,
+                targetMdf,
+                targetLdf);
+        }
+
+        //    public string GetDatabaseVersion(
+        //string sqlInstance,
+        //string databaseName)
+        //    {
+        //        string connectionString =
+        //            $"Server={sqlInstance};" +
+        //            $"Database={databaseName};" +
+        //            $"Trusted_Connection=True;";
+
+        //        using (var connection =
+        //            new SqlConnection(connectionString))
+        //        {
+        //            connection.Open();
+
+        //            using (var command =
+        //                new SqlCommand(
+        //                    @"SELECT Value
+        //              FROM dbo.SysParameter
+        //              WHERE Name = 'DbVersion'",
+        //                    connection))
+        //            {
+        //                object value =
+        //                    command.ExecuteScalar();
+
+        //                if (value == null ||
+        //                    value == DBNull.Value)
+        //                {
+        //                    throw new Exception(
+        //                        "Параметр DbVersion не найден.");
+        //                }
+
+        //                return value.ToString();
+        //            }
+        //        }
+        //    }
+
+        public string GetDatabaseVersion(
+    string sqlInstance,
+    string databaseName)
+        {
+            string connectionString =
+                $"Server={sqlInstance};" +
+                $"Database={databaseName};" +
+                $"Trusted_Connection=True;";
+
+            using (var connection =
+                new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                try
+                {
+                    using (var command =
+                        new SqlCommand(
+                            @"SELECT Value
+                      FROM dbo.SysParameter
+                      WHERE Name='DbVersion'",
+                            connection))
+                    {
+                        object value =
+                            command.ExecuteScalar();
+
+                        if (value == null ||
+                            value == DBNull.Value)
+                        {
+                            return null;
+                        }
+
+                        return value.ToString();
+                    }
+                }
+                catch (SqlException ex)
+                    when (ex.Number == 208)   // Invalid object name
+                {
+                    // Таблица SysParameter ещё не создана.
+                    return null;
+                }
+            }
+        }
+
+
+        public void WaitForDatabaseUpgrade(
+    string sqlInstance,
+    string databaseName,
+    int stableSeconds = 5,
+    int timeoutSeconds = 180)
+        {
+            DateTime start =
+                DateTime.Now;
+
+            string lastVersion =
+                GetDatabaseVersion(
+                    sqlInstance,
+                    databaseName);
+
+            DateTime lastChange =
+                DateTime.Now;
+
+            while (true)
+            {
+                string currentVersion =
+                    GetDatabaseVersion(
+                        sqlInstance,
+                        databaseName);
+
+                if (!String.Equals(
+                        currentVersion,
+                        lastVersion,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    lastVersion =
+                        currentVersion;
+
+                    lastChange =
+                        DateTime.Now;
+                }
+
+                // Версия не менялась несколько секунд —
+                // считаем обновление завершённым.
+                if ((DateTime.Now - lastChange).TotalSeconds >=
+                    stableSeconds)
+                {
+                    return;
+                }
+
+                if ((DateTime.Now - start).TotalSeconds >
+                    timeoutSeconds)
+                {
+                    throw new System.TimeoutException(
+                        "Истекло время ожидания обновления структуры базы.");
+                }
+
+                Thread.Sleep(1000);
+            }
+        }
+
+
+
+
+
+
     }
 }

@@ -1,2 +1,2 @@
-DELETE FROM [ImportVersions];
-GO
+--DELETE FROM [ImportVersions];
+--GO

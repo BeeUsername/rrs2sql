@@ -85,9 +85,11 @@
     <Compile Include="Services\ConfigFinderService.cs" />
     <Compile Include="Services\ConfigService.cs" />
     <Compile Include="Services\MigrationService.cs" />
+    <Compile Include="Services\Migration\Engines\NativeMigrationEngine.cs" />
     <Compile Include="Services\Migration\IMigrationStep.cs" />
     <Compile Include="Services\Migration\MigrationContext.cs" />
     <Compile Include="Services\Migration\MigrationPipeline.cs" />
+    <Compile Include="Services\Migration\RemoteRegController.cs" />
     <Compile Include="Services\Migration\RemoteRegLauncher.cs" />
     <Compile Include="Services\Migration\Steps\CheckCorruptedRecordsStep.cs" />
     <Compile Include="Services\Migration\Steps\CompactAccessStep.cs" />
@@ -101,7 +103,7 @@
     <Compile Include="Services\Migration\Steps\GrantDatabaseRightsStep.cs" />
     <Compile Include="Services\Migration\Steps\MigrationPipelineFactory.cs" />
     <Compile Include="Services\Migration\Steps\MigrationStepBase.cs" />
-    <Compile Include="Services\Migration\Engines\NativeMigrationEngine.cs" />
+    <Compile Include="Services\Migration\Engines\AccessToSqlMigrationEngine.cs" />
     <Compile Include="Services\Migration\Steps\OpenFirewallPortStep.cs" />
     <Compile Include="Services\Migration\Steps\PatchAccessDatabaseStep.cs" />
     <Compile Include="Services\Migration\Steps\PatchSqlDatabaseStep.cs" />
@@ -172,9 +174,13 @@
     <Content Include="Resources\misc\CorruptedTables.cfg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\misc\Data.mdb">
+   <Content Include="Resources\misc\Data.mdb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </Content> 
+	  <!-- Шаблонная SQL-база и все сопутствующие файлы -->
+	  <Content Include="Resources\misc\mssqlBlankBase\**\*">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
     <Content Include="Resources\sql_distrib\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

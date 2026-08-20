@@ -6,6 +6,9 @@ namespace RRStoSQL.Services.Migration.Steps
     public class ConvertAccessDatabaseStep
         : IMigrationStep
     {
+        //private readonly AccessToSqlMigrationEngine _engine =
+        //    new AccessToSqlMigrationEngine();
+
         private readonly NativeMigrationEngine _engine =
             new NativeMigrationEngine();
 
