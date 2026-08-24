@@ -94,7 +94,7 @@ namespace RRStoSQL.Services.Migration
         // Закрыть корректно и дождаться завершения
         // ============================================
         public void CloseGracefully(
-            int timeoutMilliseconds = 30000)
+            int timeoutMilliseconds = 10000)
         {
             if (_process == null)
             {
@@ -120,7 +120,7 @@ namespace RRStoSQL.Services.Migration
         // Ждем завершения
         // ============================================
         public void WaitForExit(
-            int timeoutMilliseconds = 30000)
+            int timeoutMilliseconds = 10000)
         {
             if (_process == null)
             {
