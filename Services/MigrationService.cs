@@ -67,8 +67,9 @@ namespace RRStoSQL.Services
             }
 
             //Заменяем новую базу базой с правильной структурой и версией БД из папки \misc\Data.mdb
-            _accessBaseService.ReplaceIfNewDatabase(
-                appConfig.MdbPath);
+            // Неактуально, на этапе ковертиции, запускается УР и обновляет структуру sql - базы
+           // _accessBaseService.ReplaceIfNewDatabase(
+             //   appConfig.MdbPath);
 
             //Создаем пайплайн миграции
             var pipeline =

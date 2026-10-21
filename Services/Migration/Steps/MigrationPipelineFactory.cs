@@ -39,7 +39,8 @@ namespace RRStoSQL.Services.Migration
             pipeline.Steps.Add(
                 new CreateRRUserStep());
 
-            
+            //pipeline.Steps.Add(
+            //     new SwitchConnectionStringsStep());
 
             pipeline.Steps.Add(
              new ConvertAccessDatabaseStep());
@@ -58,7 +59,7 @@ namespace RRStoSQL.Services.Migration
 
             pipeline.Steps.Add(
                  new SwitchConnectionStringsStep());
-                       
+
             pipeline.Steps.Add(
                  new CopyConnectionStringStep());
 

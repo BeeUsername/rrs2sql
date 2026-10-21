@@ -22,52 +22,107 @@ namespace RRStoSQL.Services
 	public class SqlService
 	{
 
-		/// <summary>
-		/// Создаёт пользователя в базе
-		/// и выдаёт права
-		/// </summary>
-		public void GrantDatabaseRights(
-			string sqlInstance,
-			string databaseName)
-		{
-			string connectionString =
-				$"Server={sqlInstance};" +
-				$"Database={databaseName};" +
-				$"Integrated Security=True;" +
-				$"TrustServerCertificate=True;";
+        /// <summary>
+        /// Создаёт пользователя в базе
+        /// и выдаёт права
+        /// </summary>
+        public void GrantDatabaseRights(
+    string sqlInstance,
+    string databaseName)
+        {
+            string connectionString =
+                $"Server={sqlInstance};" +
+                $"Database={databaseName};" +
+                $"Integrated Security=True;" +
+                $"TrustServerCertificate=True;";
 
-			using (var connection =
-				new SqlConnection(
-					connectionString))
-			{
-				connection.Open();
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
 
-				string sql =
-							@"
-					IF NOT EXISTS
-					(
-						SELECT *
-						FROM sys.database_principals
-						WHERE name='RRUser'
-					)
-					BEGIN
-						CREATE USER RRUser
-						FOR LOGIN RRUser
-					END
+                string sql = @"
+                    IF EXISTS
+                    (
+                        SELECT 1
+                        FROM sys.database_principals
+                        WHERE name = N'RRUser'
+                    )
+                    BEGIN
+                        -- Пользователь уже существует.
+                        -- Перепривязываем его к актуальному login.
+                        ALTER USER [RRUser] WITH LOGIN = [RRUser];
+                    END
+                    ELSE
+                    BEGIN
+                        -- Пользователя нет - создаём его.
+                        CREATE USER [RRUser] FOR LOGIN [RRUser];
+                    END;
 
-					ALTER ROLE db_owner
-					ADD MEMBER RRUser
-					";
+                    -- На всякий случай добавляем в db_owner.
+                    IF NOT EXISTS
+                    (
+                        SELECT 1
+                        FROM sys.database_role_members drm
+                        INNER JOIN sys.database_principals role_principal
+                            ON role_principal.principal_id = drm.role_principal_id
+                        INNER JOIN sys.database_principals user_principal
+                            ON user_principal.principal_id = drm.member_principal_id
+                        WHERE role_principal.name = N'db_owner'
+                          AND user_principal.name = N'RRUser'
+                    )
+                    BEGIN
+                        ALTER ROLE [db_owner] ADD MEMBER [RRUser];
+                    END;
+                    ";
 
-				using (var command =
-					new SqlCommand(
-						sql,
-						connection))
-				{
-					command.ExecuteNonQuery();
-				}
-			}
-		}
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+        //public void GrantDatabaseRights(
+        //	string sqlInstance,
+        //	string databaseName)
+        //{
+        //	string connectionString =
+        //		$"Server={sqlInstance};" +
+        //		$"Database={databaseName};" +
+        //		$"Integrated Security=True;" +
+        //		$"TrustServerCertificate=True;";
+
+        //	using (var connection =
+        //		new SqlConnection(
+        //			connectionString))
+        //	{
+        //		connection.Open();
+
+        //		string sql =
+        //					@"
+        //			IF NOT EXISTS
+        //			(
+        //				SELECT *
+        //				FROM sys.database_principals
+        //				WHERE name='RRUser'
+        //			)
+        //			BEGIN
+        //				CREATE USER RRUser
+        //				FOR LOGIN RRUser
+        //			END
+
+        //			ALTER ROLE db_owner
+        //			ADD MEMBER RRUser
+        //			";
+
+        //		using (var command =
+        //			new SqlCommand(
+        //				sql,
+        //				connection))
+        //		{
+        //			command.ExecuteNonQuery();
+        //		}
+        //	}
+        //}
 
         /// <summary>
         /// Перезапускает SQL службу
@@ -947,14 +1002,14 @@ public void OpenFirewallPort()
                 connection.Open();
 
                 string sql =
-        $@"
-ALTER DATABASE [{databaseName}]
-SET SINGLE_USER
-WITH ROLLBACK IMMEDIATE;
+                            $@"
+                    ALTER DATABASE [{databaseName}]
+                    SET SINGLE_USER
+                    WITH ROLLBACK IMMEDIATE;
 
-EXEC sp_detach_db
-    @dbname = N'{databaseName}';
-";
+                    EXEC sp_detach_db
+                        @dbname = N'{databaseName}';
+                    ";
 
                 using (var command =
                     new SqlCommand(
@@ -983,17 +1038,17 @@ EXEC sp_detach_db
                 connection.Open();
 
                 string sql =
-        $@"
-CREATE DATABASE [{databaseName}]
-ON
-(
-    FILENAME = N'{mdfPath}'
-),
-(
-    FILENAME = N'{ldfPath}'
-)
-FOR ATTACH;
-";
+                        $@"
+                CREATE DATABASE [{databaseName}]
+                ON
+                (
+                    FILENAME = N'{mdfPath}'
+                ),
+                (
+                    FILENAME = N'{ldfPath}'
+                )
+                FOR ATTACH;
+                ";
 
                 using (var command =
                     new SqlCommand(
@@ -1006,8 +1061,8 @@ FOR ATTACH;
         }
 
         public void DropDatabaseIfExists(
-    string sqlInstance,
-    string databaseName)
+            string sqlInstance,
+            string databaseName)
         {
             if (!DatabaseExists(
                     sqlInstance,
@@ -1087,45 +1142,11 @@ FOR ATTACH;
                 targetLdf);
         }
 
-        //    public string GetDatabaseVersion(
-        //string sqlInstance,
-        //string databaseName)
-        //    {
-        //        string connectionString =
-        //            $"Server={sqlInstance};" +
-        //            $"Database={databaseName};" +
-        //            $"Trusted_Connection=True;";
-
-        //        using (var connection =
-        //            new SqlConnection(connectionString))
-        //        {
-        //            connection.Open();
-
-        //            using (var command =
-        //                new SqlCommand(
-        //                    @"SELECT Value
-        //              FROM dbo.SysParameter
-        //              WHERE Name = 'DbVersion'",
-        //                    connection))
-        //            {
-        //                object value =
-        //                    command.ExecuteScalar();
-
-        //                if (value == null ||
-        //                    value == DBNull.Value)
-        //                {
-        //                    throw new Exception(
-        //                        "Параметр DbVersion не найден.");
-        //                }
-
-        //                return value.ToString();
-        //            }
-        //        }
-        //    }
+        
 
         public string GetDatabaseVersion(
-    string sqlInstance,
-    string databaseName)
+            string sqlInstance,
+            string databaseName)
         {
             string connectionString =
                 $"Server={sqlInstance};" +
@@ -1169,10 +1190,10 @@ FOR ATTACH;
 
 
         public void WaitForDatabaseUpgrade(
-    string sqlInstance,
-    string databaseName,
-    int stableSeconds = 5,
-    int timeoutSeconds = 180)
+            string sqlInstance,
+            string databaseName,
+            int stableSeconds = 4,
+            int timeoutSeconds = 60)
         {
             DateTime start =
                 DateTime.Now;

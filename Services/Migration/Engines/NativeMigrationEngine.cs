@@ -705,8 +705,8 @@ namespace RRStoSQL.Services.Migration.Engines
                     bulk.BatchSize =
                         1000;
 
-                    bulk.NotifyAfter =
-                        1000;
+                    bulk.NotifyAfter = //изменил на 10000 чтобы меньше спамить в лог
+                        10000;
 
                     bulk.BulkCopyTimeout =
                         0;
@@ -831,11 +831,11 @@ namespace RRStoSQL.Services.Migration.Engines
                 $"  Создаем временную таблицу {tempTable}...");
 
             string sql =
-                $@"
-SELECT TOP 0 *
-INTO {tempTable}
-FROM [dbo].[{tableName}];
-";
+                                $@"
+                SELECT TOP 0 *
+                INTO {tempTable}
+                FROM [dbo].[{tableName}];
+                ";
 
             using (var command =
                 new SqlCommand(
@@ -857,11 +857,11 @@ FROM [dbo].[{tableName}];
             try
             {
                 string sql =
-                    $@"
-IF OBJECT_ID('tempdb..{tempTable.TrimStart('#')}')
-    IS NOT NULL
-    DROP TABLE {tempTable};
-";
+                                    $@"
+                IF OBJECT_ID('tempdb..{tempTable.TrimStart('#')}')
+                    IS NOT NULL
+                    DROP TABLE {tempTable};
+                ";
 
                 using (var command =
                     new SqlCommand(
@@ -949,11 +949,11 @@ IF OBJECT_ID('tempdb..{tempTable.TrimStart('#')}')
                     bulk.DestinationTableName =
                         tempTable;
 
-                    bulk.BatchSize =
+                    bulk.BatchSize = //change to 1000 for better performance !!!
                         1000;
 
-                    bulk.NotifyAfter =
-                        1000;
+                    bulk.NotifyAfter = //change to 10 000 for better performance !!!
+                        10000;
 
                     bulk.BulkCopyTimeout =
                         0;

@@ -24,9 +24,11 @@ namespace RRStoSQL.Services.Migration.Steps
         public Task ExecuteAsync(
             MigrationContext context)
         {
-            _configService.SwitchToSql(
-                context.ConfigPath,
-                context.Config);
+            //тут заглушка, на этапе конвертации изменение и бекап конфига уже выполнены . Оставалю для красоты
+
+            //_configService.SwitchToSql(
+            //    context.ConfigPath,
+            //    context.Config);
 
             return Task.CompletedTask;
         }

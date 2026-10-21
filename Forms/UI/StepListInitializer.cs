@@ -19,8 +19,8 @@ namespace RRStoSQL.Forms.UI
 			AddStep(listView, "Разрешаем mixed authentication");
 			AddStep(listView, "Перезапуск службы sql");
 			AddStep(listView, "Создаём rruser");
-						
-			AddStep(listView, "Конвертируем базу");
+           // AddStep(listView, "Правим конфиг");
+            AddStep(listView, "Конвертируем базу");
 			AddStep(listView, "Выдаём права rruser");
 			AddStep(listView, "Назначаем порт 1433 для sql");
 			AddStep(listView, "Открываем 1433 в брандмауэре");
